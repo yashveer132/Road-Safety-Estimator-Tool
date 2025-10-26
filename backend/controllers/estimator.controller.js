@@ -121,7 +121,7 @@ export const processDocument = async (req, res) => {
     estimate.materialEstimates = materialEstimates;
 
     const totalCost = materialEstimates.reduce(
-      (sum, item) => sum + (item.totalCost || 0),
+      (sum, section) => sum + (section.totalCost || 0),
       0
     );
     estimate.totalMaterialCost = totalCost;
@@ -131,30 +131,61 @@ export const processDocument = async (req, res) => {
 
     console.log("✅ Processing completed. Total cost:", totalCost);
 
+    const categories = materialEstimates.map((section, index) => {
+      const emojiMap = {
+        A: "🅰️",
+        B: "🅱️",
+        C: "🅲",
+        D: "🅳",
+        E: "🅴",
+        F: "🅵",
+        G: "🅶",
+        H: "🅷",
+      };
+
+      return {
+        id: section.sectionId,
+        name: section.sectionName,
+        emoji: emojiMap[section.sectionId] || "📋",
+        totalCost: section.totalCost,
+        count: section.items.length,
+      };
+    });
+
     res.status(200).json({
       success: true,
       message: "Estimate processed successfully",
       data: {
         estimateId: estimate._id,
         interventionsCount: interventions.length,
+        sectionsCount: materialEstimates.length,
         totalMaterialCost: totalCost,
         currency: estimate.currency,
+        categories: categories,
       },
     });
   } catch (error) {
     console.error("Error processing document:", error);
 
+    let errorMessage = error.message;
+    let userMessage = "Failed to process document";
+
+    if (error.message && error.message.includes("429") && error.message.includes("Too Many Requests")) {
+      userMessage = "AI service quota exceeded. Some material prices may use default estimates. Consider upgrading your API plan or waiting for quota reset.";
+      errorMessage = "Gemini API quota exceeded during price estimation";
+    }
+
     if (req.params.estimateId) {
       await Estimate.findByIdAndUpdate(req.params.estimateId, {
         status: "failed",
-        errorMessage: error.message,
+        errorMessage: errorMessage,
       });
     }
 
     res.status(500).json({
       error: true,
-      message: "Failed to process document",
-      details: error.message,
+      message: userMessage,
+      details: errorMessage,
     });
   }
 };
@@ -172,9 +203,74 @@ export const getEstimate = async (req, res) => {
       });
     }
 
+    const emojiMap = {
+      A: "🅰️",
+      B: "🅱️",
+      C: "🅲",
+      D: "🅳",
+      E: "🅴",
+      F: "🅵",
+      G: "🅶",
+      H: "🅷",
+    };
+
+    const categories =
+      estimate.materialEstimates?.map((section) => ({
+        id: section.sectionId,
+        name: section.sectionName,
+        emoji: emojiMap[section.sectionId] || "📋",
+        totalCost: section.totalCost,
+        count: section.items.length,
+      })) || [];
+
+    const formattedInterventions =
+      estimate.materialEstimates?.map((section) => ({
+        categoryId: section.sectionId,
+        categoryName: section.sectionName,
+        categoryEmoji: emojiMap[section.sectionId] || "📋",
+        totalCost: section.totalCost,
+        items: section.items.map((item) => ({
+          no: item.no,
+          intervention: item.recommendation,
+          location: `${item.chainage} ${item.side} ${item.road}`,
+          observation: item.observation,
+          ircReference: item.ircReference,
+          materials: item.materials
+            .map((m) => `${m.itemName} (${m.quantity} ${m.unit})`)
+            .join(", "),
+          materialsList: item.materials,
+          quantity: item.materials.reduce((sum, m) => sum + m.quantity, 0),
+          unit: item.materials.length > 0 ? "items" : "",
+          unitRate:
+            item.materials.length > 0
+              ? Math.round(
+                  (item.totalCost /
+                    item.materials.reduce((sum, m) => sum + m.quantity, 0)) *
+                    100
+                ) / 100
+              : 0,
+          totalCost: item.totalCost,
+          source: item.materials.length > 0 ? item.materials[0].source : "N/A",
+          rationale: item.rationale,
+          assumptions: item.assumptions,
+        })),
+      })) || [];
+
     res.status(200).json({
       success: true,
-      data: estimate,
+      data: {
+        _id: estimate._id,
+        documentName: estimate.documentName,
+        documentType: estimate.documentType,
+        status: estimate.status,
+        createdAt: estimate.createdAt,
+        updatedAt: estimate.updatedAt,
+        totalMaterialCost: estimate.totalMaterialCost,
+        totalInterventions: estimate.interventions?.length || 0,
+        currency: estimate.currency,
+        categories: categories,
+        interventions: formattedInterventions,
+      },
     });
   } catch (error) {
     console.error("Error fetching estimate:", error);

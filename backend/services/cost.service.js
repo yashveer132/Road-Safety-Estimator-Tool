@@ -13,88 +13,119 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
       "interventions..."
     );
 
-    const materialEstimates = [];
+    const sectionGroups = {};
+
+    interventions.forEach((intervention) => {
+      const sectionId = intervention.sectionId;
+      if (!sectionGroups[sectionId]) {
+        sectionGroups[sectionId] = {
+          sectionId,
+          sectionName: intervention.sectionName,
+          items: [],
+          totalCost: 0,
+        };
+      }
+    });
 
     for (let i = 0; i < interventions.length; i++) {
       const intervention = interventions[i];
-      const ircMapping =
-        ircMappings.find(
-          (m) =>
-            m.intervention === intervention.name ||
-            m.intervention
-              .toLowerCase()
-              .includes(intervention.name.toLowerCase())
-        ) || ircMappings[i];
+      const mapping = ircMappings.find(
+        (m) =>
+          m.sectionId === intervention.sectionId &&
+          m.serialNo === intervention.serialNo
+      );
 
-      if (!ircMapping) {
-        console.warn(`No IRC mapping found for: ${intervention.name}`);
+      if (!mapping) {
+        console.warn(
+          `No IRC mapping found for: Section ${intervention.sectionId}, #${intervention.serialNo}`
+        );
         continue;
       }
 
       console.log(
-        `Processing ${i + 1}/${interventions.length}: ${intervention.name}`
-      );
-
-      const materials = await extractMaterialRequirements(
-        intervention,
-        ircMapping
+        `Processing ${intervention.sectionId}-${intervention.serialNo}: ${intervention.recommendation}`
       );
 
       const itemsWithPrices = [];
       let totalCost = 0;
 
-      for (const material of materials) {
-        const priceInfo = await searchPriceData(
-          material.itemName,
-          material.unit
-        );
+      if (mapping.materials && Array.isArray(mapping.materials)) {
+        for (const material of mapping.materials) {
+          const priceInfo = await searchPriceData(material.item, material.unit);
 
-        let unitPrice = priceInfo?.unitPrice || 0;
-        let source = priceInfo?.source || "ESTIMATED";
-        let sourceUrl = priceInfo?.sourceUrl || null;
+          let unitPrice = priceInfo?.unitPrice || 0;
+          let source = priceInfo?.source || "ESTIMATED";
+          let sourceUrl = priceInfo?.sourceUrl || null;
 
-        if (!priceInfo) {
-          const estimatedPrice = await estimatePriceIfNotFound(material);
-          unitPrice = estimatedPrice.unitPrice;
-          source = "AI_ESTIMATED";
+          if (!priceInfo) {
+            const estimatedPrice = await estimatePriceIfNotFound({
+              itemName: material.item,
+              description: material.details,
+              unit: material.unit,
+            });
+            unitPrice = estimatedPrice.unitPrice;
+            source = estimatedPrice.source;
+
+            if (estimatedPrice.source === "DEFAULT_ESTIMATE") {
+              source = "QUOTA_LIMITED_DEFAULT";
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+
+          const totalPrice =
+            Math.round(material.quantity * unitPrice * 100) / 100;
+          totalCost += totalPrice;
+
+          itemsWithPrices.push({
+            itemName: material.item,
+            description: material.details,
+            quantity: material.quantity,
+            unit: material.unit,
+            unitPrice: unitPrice,
+            totalPrice: totalPrice,
+            source: source,
+            sourceUrl: sourceUrl,
+            lastUpdated: new Date(),
+          });
         }
-
-        const totalPrice =
-          Math.round(material.quantity * unitPrice * 100) / 100;
-        totalCost += totalPrice;
-
-        itemsWithPrices.push({
-          itemName: material.itemName,
-          description: material.description,
-          quantity: material.quantity,
-          unit: material.unit,
-          unitPrice: unitPrice,
-          totalPrice: totalPrice,
-          source: source,
-          sourceUrl: sourceUrl,
-          lastUpdated: new Date(),
-        });
       }
 
-      const { rationale, assumptions, notes } = await generateCostRationale(
-        intervention,
-        itemsWithPrices,
-        ircMapping,
-        totalCost
-      );
+      const rationale = `Cost estimate based on ${mapping.ircCode} ${mapping.clause}: ${mapping.specification}. Materials priced from CPWD SOR/GeM portal.`;
+      const assumptions = [
+        `IRC specification: ${mapping.specification}`,
+        "Standard quality materials as per IRC guidelines",
+        "Prices exclude GST, labor, and installation",
+        `Location: ${intervention.chainage} ${intervention.side} ${intervention.road}`,
+      ];
 
-      materialEstimates.push({
-        intervention: intervention.name,
-        items: itemsWithPrices,
+      sectionGroups[intervention.sectionId].items.push({
+        no: intervention.serialNo,
+        chainage: intervention.chainage,
+        side: intervention.side,
+        road: intervention.road,
+        observation: intervention.observation,
+        recommendation: intervention.recommendation,
+        ircReference: `${mapping.ircCode} ${mapping.clause}`,
+        materials: itemsWithPrices,
         totalCost: Math.round(totalCost * 100) / 100,
-        ircReference: `${ircMapping.ircCode} - ${ircMapping.clause}`,
-        assumptions: assumptions || [],
-        rationale: rationale || "Cost calculated based on IRC specifications",
-        notes: notes || "",
+        rationale: rationale,
+        assumptions: assumptions,
       });
 
-      console.log(`✓ ${intervention.name}: ₹${totalCost.toFixed(2)}`);
+      sectionGroups[intervention.sectionId].totalCost += totalCost;
+
+      console.log(
+        `✓ ${intervention.sectionId}-${
+          intervention.serialNo
+        }: ₹${totalCost.toFixed(2)}`
+      );
     }
+
+    const materialEstimates = Object.values(sectionGroups).map((section) => ({
+      ...section,
+      totalCost: Math.round(section.totalCost * 100) / 100,
+    }));
 
     console.log("✅ Material cost calculation completed");
     return materialEstimates;

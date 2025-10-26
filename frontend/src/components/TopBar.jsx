@@ -4,14 +4,17 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
-import Tooltip from "@mui/material/Tooltip";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import MenuIcon from "@mui/icons-material/Menu";
+import Button from "@mui/material/Button";
 import { useNavigate, useLocation } from "react-router-dom";
 
-export default function TopBar({ toggleSidebar, sidebarOpen }) {
+const menuItems = [
+  { text: "Dashboard", path: "/" },
+  { text: "Upload Report", path: "/upload" },
+  { text: "Estimates", path: "/estimates" },
+  { text: "Price Management", path: "/prices" },
+];
+
+export default function TopBar() {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -30,19 +33,6 @@ export default function TopBar({ toggleSidebar, sidebarOpen }) {
     >
       <Toolbar sx={{ justifyContent: "space-between", px: { xs: 2, sm: 3 } }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Tooltip title={sidebarOpen ? "Close sidebar" : "Open sidebar"} arrow>
-            <IconButton
-              onClick={toggleSidebar}
-              sx={{
-                color: "primary.main",
-                "&:hover": {
-                  bgcolor: "rgba(16, 185, 129, 0.15)",
-                },
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-          </Tooltip>
           <Box
             sx={{
               width: 40,
@@ -75,71 +65,40 @@ export default function TopBar({ toggleSidebar, sidebarOpen }) {
             >
               Road Safety Estimator
             </Typography>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-                fontSize: "0.75rem",
-                fontWeight: 500,
-              }}
-            >
-              AI-Powered Cost Analysis
-            </Typography>
           </Box>
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Tooltip title="Upload Report" arrow>
-            <IconButton
-              onClick={() => navigate("/upload")}
-              sx={{
-                bgcolor:
-                  location.pathname === "/upload"
-                    ? "primary.main"
-                    : "transparent",
-                color:
-                  location.pathname === "/upload" ? "white" : "primary.main",
-                "&:hover": {
-                  bgcolor:
-                    location.pathname === "/upload"
+          {menuItems.map((item) => {
+            const isActive =
+              location.pathname === item.path ||
+              (item.path !== "/" && location.pathname.startsWith(item.path));
+
+            return (
+              <Button
+                key={item.text}
+                onClick={() => navigate(item.path)}
+                variant={isActive ? "contained" : "text"}
+                sx={{
+                  color: isActive ? "white" : "primary.main",
+                  bgcolor: isActive ? "primary.main" : "transparent",
+                  "&:hover": {
+                    bgcolor: isActive
                       ? "primary.dark"
                       : "rgba(16, 185, 129, 0.15)",
-                  transform: "scale(1.05)",
-                },
-                transition: "all 0.2s ease-in-out",
-              }}
-            >
-              <UploadFileIcon />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Notifications" arrow>
-            <IconButton
-              sx={{
-                color: "text.secondary",
-                "&:hover": {
-                  bgcolor: "rgba(16, 185, 129, 0.15)",
-                  color: "primary.main",
-                },
-              }}
-            >
-              <NotificationsOutlinedIcon />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Account" arrow>
-            <IconButton
-              sx={{
-                color: "text.secondary",
-                "&:hover": {
-                  bgcolor: "rgba(16, 185, 129, 0.15)",
-                  color: "primary.main",
-                },
-              }}
-            >
-              <AccountCircleOutlinedIcon />
-            </IconButton>
-          </Tooltip>
+                  },
+                  fontSize: "0.875rem",
+                  fontWeight: 500,
+                  px: 2,
+                  py: 1,
+                  borderRadius: 2,
+                  textTransform: "none",
+                }}
+              >
+                {item.text}
+              </Button>
+            );
+          })}
         </Box>
       </Toolbar>
     </AppBar>

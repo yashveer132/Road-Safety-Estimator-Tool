@@ -104,31 +104,29 @@ export default function PriceManagement() {
               borderColor: "divider",
             }}
           >
-            <CardContent>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <Box
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 2,
-                    bgcolor: "rgba(16, 185, 129, 0.1)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "primary.main",
-                  }}
-                >
-                  <LocalOfferOutlinedIcon />
-                </Box>
-                <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                    {stats.total}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    Total Items
-                  </Typography>
-                </Box>
+            <CardContent sx={{ textAlign: "center" }}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 2,
+                  bgcolor: "rgba(16, 185, 129, 0.1)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "primary.main",
+                  mx: "auto",
+                  mb: 2,
+                }}
+              >
+                <LocalOfferOutlinedIcon />
               </Box>
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                {stats.total}
+              </Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                Total Items
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -142,31 +140,29 @@ export default function PriceManagement() {
               borderColor: "divider",
             }}
           >
-            <CardContent>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <Box
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 2,
-                    bgcolor: "rgba(230, 126, 34, 0.1)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "secondary.main",
-                  }}
-                >
-                  <CategoryOutlinedIcon />
-                </Box>
-                <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                    {stats.categories}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    Categories
-                  </Typography>
-                </Box>
+            <CardContent sx={{ textAlign: "center" }}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 2,
+                  bgcolor: "rgba(230, 126, 34, 0.1)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "secondary.main",
+                  mx: "auto",
+                  mb: 2,
+                }}
+              >
+                <CategoryOutlinedIcon />
               </Box>
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                {stats.categories}
+              </Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                Categories
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -180,31 +176,29 @@ export default function PriceManagement() {
               borderColor: "divider",
             }}
           >
-            <CardContent>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <Box
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 2,
-                    bgcolor: "rgba(39, 174, 96, 0.1)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "success.main",
-                  }}
-                >
-                  <TrendingUpIcon />
-                </Box>
-                <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                    ₹{stats.avgPrice.toLocaleString("en-IN")}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    Avg Price
-                  </Typography>
-                </Box>
+            <CardContent sx={{ textAlign: "center" }}>
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 2,
+                  bgcolor: "rgba(39, 174, 96, 0.1)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "success.main",
+                  mx: "auto",
+                  mb: 2,
+                }}
+              >
+                <TrendingUpIcon />
               </Box>
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                ₹{stats.avgPrice.toLocaleString("en-IN")}
+              </Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                Avg Price
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -451,6 +445,7 @@ export default function PriceManagement() {
           bgcolor: "rgba(16, 185, 129, 0.05)",
           border: "1px solid",
           borderColor: "rgba(16, 185, 129, 0.2)",
+          textAlign: "center",
         }}
       >
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>

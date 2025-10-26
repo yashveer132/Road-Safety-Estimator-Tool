@@ -37,7 +37,7 @@ const priceSchema = new mongoose.Schema(
 
     source: {
       type: String,
-      enum: ["CPWD_SOR", "GeM", "AOR", "MANUAL"],
+      enum: ["CPWD_SOR", "GeM", "AOR", "MANUAL", "AI_ESTIMATED"],
       required: true,
     },
     sourceUrl: String,

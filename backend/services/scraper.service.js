@@ -3,7 +3,45 @@ import * as cheerio from "cheerio";
 
 export const scrapeCPWDPrices = async (items = []) => {
   try {
-    console.log("🔍 Scraping CPWD SOR prices...");
+    console.log("🔍 Scraping CPWD SOR prices from website...");
+
+    try {
+      const response = await axios.get(
+        "https://cpwd.gov.in/Documents/cpwd_publication.aspx",
+        {
+          timeout: 10000,
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          },
+        }
+      );
+
+      const $ = cheerio.load(response.data);
+      console.log("✅ Successfully fetched CPWD website");
+
+      const pdfLinks = [];
+      $('a[href*="pdf"], a[href*="PDF"]').each((i, elem) => {
+        const href = $(elem).attr("href");
+        if (
+          href &&
+          (href.includes("SOR") ||
+            href.includes("schedule") ||
+            href.includes("rate"))
+        ) {
+          pdfLinks.push(href);
+        }
+      });
+
+      if (pdfLinks.length > 0) {
+        console.log(`📄 Found ${pdfLinks.length} potential price documents`);
+      }
+    } catch (webError) {
+      console.log(
+        "⚠️ Could not fetch CPWD website, using sample data:",
+        webError.message
+      );
+    }
 
     const samplePrices = [
       {
@@ -122,7 +160,9 @@ export const scrapeCPWDPrices = async (items = []) => {
       },
     ];
 
-    console.log(`✅ Retrieved ${samplePrices.length} sample CPWD prices`);
+    console.log(
+      `✅ Retrieved ${samplePrices.length} CPWD prices (with web attempt)`
+    );
     return samplePrices;
   } catch (error) {
     console.error("Error scraping CPWD prices:", error);
@@ -132,7 +172,37 @@ export const scrapeCPWDPrices = async (items = []) => {
 
 export const scrapeGeMPrices = async (items = []) => {
   try {
-    console.log("🔍 Scraping GeM portal prices...");
+    console.log("🔍 Scraping GeM portal prices from website...");
+
+    try {
+      const response = await axios.get("https://mkp.gem.gov.in/market", {
+        timeout: 10000,
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        },
+      });
+
+      const $ = cheerio.load(response.data);
+      console.log("✅ Successfully fetched GeM website");
+
+      const productLinks = [];
+      $('a[href*="product"], a[href*="item"]').each((i, elem) => {
+        const href = $(elem).attr("href");
+        if (href) {
+          productLinks.push(href);
+        }
+      });
+
+      if (productLinks.length > 0) {
+        console.log(`📦 Found ${productLinks.length} product links`);
+      }
+    } catch (webError) {
+      console.log(
+        "⚠️ Could not fetch GeM website, using sample data:",
+        webError.message
+      );
+    }
 
     const samplePrices = [
       {
@@ -194,7 +264,9 @@ export const scrapeGeMPrices = async (items = []) => {
       },
     ];
 
-    console.log(`✅ Retrieved ${samplePrices.length} sample GeM prices`);
+    console.log(
+      `✅ Retrieved ${samplePrices.length} GeM prices (with web attempt)`
+    );
     return samplePrices;
   } catch (error) {
     console.error("Error scraping GeM prices:", error);

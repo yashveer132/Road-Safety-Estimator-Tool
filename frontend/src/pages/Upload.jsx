@@ -11,6 +11,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
+import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
@@ -19,20 +20,23 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
-import { getMockEstimate } from "../data/mockEstimate";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function Upload() {
   const [file, setFile] = useState(null);
-  const [progress, setProgress] = useState(0);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
-  const [useMockData, setUseMockData] = useState(true); // Toggle for testing
+  const [processing, setProcessing] = useState(false);
+  const [estimateId, setEstimateId] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
   const onDrop = useCallback((acceptedFiles) => {
     if (acceptedFiles && acceptedFiles[0]) {
       setFile(acceptedFiles[0]);
-      setProgress(0);
+      setUploadProgress(0);
+      setEstimateId(null);
     }
   }, []);
 
@@ -47,67 +51,108 @@ export default function Upload() {
     },
   });
 
-  const upload = async () => {
-    if (!file)
-      return enqueueSnackbar("Please select a file", { variant: "warning" });
-
-    setUploading(true);
-    
+  const pollProcessingStatus = async (id) => {
     try {
-      let resp;
-      
-      if (useMockData) {
-        const progressInterval = setInterval(() => {
-          setProgress((prev) => {
-            if (prev >= 100) {
-              clearInterval(progressInterval);
-              return 100;
-            }
-            return prev + 10;
-          });
-        }, 200);
-        
-        resp = await getMockEstimate();
-        clearInterval(progressInterval);
-        setProgress(100);
-      } else {
-        const fd = new FormData();
-        fd.append("document", file);
-        
-        resp = await axios.post(
-          (import.meta.env.VITE_API_URL || "http://localhost:5000") +
-            "/api/estimator/upload",
-          fd,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-            onUploadProgress: (e) =>
-              setProgress(Math.round((e.loaded / e.total) * 100)),
-          }
+      const response = await axios.get(`${API_URL}/api/estimator/${id}`);
+      const estimate = response.data.data;
+
+      if (estimate.status === "completed") {
+        setProcessing(false);
+        enqueueSnackbar("Analysis completed successfully!", {
+          variant: "success",
+        });
+        setTimeout(() => navigate(`/estimates/${id}`), 500);
+        return true;
+      } else if (estimate.status === "failed") {
+        setProcessing(false);
+        enqueueSnackbar(
+          estimate.errorMessage || "Processing failed. Please try again.",
+          { variant: "error" }
+        );
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error("Error polling status:", error);
+      return false;
+    }
+  };
+
+  const startPolling = (id) => {
+    const interval = setInterval(async () => {
+      const completed = await pollProcessingStatus(id);
+      if (completed) {
+        clearInterval(interval);
+      }
+    }, 3000);
+
+    setTimeout(() => {
+      clearInterval(interval);
+      if (processing) {
+        setProcessing(false);
+        enqueueSnackbar(
+          "Processing is taking longer than expected. Please check back later.",
+          { variant: "warning" }
         );
       }
-      
-      enqueueSnackbar(
-        useMockData 
-          ? "Demo estimate generated successfully! This is sample data for UI testing." 
-          : "File uploaded successfully! Processing estimate...", 
-        { variant: "success" }
+    }, 300000);
+  };
+
+  const upload = async () => {
+    if (!file) {
+      enqueueSnackbar("Please select a file", { variant: "warning" });
+      return;
+    }
+
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const formData = new FormData();
+      formData.append("document", file);
+
+      const uploadResponse = await axios.post(
+        `${API_URL}/api/estimator/upload`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          onUploadProgress: (e) =>
+            setUploadProgress(Math.round((e.loaded / e.total) * 100)),
+        }
       );
-      
-      const id = resp.data.data.estimateId;
-      setTimeout(() => navigate(`/estimates/${id}`), 1000);
-    } catch (e) {
+
+      const uploadedEstimateId = uploadResponse.data.data.estimateId;
+      setEstimateId(uploadedEstimateId);
+      setUploading(false);
+
+      enqueueSnackbar("File uploaded successfully! Starting AI analysis...", {
+        variant: "success",
+      });
+
+      setProcessing(true);
+
+      await axios.post(
+        `${API_URL}/api/estimator/process/${uploadedEstimateId}`
+      );
+
+      startPolling(uploadedEstimateId);
+    } catch (error) {
+      console.error("Upload error:", error);
       enqueueSnackbar(
-        e.response?.data?.message || "Upload failed. Please try again.",
+        error.response?.data?.message || "Upload failed. Please try again.",
         { variant: "error" }
       );
       setUploading(false);
-      setProgress(0);
+      setProcessing(false);
+      setUploadProgress(0);
     }
   };
 
   const removeFile = () => {
     setFile(null);
-    setProgress(0);
+    setUploadProgress(0);
+    setEstimateId(null);
   };
 
   const supportedFormats = [
@@ -115,6 +160,8 @@ export default function Upload() {
     { format: "DOCX", description: "Microsoft Word Document", icon: "📝" },
     { format: "TXT", description: "Plain Text File", icon: "📃" },
   ];
+
+  const isProcessingOrUploading = uploading || processing;
 
   return (
     <Box className="fade-in">
@@ -126,25 +173,6 @@ export default function Upload() {
           Upload your road safety intervention report to get AI-powered cost
           estimates based on IRC standards
         </Typography>
-        
-        <Chip
-          label={useMockData ? "🎭 DEMO MODE (Click to disable)" : "🔌 API MODE (Click for demo)"}
-          onClick={() => setUseMockData(!useMockData)}
-          sx={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            bgcolor: useMockData ? "rgba(245, 158, 11, 0.15)" : "rgba(16, 185, 129, 0.15)",
-            color: useMockData ? "#F59E0B" : "#10B981",
-            fontWeight: 600,
-            border: "1px solid",
-            borderColor: useMockData ? "#F59E0B" : "#10B981",
-            cursor: "pointer",
-            "&:hover": {
-              bgcolor: useMockData ? "rgba(245, 158, 11, 0.25)" : "rgba(16, 185, 129, 0.25)",
-            }
-          }}
-        />
       </Box>
 
       <Paper
@@ -164,21 +192,24 @@ export default function Upload() {
             borderRadius: 3,
             p: 6,
             textAlign: "center",
-            cursor: "pointer",
+            cursor: isProcessingOrUploading ? "not-allowed" : "pointer",
             bgcolor: isDragActive
               ? "rgba(16, 185, 129, 0.05)"
               : "rgba(30, 41, 59, 0.5)",
             transition: "all 0.3s ease-in-out",
             position: "relative",
             overflow: "hidden",
+            opacity: isProcessingOrUploading ? 0.6 : 1,
             "&:hover": {
-              borderColor: "primary.main",
-              bgcolor: "rgba(16, 185, 129, 0.05)",
-              transform: "scale(1.01)",
+              borderColor: isProcessingOrUploading ? "divider" : "primary.main",
+              bgcolor: isProcessingOrUploading
+                ? "rgba(30, 41, 59, 0.5)"
+                : "rgba(16, 185, 129, 0.05)",
+              transform: isProcessingOrUploading ? "none" : "scale(1.01)",
             },
           }}
         >
-          <input {...getInputProps()} />
+          <input {...getInputProps()} disabled={isProcessingOrUploading} />
 
           <Box
             sx={{
@@ -273,6 +304,7 @@ export default function Upload() {
                 removeFile();
               }}
               startIcon={<DeleteOutlineIcon />}
+              disabled={isProcessingOrUploading}
               sx={{
                 color: "white",
                 "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
@@ -283,24 +315,24 @@ export default function Upload() {
           </Box>
         )}
 
-        {uploading && progress > 0 && (
+        {uploading && uploadProgress > 0 && (
           <Box sx={{ mt: 3 }}>
             <Box
               sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
             >
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                Uploading...
+                Uploading document...
               </Typography>
               <Typography
                 variant="body2"
                 sx={{ fontWeight: 600, color: "primary.main" }}
               >
-                {progress}%
+                {uploadProgress}%
               </Typography>
             </Box>
             <LinearProgress
               variant="determinate"
-              value={progress}
+              value={uploadProgress}
               sx={{
                 height: 8,
                 borderRadius: 4,
@@ -313,13 +345,48 @@ export default function Upload() {
           </Box>
         )}
 
+        {processing && (
+          <Box
+            sx={{
+              mt: 3,
+              p: 3,
+              borderRadius: 2,
+              bgcolor: "rgba(16, 185, 129, 0.1)",
+              border: "1px solid",
+              borderColor: "primary.main",
+              textAlign: "center",
+            }}
+          >
+            <CircularProgress size={40} sx={{ mb: 2 }} />
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+              AI Analysis in Progress
+            </Typography>
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              Extracting interventions, mapping IRC standards, and calculating
+              costs...
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{ color: "text.secondary", mt: 1, display: "block" }}
+            >
+              This may take a few minutes depending on the document size
+            </Typography>
+          </Box>
+        )}
+
         <Box sx={{ display: "flex", gap: 2, mt: 4, justifyContent: "center" }}>
           <Button
             variant="contained"
             size="large"
             onClick={upload}
-            disabled={!file || uploading}
-            startIcon={<CloudUploadOutlinedIcon />}
+            disabled={!file || isProcessingOrUploading}
+            startIcon={
+              isProcessingOrUploading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                <CloudUploadOutlinedIcon />
+              )
+            }
             sx={{
               px: 4,
               fontWeight: 600,
@@ -329,13 +396,17 @@ export default function Upload() {
               },
             }}
           >
-            {uploading ? "Processing..." : "Upload & Process"}
+            {uploading
+              ? "Uploading..."
+              : processing
+              ? "Processing..."
+              : "Upload & Process"}
           </Button>
           <Button
             variant="outlined"
             size="large"
             onClick={removeFile}
-            disabled={!file || uploading}
+            disabled={!file || isProcessingOrUploading}
             sx={{
               fontWeight: 600,
               borderColor: "#F59E0B",
@@ -415,15 +486,15 @@ export default function Upload() {
           </Typography>
           <List sx={{ maxWidth: 700, mx: "auto", textAlign: "left" }}>
             {[
-              "AI analyzes your intervention report",
-              "Extracts technical specifications from IRC standards (IRC 35, 67, 99, SP:84, SP:87)",
-              "Determines required material quantities and itemization",
-              "Fetches current unit prices from CPWD SOR and GeM portal",
-              "Generates detailed cost estimate with citations",
+              "AI analyzes your intervention report and extracts all sections",
+              "Identifies technical specifications from IRC standards (IRC 35, 67, 99, SP:73, SP:84, SP:87, 79, 82, 93)",
+              "Determines required material quantities for each intervention",
+              "Fetches current unit prices from CPWD SOR and GeM portal database",
+              "Generates detailed cost estimate with IRC clause citations and rationale",
             ].map((step, index) => (
               <ListItem key={index} sx={{ py: 0.5, pl: 0 }}>
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  • {step}
+                  {index + 1}. {step}
                 </Typography>
               </ListItem>
             ))}

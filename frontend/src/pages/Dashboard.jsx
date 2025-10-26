@@ -128,14 +128,14 @@ export default function Dashboard() {
     <Box className="fade-in">
       <Box
         sx={{
-          background: "linear-gradient(135deg, #10B981 0%, #34D399 100%)",
+          background: "#1E293B",
           borderRadius: 4,
           p: 4,
           mb: 4,
           color: "white",
           position: "relative",
           overflow: "hidden",
-          boxShadow: "0px 8px 24px rgba(16, 185, 129, 0.25)",
+          boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.25)",
         }}
       >
         <Box sx={{ position: "relative", zIndex: 1, textAlign: "center" }}>
@@ -156,12 +156,12 @@ export default function Dashboard() {
             onClick={() => navigate("/upload")}
             startIcon={<UploadFileOutlinedIcon />}
             sx={{
-              bgcolor: "#1E293B",
+              background: "#EF4444",
               color: "white",
               fontWeight: 600,
               px: 4,
               "&:hover": {
-                bgcolor: "#0F172A",
+                background: "#DC2626",
                 transform: "translateY(-2px)",
                 boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.3)",
               },
@@ -214,39 +214,22 @@ export default function Dashboard() {
                 },
               }}
             >
-              <CardContent sx={{ p: 3 }}>
+              <CardContent sx={{ p: 3, textAlign: "center" }}>
                 <Box
                   sx={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 2,
+                    bgcolor: stat.bgColor,
                     display: "flex",
-                    alignItems: "flex-start",
-                    justifyContent: "space-between",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: stat.color,
+                    mx: "auto",
                     mb: 2,
                   }}
                 >
-                  <Box
-                    sx={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 2,
-                      bgcolor: stat.bgColor,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: stat.color,
-                    }}
-                  >
-                    {stat.icon}
-                  </Box>
-                  <Chip
-                    label={stat.trend}
-                    size="small"
-                    sx={{
-                      bgcolor: "success.light",
-                      color: "white",
-                      fontWeight: 600,
-                      fontSize: "0.75rem",
-                    }}
-                  />
+                  {stat.icon}
                 </Box>
                 <Typography
                   variant="h4"
@@ -333,6 +316,13 @@ export default function Dashboard() {
                   variant="contained"
                   onClick={() => navigate("/upload")}
                   startIcon={<UploadFileOutlinedIcon />}
+                  sx={{
+                    background: "#EF4444",
+                    color: "white",
+                    "&:hover": {
+                      background: "#DC2626",
+                    },
+                  }}
                 >
                   Upload Report
                 </Button>

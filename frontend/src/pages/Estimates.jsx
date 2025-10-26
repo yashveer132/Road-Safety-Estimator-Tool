@@ -211,25 +211,19 @@ export default function Estimates() {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "0.875rem" }}>
+                    <TableCell align="center" sx={{ fontWeight: 600, fontSize: "0.875rem" }}>
                       Document Name
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "0.875rem" }}>
+                    <TableCell align="center" sx={{ fontWeight: 600, fontSize: "0.875rem" }}>
                       Status
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "0.875rem" }}>
+                    <TableCell align="center" sx={{ fontWeight: 600, fontSize: "0.875rem" }}>
                       Created Date
                     </TableCell>
-                    <TableCell
-                      align="right"
-                      sx={{ fontWeight: 600, fontSize: "0.875rem" }}
-                    >
+                    <TableCell align="center" sx={{ fontWeight: 600, fontSize: "0.875rem" }}>
                       Material Cost
                     </TableCell>
-                    <TableCell
-                      align="center"
-                      sx={{ fontWeight: 600, fontSize: "0.875rem" }}
-                    >
+                    <TableCell align="center" sx={{ fontWeight: 600, fontSize: "0.875rem" }}>
                       Actions
                     </TableCell>
                   </TableRow>
@@ -250,6 +244,7 @@ export default function Estimates() {
                         }}
                       >
                         <TableCell
+                          align="center"
                           onClick={() => navigate(`/estimates/${row._id}`)}
                           sx={{ py: 2.5 }}
                         >
@@ -291,6 +286,7 @@ export default function Estimates() {
                           </Box>
                         </TableCell>
                         <TableCell
+                          align="center"
                           onClick={() => navigate(`/estimates/${row._id}`)}
                         >
                           <Chip
@@ -305,6 +301,7 @@ export default function Estimates() {
                           />
                         </TableCell>
                         <TableCell
+                          align="center"
                           onClick={() => navigate(`/estimates/${row._id}`)}
                         >
                           <Typography variant="body2">
@@ -331,7 +328,7 @@ export default function Estimates() {
                           </Typography>
                         </TableCell>
                         <TableCell
-                          align="right"
+                          align="center"
                           onClick={() => navigate(`/estimates/${row._id}`)}
                         >
                           <Typography

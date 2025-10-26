@@ -11,14 +11,17 @@ export const extractTextFromDocument = async (file) => {
     if (mimeType === "application/pdf") {
       const pdfData = await pdf(buffer);
       extractedText = pdfData.text;
+      console.log("Extracted text from PDF:", extractedText);
     } else if (
       mimeType ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ) {
       const result = await mammoth.extractRawText({ buffer });
       extractedText = result.value;
+      console.log("Extracted text from DOCX:", extractedText);
     } else if (mimeType === "text/plain") {
       extractedText = buffer.toString("utf-8");
+      console.log("Extracted text from TXT:", extractedText);
     } else {
       throw new Error("Unsupported file type");
     }
@@ -26,6 +29,8 @@ export const extractTextFromDocument = async (file) => {
       .replace(/\r\n/g, "\n")
       .replace(/\n{3,}/g, "\n\n")
       .trim();
+
+    console.log("Final cleaned extracted text:", extractedText);
 
     return extractedText;
   } catch (error) {

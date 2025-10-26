@@ -76,9 +76,25 @@ export const generateContent = async (prompt, retries = 3) => {
         throw error;
       }
 
-      await new Promise((resolve) =>
-        setTimeout(resolve, Math.pow(2, i) * 1000)
-      );
+      let retryDelayMs = Math.pow(2, i) * 1000; 
+
+      if (error.status === 429 && error.errorDetails) {
+        const retryInfo = error.errorDetails.find(
+          (detail) =>
+            detail["@type"] === "type.googleapis.com/google.rpc.RetryInfo"
+        );
+
+        if (retryInfo && retryInfo.retryDelay) {
+          const delayMatch = retryInfo.retryDelay.match(/^(\d+(?:\.\d+)?)s$/);
+          if (delayMatch) {
+            retryDelayMs = parseFloat(delayMatch[1]) * 1000;
+            console.log(`Using API suggested retry delay: ${retryDelayMs}ms`);
+          }
+        }
+      }
+
+      console.log(`Waiting ${retryDelayMs}ms before retry...`);
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
     }
   }
 };
