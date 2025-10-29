@@ -1,19 +1,19 @@
 import Price from "../models/Price.model.js";
-import { generateContent, cleanJsonResponse } from "../config/gemini.js";
 import { scrapeCPWDPrices, scrapeGeMPrices } from "./scraper.service.js";
+import { normalizeUnit } from "../utils/unit.js";
 
 const priceEstimateCache = new Map();
 const CACHE_TTL = 24 * 60 * 60 * 1000;
 
 const getCacheKey = (itemName, unit) =>
-  `${itemName.toLowerCase().trim()}_${unit}`;
+  `${itemName.toLowerCase().trim()}_${normalizeUnit(unit)}`;
 
 const getCachedEstimate = (itemName, unit) => {
   const key = getCacheKey(itemName, unit);
   const cached = priceEstimateCache.get(key);
 
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    console.log(`📋 Using cached price estimate for: ${itemName}`);
+    console.log(`   📋 Using cached price for: ${itemName}`);
     return cached.data;
   }
 
@@ -34,21 +34,28 @@ const setCachedEstimate = (itemName, unit, data) => {
 
 export const searchWebPrices = async (itemName, unit) => {
   try {
-    console.log(`🌐 Searching web prices for: ${itemName}`);
+    const normalizedUnit = normalizeUnit(unit);
+    console.log(
+      `🌐 Searching REAL web prices for: ${itemName} (${normalizedUnit})`
+    );
 
+    console.log(`   📊 Checking CPWD SOR...`);
     const cpwdPrices = await scrapeCPWDPrices([itemName]);
     const cpwdMatch = cpwdPrices.find(
       (price) =>
-        price.itemName
+        (price.itemName
           .toLowerCase()
           .includes(itemName.toLowerCase().split(" ")[0]) ||
-        itemName
-          .toLowerCase()
-          .includes(price.itemName.toLowerCase().split(" ")[0])
+          itemName
+            .toLowerCase()
+            .includes(price.itemName.toLowerCase().split(" ")[0])) &&
+        normalizeUnit(price.unit) === normalizedUnit
     );
 
-    if (cpwdMatch && cpwdMatch.unit === unit) {
-      console.log(`📊 Found CPWD price: ₹${cpwdMatch.unitPrice} per ${unit}`);
+    if (cpwdMatch) {
+      console.log(
+        `   ✅ Found CPWD price: ₹${cpwdMatch.unitPrice} per ${normalizedUnit}`
+      );
       return {
         unitPrice: cpwdMatch.unitPrice,
         source: cpwdMatch.source,
@@ -57,19 +64,23 @@ export const searchWebPrices = async (itemName, unit) => {
       };
     }
 
+    console.log(`   🛒 Checking GeM portal...`);
     const gemPrices = await scrapeGeMPrices([itemName]);
     const gemMatch = gemPrices.find(
       (price) =>
-        price.itemName
+        (price.itemName
           .toLowerCase()
           .includes(itemName.toLowerCase().split(" ")[0]) ||
-        itemName
-          .toLowerCase()
-          .includes(price.itemName.toLowerCase().split(" ")[0])
+          itemName
+            .toLowerCase()
+            .includes(price.itemName.toLowerCase().split(" ")[0])) &&
+        normalizeUnit(price.unit) === normalizedUnit
     );
 
-    if (gemMatch && gemMatch.unit === unit) {
-      console.log(`📊 Found GeM price: ₹${gemMatch.unitPrice} per ${unit}`);
+    if (gemMatch) {
+      console.log(
+        `   ✅ Found GeM price: ₹${gemMatch.unitPrice} per ${normalizedUnit}`
+      );
       return {
         unitPrice: gemMatch.unitPrice,
         source: gemMatch.source,
@@ -78,19 +89,21 @@ export const searchWebPrices = async (itemName, unit) => {
       };
     }
 
-    console.log(`❌ No web prices found for: ${itemName}`);
+    console.log(`   ❌ No web prices found for: ${itemName}`);
     return null;
   } catch (error) {
-    console.error("Error searching web prices:", error);
+    console.error("   ⚠️ Error searching web prices:", error.message);
     return null;
   }
 };
 
 export const searchPriceData = async (itemName, unit) => {
   try {
+    const normalizedUnit = normalizeUnit(unit);
+
     let price = await Price.findOne({
       itemName: new RegExp(`^${itemName}$`, "i"),
-      unit: unit,
+      unit: normalizedUnit,
       isActive: true,
     }).sort({ lastVerified: -1 });
 
@@ -100,6 +113,7 @@ export const searchPriceData = async (itemName, unit) => {
 
     price = await Price.findOne({
       itemName: new RegExp(itemName, "i"),
+      unit: normalizedUnit,
       isActive: true,
     }).sort({ lastVerified: -1 });
 
@@ -110,6 +124,7 @@ export const searchPriceData = async (itemName, unit) => {
     const prices = await Price.find({
       $text: { $search: itemName },
       isActive: true,
+      unit: normalizedUnit,
     })
       .sort({ score: { $meta: "textScore" } })
       .limit(1);
@@ -123,23 +138,29 @@ export const searchPriceData = async (itemName, unit) => {
 
 export const estimatePriceIfNotFound = async (material) => {
   try {
+    console.log(
+      `💰 Finding price for: ${material.itemName} (${material.unit})`
+    );
+
+    const normalizedUnit = normalizeUnit(material.unit);
+
     const cachedResult = getCachedEstimate(material.itemName, material.unit);
     if (cachedResult) {
       return cachedResult;
     }
 
-    console.log(`🌐 Searching web sources for: ${material.itemName}`);
+    console.log(`   🌐 Searching web sources...`);
     const webPrice = await searchWebPrices(material.itemName, material.unit);
     if (webPrice) {
       setCachedEstimate(material.itemName, material.unit, webPrice);
 
-      if (webPrice.source !== "AI_ESTIMATED") {
+      try {
         const newPrice = new Price({
           itemName: material.itemName,
           itemCode: `${webPrice.source}-${Date.now()}`,
           category: "other",
           unitPrice: webPrice.unitPrice,
-          unit: material.unit,
+          unit: normalizedUnit,
           currency: "₹",
           source: webPrice.source,
           sourceUrl: webPrice.sourceUrl,
@@ -148,131 +169,115 @@ export const estimatePriceIfNotFound = async (material) => {
           isActive: true,
         });
         await newPrice.save();
+        console.log(`   💾 Saved web price to database`);
+      } catch (dbError) {
+        console.log(`   ⚠️ Could not save to DB:`, dbError.message);
       }
 
       return webPrice;
     }
 
-    console.log(`🤖 AI: Estimating price for: ${material.itemName}`);
-
-    const similarItems = await findSimilarItems(material.itemName, 3);
+    console.log(`   📊 Searching for similar items in database...`);
+    const similarItems = await findSimilarItems(material.itemName, 5);
     if (similarItems.length > 0) {
       const avgPrice =
         similarItems.reduce((sum, item) => sum + item.unitPrice, 0) /
         similarItems.length;
       console.log(
-        `📊 Using similar DB items for fallback price: ₹${avgPrice.toFixed(2)}`
+        `   ✅ Found ${
+          similarItems.length
+        } similar items, avg price: ₹${avgPrice.toFixed(2)}`
       );
-      return {
+
+      const result = {
         unitPrice: Math.round(avgPrice * 100) / 100,
-        source: "DB_SIMILAR_FALLBACK",
+        source: "DB_SIMILAR_ITEMS",
         confidence: "medium",
       };
+
+      setCachedEstimate(material.itemName, material.unit, result);
+      return result;
     }
 
-    const prompt = `
-You are a cost estimation expert for road safety materials in India. Estimate the current market price for the following material.
+    console.log(`   ⚠️ No web/DB prices found, using category fallback`);
+    const categoryFallbackPrices = {
+      signage: { sqm: 1250, nos: 850, m: 285 },
+      marking: { kg: 285, sqm: 180, m: 150 },
+      barrier: { m: 3500, nos: 2500 },
+      lighting: { nos: 8500 },
+      equipment: { nos: 425, m: 2200 },
+      other: { sqm: 500, nos: 500, m: 250, kg: 200, litre: 220 },
+    };
 
-Material: ${material.itemName}
-Description: ${material.description}
-Unit: ${material.unit}
+    const category = detectCategory(material.itemName);
+    const fallbackPrice =
+      categoryFallbackPrices[category]?.[normalizedUnit] ||
+      categoryFallbackPrices.other[normalizedUnit] ||
+      500;
 
-Provide a realistic estimate based on:
-1. Current market rates in India
-2. Standard specifications
-3. Typical supplier pricing
-4. CPWD/GeM portal reference prices
-
-Return ONLY a JSON object with this structure:
-{
-  "unitPrice": 150.50,
-  "currency": "INR",
-  "confidence": "medium",
-  "reasoning": "Based on typical market rates for reflective sheeting materials",
-  "priceRange": {
-    "min": 120,
-    "max": 180
-  }
-}
-
-IMPORTANT:
-- Provide realistic Indian market prices in INR (₹)
-- Consider the material quality and specifications
-- Use confidence: "high", "medium", or "low"
-- Return valid JSON only
-`;
-
-    const response = await generateContent(prompt);
-    const priceEstimate = cleanJsonResponse(response);
+    console.log(`   📌 Using ${category} category fallback: ₹${fallbackPrice}`);
 
     const result = {
-      unitPrice: priceEstimate.unitPrice,
-      source: "AI_ESTIMATED",
-      confidence: priceEstimate.confidence,
-    };
-
-    setCachedEstimate(material.itemName, material.unit, result);
-
-    const newPrice = new Price({
-      itemName: material.itemName,
-      itemCode: `EST-${Date.now()}`,
-      category: "other",
-      unitPrice: priceEstimate.unitPrice,
-      unit: material.unit,
-      currency: "₹",
-      source: "AI_ESTIMATED",
-      description: material.description,
-      validFrom: new Date(),
-      isActive: true,
-      specifications: new Map([
-        ["estimationMethod", "AI"],
-        ["confidence", priceEstimate.confidence],
-        ["reasoning", priceEstimate.reasoning],
-      ]),
-    });
-
-    await newPrice.save();
-    console.log(
-      `✓ Estimated price: ₹${priceEstimate.unitPrice} per ${material.unit}`
-    );
-
-    return result;
-  } catch (error) {
-    console.error("Error estimating price:", error);
-
-    if (error.status === 429) {
-      const cachedResult = getCachedEstimate(material.itemName, material.unit);
-      if (cachedResult) {
-        console.log(
-          `⚠️ Quota exceeded, using cached price for: ${material.itemName}`
-        );
-        return cachedResult;
-      }
-
-      const similarItems = await findSimilarItems(material.itemName, 3);
-      if (similarItems.length > 0) {
-        const avgPrice =
-          similarItems.reduce((sum, item) => sum + item.unitPrice, 0) /
-          similarItems.length;
-        console.log(
-          `📊 Quota exceeded, using DB similar items fallback: ₹${avgPrice.toFixed(
-            2
-          )}`
-        );
-        return {
-          unitPrice: Math.round(avgPrice * 100) / 100,
-          source: "DB_SIMILAR_QUOTA_FALLBACK",
-          confidence: "low",
-        };
-      }
-    }
-
-    return {
-      unitPrice: 100,
-      source: "DEFAULT_ESTIMATE",
+      unitPrice: fallbackPrice,
+      source: "CATEGORY_FALLBACK",
       confidence: "low",
     };
+
+    setCachedEstimate(material.itemName, normalizedUnit, result);
+    return result;
+  } catch (error) {
+    console.error("   ❌ Error in price estimation:", error.message);
+
+    return {
+      unitPrice: 500,
+      source: "DEFAULT_FALLBACK",
+      confidence: "very_low",
+    };
   }
+};
+
+const detectCategory = (itemName) => {
+  const lower = itemName.toLowerCase();
+
+  if (
+    lower.includes("sign") ||
+    lower.includes("reflective") ||
+    lower.includes("aluminum")
+  ) {
+    return "signage";
+  }
+  if (
+    lower.includes("barrier") ||
+    lower.includes("guard") ||
+    lower.includes("rail")
+  ) {
+    return "barrier";
+  }
+  if (
+    lower.includes("marking") ||
+    lower.includes("paint") ||
+    lower.includes("thermoplastic")
+  ) {
+    return "marking";
+  }
+  if (
+    lower.includes("signal") ||
+    lower.includes("light") ||
+    lower.includes("led") ||
+    lower.includes("blinker")
+  ) {
+    return "lighting";
+  }
+  if (
+    lower.includes("stud") ||
+    lower.includes("cone") ||
+    lower.includes("delineator") ||
+    lower.includes("breaker")
+  ) {
+    return "equipment";
+  }
+
+  return "other";
 };
 
 export const normalizeItemName = (itemName) => {

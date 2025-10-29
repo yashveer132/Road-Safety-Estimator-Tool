@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
@@ -11,18 +9,9 @@ import LinearProgress from "@mui/material/LinearProgress";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
-import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 export default function Dashboard() {
-  const [stats, setStats] = useState({
-    totalEstimates: 0,
-    completedEstimates: 0,
-    processingEstimates: 0,
-    totalCost: 0,
-  });
   const [recentEstimates, setRecentEstimates] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -56,73 +45,12 @@ export default function Dashboard() {
         );
 
         setRecentEstimates(allEstimates.slice(0, 5));
-        setStats({
-          totalEstimates: allEstimates.length,
-          completedEstimates: allEstimates.filter(
-            (e) => e.status === "completed"
-          ).length,
-          processingEstimates: allEstimates.filter(
-            (e) => e.status === "processing"
-          ).length,
-          totalCost: allEstimates.reduce(
-            (sum, e) => sum + (e.totalMaterialCost || 0),
-            0
-          ),
-        });
       })
       .catch(() => {
         setRecentEstimates(mockEstimates.slice(0, 5));
-        setStats({
-          totalEstimates: mockEstimates.length,
-          completedEstimates: mockEstimates.filter(
-            (e) => e.status === "completed"
-          ).length,
-          processingEstimates: mockEstimates.filter(
-            (e) => e.status === "processing"
-          ).length,
-          totalCost: mockEstimates.reduce(
-            (sum, e) => sum + (e.totalMaterialCost || 0),
-            0
-          ),
-        });
       })
       .finally(() => setLoading(false));
   }, []);
-
-  const statCards = [
-    {
-      title: "Total Estimates",
-      value: stats.totalEstimates,
-      icon: <AssessmentOutlinedIcon sx={{ fontSize: 40 }} />,
-      color: "#10B981",
-      bgColor: "rgba(16, 185, 129, 0.1)",
-      trend: "+12%",
-    },
-    {
-      title: "Completed",
-      value: stats.completedEstimates,
-      icon: <DescriptionOutlinedIcon sx={{ fontSize: 40 }} />,
-      color: "#27AE60",
-      bgColor: "rgba(39, 174, 96, 0.1)",
-      trend: "+8%",
-    },
-    {
-      title: "Processing",
-      value: stats.processingEstimates,
-      icon: <AccessTimeIcon sx={{ fontSize: 40 }} />,
-      color: "#F39C12",
-      bgColor: "rgba(243, 156, 18, 0.1)",
-      trend: "2 active",
-    },
-    {
-      title: "Total Cost",
-      value: `₹${(stats.totalCost / 100000).toFixed(2)}L`,
-      icon: <TrendingUpIcon sx={{ fontSize: 40 }} />,
-      color: "#E67E22",
-      bgColor: "rgba(230, 126, 34, 0.1)",
-      trend: "+15%",
-    },
-  ];
 
   return (
     <Box className="fade-in">
@@ -196,58 +124,6 @@ export default function Dashboard() {
           }}
         />
       </Box>
-
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {statCards.map((stat, index) => (
-          <Grid item xs={12} sm={6} lg={3} key={index}>
-            <Card
-              elevation={0}
-              sx={{
-                height: "100%",
-                borderRadius: 3,
-                border: "1px solid",
-                borderColor: "divider",
-                transition: "all 0.3s ease-in-out",
-                "&:hover": {
-                  transform: "translateY(-4px)",
-                  boxShadow: "0px 8px 24px rgba(44, 62, 80, 0.12)",
-                },
-              }}
-            >
-              <CardContent sx={{ p: 3, textAlign: "center" }}>
-                <Box
-                  sx={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: 2,
-                    bgcolor: stat.bgColor,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: stat.color,
-                    mx: "auto",
-                    mb: 2,
-                  }}
-                >
-                  {stat.icon}
-                </Box>
-                <Typography
-                  variant="h4"
-                  sx={{ fontWeight: 700, mb: 0.5, color: "text.primary" }}
-                >
-                  {stat.value}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ color: "text.secondary", fontWeight: 500 }}
-                >
-                  {stat.title}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
 
       <Grid container spacing={3}>
         <Grid item xs={12}>

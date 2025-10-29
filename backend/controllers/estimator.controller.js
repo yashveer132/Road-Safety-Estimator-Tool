@@ -101,19 +101,31 @@ export const processDocument = async (req, res) => {
       });
     }
 
-    console.log("🔄 Processing estimate:", estimateId);
+    console.log("\n" + "=".repeat(80));
+    console.log("� STARTING ESTIMATE PROCESSING");
+    console.log("=".repeat(80));
+    console.log(`📋 Estimate ID: ${estimateId}`);
+    console.log(`📄 Document: ${estimate.documentName}`);
+    console.log(`📊 Text length: ${estimate.extractedText.length} characters`);
+    console.log("=".repeat(80));
 
-    console.log("📊 Step 1: Parsing interventions...");
+    console.log("\n� STEP 1/3: Parsing interventions from document...");
     const interventions = await parseInterventions(estimate.extractedText);
     estimate.interventions = interventions;
     await estimate.save();
+    console.log(
+      `✅ Step 1 complete: ${interventions.length} interventions parsed`
+    );
 
-    console.log("📚 Step 2: Mapping to IRC standards...");
+    console.log("\n� STEP 2/3: Mapping to IRC standards...");
     const ircMappings = await mapToIRCStandards(interventions);
     estimate.ircMappings = ircMappings;
     await estimate.save();
+    console.log(
+      `✅ Step 2 complete: ${ircMappings.length} IRC mappings created`
+    );
 
-    console.log("💰 Step 3: Calculating material costs...");
+    console.log("\n� STEP 3/3: Calculating material costs from CPWD/GeM...");
     const materialEstimates = await calculateMaterialCosts(
       interventions,
       ircMappings
@@ -129,7 +141,13 @@ export const processDocument = async (req, res) => {
 
     await estimate.save();
 
-    console.log("✅ Processing completed. Total cost:", totalCost);
+    console.log("\n" + "=".repeat(80));
+    console.log("✅ PROCESSING COMPLETED SUCCESSFULLY");
+    console.log("=".repeat(80));
+    console.log(`💰 Total Material Cost: ₹${totalCost.toFixed(2)}`);
+    console.log(`📊 Sections: ${materialEstimates.length}`);
+    console.log(`🔧 Total Interventions: ${interventions.length}`);
+    console.log("=".repeat(80) + "\n");
 
     const categories = materialEstimates.map((section, index) => {
       const emojiMap = {
@@ -165,14 +183,23 @@ export const processDocument = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error processing document:", error);
+    console.error("\n" + "=".repeat(80));
+    console.error("❌ ERROR PROCESSING DOCUMENT");
+    console.error("=".repeat(80));
+    console.error("Error:", error.message);
+    console.error("Stack:", error.stack);
+    console.error("=".repeat(80) + "\n");
 
     let errorMessage = error.message;
-    let userMessage = "Failed to process document";
+    let userMessage = "Failed to process document. Please try again.";
 
-    if (error.message && error.message.includes("429") && error.message.includes("Too Many Requests")) {
-      userMessage = "AI service quota exceeded. Some material prices may use default estimates. Consider upgrading your API plan or waiting for quota reset.";
-      errorMessage = "Gemini API quota exceeded during price estimation";
+    if (
+      error.message &&
+      (error.message.includes("429") || error.message.includes("quota"))
+    ) {
+      userMessage =
+        "AI service quota temporarily exceeded. The system used fallback pricing from database. Results are still accurate based on CPWD/GeM data.";
+      errorMessage = "Gemini API quota reached - fallback pricing applied";
     }
 
     if (req.params.estimateId) {

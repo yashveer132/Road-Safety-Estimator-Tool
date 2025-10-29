@@ -2,7 +2,10 @@
 
 export const parseInterventions = async (documentText) => {
   try {
-    console.log("🤖 AI: Parsing interventions from document...");
+    console.log("\n" + "=".repeat(60));
+    console.log("🤖 AI: PARSING INTERVENTIONS FROM DOCUMENT");
+    console.log("=".repeat(60));
+    console.log(`📄 Document length: ${documentText.length} characters`);
 
     const prompt = `
 You are an expert road safety engineer analyzing intervention reports formatted in sections (A, B, C, etc.) with tables.
@@ -77,21 +80,35 @@ IMPORTANT:
     const response = await generateContent(prompt);
     const interventions = cleanJsonResponse(response);
 
-    console.log(
-      `✅ Parsed ${interventions.length} interventions across all sections`
-    );
+    console.log(`✅ Successfully parsed ${interventions.length} interventions`);
+
+    const bySection = {};
+    interventions.forEach((int) => {
+      if (!bySection[int.sectionId]) {
+        bySection[int.sectionId] = { name: int.sectionName, count: 0 };
+      }
+      bySection[int.sectionId].count++;
+    });
+
+    console.log("\n📊 Interventions by section:");
+    Object.entries(bySection).forEach(([id, info]) => {
+      console.log(`   ${id} - ${info.name}: ${info.count} interventions`);
+    });
+    console.log("=".repeat(60) + "\n");
+
     return Array.isArray(interventions) ? interventions : [];
   } catch (error) {
-    console.error("Error parsing interventions:", error);
+    console.error("❌ Error parsing interventions:", error);
     throw new Error(`Failed to parse interventions: ${error.message}`);
   }
 };
 
 export const mapToIRCStandards = async (interventions) => {
   try {
-    console.log(
-      "🤖 AI: Mapping interventions to IRC standards and extracting technical specifications..."
-    );
+    console.log("\n" + "=".repeat(60));
+    console.log("🤖 AI: MAPPING TO IRC STANDARDS");
+    console.log("=".repeat(60));
+    console.log(`📚 Processing ${interventions.length} interventions...`);
 
     const interventionsBySection = interventions.reduce((acc, int) => {
       if (!acc[int.sectionId]) {
@@ -106,6 +123,10 @@ export const mapToIRCStandards = async (interventions) => {
     for (const [sectionId, sectionInterventions] of Object.entries(
       interventionsBySection
     )) {
+      console.log(
+        `\n📋 Processing Section ${sectionId} - ${sectionInterventions[0].sectionName} (${sectionInterventions.length} items)...`
+      );
+
       const interventionsList = sectionInterventions
         .map(
           (int) =>
@@ -180,14 +201,17 @@ IMPORTANT:
       const response = await generateContent(prompt);
       const mappings = cleanJsonResponse(response);
       allMappings.push(...mappings);
+
+      console.log(
+        `   ✅ Mapped ${mappings.length} interventions with specifications`
+      );
     }
 
-    console.log(
-      `✅ Mapped ${allMappings.length} interventions with technical specifications`
-    );
+    console.log(`\n✅ Total IRC mappings created: ${allMappings.length}`);
+    console.log("=".repeat(60) + "\n");
     return allMappings;
   } catch (error) {
-    console.error("Error mapping to IRC standards:", error);
+    console.error("❌ Error mapping to IRC standards:", error);
     console.log("🔄 Using fallback data from database for IRC mappings...");
 
     const fallbackMappings = [];

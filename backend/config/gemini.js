@@ -9,7 +9,7 @@ if (!process.env.GEMINI_API_KEY) {
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const MODEL_NAME = "gemini-2.0-flash-exp";
+const MODEL_NAME = "gemini-2.0-flash";
 
 const safetySettings = [
   {
@@ -31,7 +31,7 @@ const safetySettings = [
 ];
 
 const generationConfig = {
-  temperature: 0.7,
+  temperature: 0.3,
   topP: 0.95,
   topK: 40,
   maxOutputTokens: 8192,
@@ -62,38 +62,52 @@ export const cleanJsonResponse = (text) => {
 };
 
 export const generateContent = async (prompt, retries = 3) => {
+  console.log(`🤖 AI Request - Model: ${MODEL_NAME}`);
   const model = getGeminiModel();
 
   for (let i = 0; i < retries; i++) {
     try {
+      console.log(`   📡 Attempt ${i + 1}/${retries}...`);
       const result = await model.generateContent(prompt);
       const response = await result.response;
-      return response.text();
+      const text = response.text();
+      console.log(`   ✅ Success - Response length: ${text.length} chars`);
+      return text;
     } catch (error) {
-      console.error(`Attempt ${i + 1} failed:`, error.message);
+      console.error(`   ❌ Attempt ${i + 1} failed:`, error.message);
 
       if (i === retries - 1) {
+        console.error(`   🚫 All ${retries} attempts exhausted`);
         throw error;
       }
 
-      let retryDelayMs = Math.pow(2, i) * 1000; 
+      let retryDelayMs = Math.pow(2, i) * 1000;
 
-      if (error.status === 429 && error.errorDetails) {
-        const retryInfo = error.errorDetails.find(
-          (detail) =>
-            detail["@type"] === "type.googleapis.com/google.rpc.RetryInfo"
-        );
+      if (error.status === 429) {
+        console.warn(`   ⚠️ Rate limit hit (429) - Quota exhausted`);
 
-        if (retryInfo && retryInfo.retryDelay) {
-          const delayMatch = retryInfo.retryDelay.match(/^(\d+(?:\.\d+)?)s$/);
-          if (delayMatch) {
-            retryDelayMs = parseFloat(delayMatch[1]) * 1000;
-            console.log(`Using API suggested retry delay: ${retryDelayMs}ms`);
+        if (error.errorDetails) {
+          const retryInfo = error.errorDetails.find(
+            (detail) =>
+              detail["@type"] === "type.googleapis.com/google.rpc.RetryInfo"
+          );
+
+          if (retryInfo && retryInfo.retryDelay) {
+            const delayMatch = retryInfo.retryDelay.match(/^(\d+(?:\.\d+)?)s$/);
+            if (delayMatch) {
+              retryDelayMs = parseFloat(delayMatch[1]) * 1000;
+              console.log(`   ⏰ API suggested retry: ${retryDelayMs}ms`);
+            }
           }
+        } else {
+          retryDelayMs = 60000;
+          console.log(
+            `   ⏰ Using fallback retry delay: ${retryDelayMs}ms (60s)`
+          );
         }
       }
 
-      console.log(`Waiting ${retryDelayMs}ms before retry...`);
+      console.log(`   ⏳ Waiting ${retryDelayMs}ms before retry...`);
       await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
     }
   }
@@ -101,12 +115,14 @@ export const generateContent = async (prompt, retries = 3) => {
 
 export const validateModel = async () => {
   try {
+    console.log("🔍 Validating Gemini AI Model...");
+    console.log(`   Model: ${MODEL_NAME}`);
     const model = getGeminiModel();
-    const result = await model.generateContent("Test");
-    console.log("✅ Gemini AI Model validated successfully");
+    const result = await model.generateContent("Test validation");
+    console.log("   ✅ Gemini AI Model validated successfully");
     return true;
   } catch (error) {
-    console.error("❌ Gemini AI Model validation failed:", error.message);
+    console.error("   ❌ Gemini AI Model validation failed:", error.message);
     return false;
   }
 };

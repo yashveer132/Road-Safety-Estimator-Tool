@@ -1,17 +1,16 @@
-import Price from "../models/Price.model.js";
 import {
   extractMaterialRequirements,
   generateCostRationale,
 } from "./ai.service.js";
 import { searchPriceData, estimatePriceIfNotFound } from "./price.service.js";
+import { isCountableUnit, normalizeUnit } from "../utils/unit.js";
 
 export const calculateMaterialCosts = async (interventions, ircMappings) => {
   try {
-    console.log(
-      "💰 Calculating material costs for",
-      interventions.length,
-      "interventions..."
-    );
+    console.log("\n" + "=".repeat(60));
+    console.log("💰 CALCULATING MATERIAL COSTS");
+    console.log("=".repeat(60));
+    console.log(`📊 Processing ${interventions.length} interventions...`);
 
     const sectionGroups = {};
 
@@ -37,27 +36,51 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
 
       if (!mapping) {
         console.warn(
-          `No IRC mapping found for: Section ${intervention.sectionId}, #${intervention.serialNo}`
+          `⚠️ No IRC mapping found for: Section ${intervention.sectionId}, #${intervention.serialNo}`
         );
         continue;
       }
 
       console.log(
-        `Processing ${intervention.sectionId}-${intervention.serialNo}: ${intervention.recommendation}`
+        `\n📍 [${intervention.sectionId}-${
+          intervention.serialNo
+        }] ${intervention.recommendation.substring(0, 60)}...`
       );
 
       const itemsWithPrices = [];
       let totalCost = 0;
 
       if (mapping.materials && Array.isArray(mapping.materials)) {
+        console.log(
+          `   🔧 Processing ${mapping.materials.length} materials...`
+        );
+
         for (const material of mapping.materials) {
+          console.log(`\n   📦 Material: ${material.item}`);
+
+          let normalizedQuantity = material.quantity;
+          const canonicalUnit = normalizeUnit(material.unit);
+
+          if (isCountableUnit(canonicalUnit)) {
+            normalizedQuantity = Math.max(
+              0,
+              Math.round(Number(material.quantity) || 0)
+            );
+          } else {
+            normalizedQuantity =
+              Math.round((Number(material.quantity) || 0) * 100) / 100;
+          }
+
+          console.log(`      Quantity: ${normalizedQuantity} ${material.unit}`);
+
           const priceInfo = await searchPriceData(material.item, material.unit);
 
           let unitPrice = priceInfo?.unitPrice || 0;
-          let source = priceInfo?.source || "ESTIMATED";
+          let source = priceInfo?.source || null;
           let sourceUrl = priceInfo?.sourceUrl || null;
 
           if (!priceInfo) {
+            console.log(`      ⚠️ Not in database, fetching from web...`);
             const estimatedPrice = await estimatePriceIfNotFound({
               itemName: material.item,
               description: material.details,
@@ -65,22 +88,25 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
             });
             unitPrice = estimatedPrice.unitPrice;
             source = estimatedPrice.source;
-
-            if (estimatedPrice.source === "DEFAULT_ESTIMATE") {
-              source = "QUOTA_LIMITED_DEFAULT";
-            }
-
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            sourceUrl = estimatedPrice.sourceUrl || null;
+          } else {
+            console.log(`      ✅ Found in database: ${source}`);
           }
 
           const totalPrice =
-            Math.round(material.quantity * unitPrice * 100) / 100;
+            Math.round(normalizedQuantity * unitPrice * 100) / 100;
           totalCost += totalPrice;
+
+          console.log(
+            `      💵 Unit Price: ₹${unitPrice} per ${material.unit}`
+          );
+          console.log(`      💰 Total: ₹${totalPrice.toFixed(2)}`);
+          console.log(`      📌 Source: ${source}`);
 
           itemsWithPrices.push({
             itemName: material.item,
             description: material.details,
-            quantity: material.quantity,
+            quantity: normalizedQuantity,
             unit: material.unit,
             unitPrice: unitPrice,
             totalPrice: totalPrice,
@@ -88,6 +114,8 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
             sourceUrl: sourceUrl,
             lastUpdated: new Date(),
           });
+
+          await new Promise((resolve) => setTimeout(resolve, 500));
         }
       }
 
@@ -116,9 +144,7 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
       sectionGroups[intervention.sectionId].totalCost += totalCost;
 
       console.log(
-        `✓ ${intervention.sectionId}-${
-          intervention.serialNo
-        }: ₹${totalCost.toFixed(2)}`
+        `   ✅ Total cost for this intervention: ₹${totalCost.toFixed(2)}`
       );
     }
 
@@ -127,10 +153,25 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
       totalCost: Math.round(section.totalCost * 100) / 100,
     }));
 
-    console.log("✅ Material cost calculation completed");
+    console.log("\n" + "=".repeat(60));
+    console.log("✅ MATERIAL COST CALCULATION COMPLETED");
+    materialEstimates.forEach((section) => {
+      console.log(
+        `   ${section.sectionId} - ${
+          section.sectionName
+        }: ₹${section.totalCost.toFixed(2)} (${section.items.length} items)`
+      );
+    });
+    const grandTotal = materialEstimates.reduce(
+      (sum, s) => sum + s.totalCost,
+      0
+    );
+    console.log(`   📊 GRAND TOTAL: ₹${grandTotal.toFixed(2)}`);
+    console.log("=".repeat(60) + "\n");
+
     return materialEstimates;
   } catch (error) {
-    console.error("Error calculating material costs:", error);
+    console.error("❌ Error calculating material costs:", error);
     throw new Error(`Failed to calculate costs: ${error.message}`);
   }
 };

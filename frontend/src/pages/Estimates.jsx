@@ -211,19 +211,34 @@ export default function Estimates() {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell align="center" sx={{ fontWeight: 600, fontSize: "0.875rem" }}>
+                    <TableCell
+                      align="center"
+                      sx={{ fontWeight: 600, fontSize: "0.875rem" }}
+                    >
                       Document Name
                     </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600, fontSize: "0.875rem" }}>
+                    <TableCell
+                      align="center"
+                      sx={{ fontWeight: 600, fontSize: "0.875rem" }}
+                    >
                       Status
                     </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600, fontSize: "0.875rem" }}>
+                    <TableCell
+                      align="center"
+                      sx={{ fontWeight: 600, fontSize: "0.875rem" }}
+                    >
                       Created Date
                     </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600, fontSize: "0.875rem" }}>
+                    <TableCell
+                      align="center"
+                      sx={{ fontWeight: 600, fontSize: "0.875rem" }}
+                    >
                       Material Cost
                     </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 600, fontSize: "0.875rem" }}>
+                    <TableCell
+                      align="center"
+                      sx={{ fontWeight: 600, fontSize: "0.875rem" }}
+                    >
                       Actions
                     </TableCell>
                   </TableRow>
@@ -251,8 +266,9 @@ export default function Estimates() {
                           <Box
                             sx={{
                               display: "flex",
+                              flexDirection: "column",
                               alignItems: "center",
-                              gap: 1.5,
+                              gap: 1,
                             }}
                           >
                             <Box
@@ -269,20 +285,12 @@ export default function Estimates() {
                             >
                               <DescriptionOutlinedIcon sx={{ fontSize: 20 }} />
                             </Box>
-                            <Box>
-                              <Typography
-                                variant="subtitle2"
-                                sx={{ fontWeight: 600 }}
-                              >
-                                {row.documentName}
-                              </Typography>
-                              <Typography
-                                variant="caption"
-                                sx={{ color: "text.secondary" }}
-                              >
-                                ID: {row._id.substring(0, 8)}...
-                              </Typography>
-                            </Box>
+                            <Typography
+                              variant="subtitle2"
+                              sx={{ fontWeight: 600, textAlign: "center" }}
+                            >
+                              {row.documentName}
+                            </Typography>
                           </Box>
                         </TableCell>
                         <TableCell
@@ -362,19 +370,21 @@ export default function Estimates() {
                 </TableBody>
               </Table>
             </TableContainer>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25, 50]}
-              component="div"
-              count={filteredList.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              sx={{
-                borderTop: "1px solid",
-                borderColor: "divider",
-              }}
-            />
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                component="div"
+                count={filteredList.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                sx={{
+                  borderTop: "1px solid",
+                  borderColor: "divider",
+                }}
+              />
+            </Box>
           </>
         )}
       </Paper>
