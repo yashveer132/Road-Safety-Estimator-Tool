@@ -12,6 +12,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 import CircularProgress from "@mui/material/CircularProgress";
+import { useTheme, useMediaQuery } from "@mui/material";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
@@ -31,6 +32,10 @@ export default function Upload() {
   const [estimateId, setEstimateId] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
 
   const onDrop = useCallback((acceptedFiles) => {
     if (acceptedFiles && acceptedFiles[0]) {
@@ -164,12 +169,35 @@ export default function Upload() {
   const isProcessingOrUploading = uploading || processing;
 
   return (
-    <Box className="fade-in">
-      <Box sx={{ mb: 4, textAlign: "center", position: "relative" }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+    <Box className="fade-in" sx={{ pb: { xs: 2, sm: 4 } }}>
+      <Box
+        sx={{
+          mb: { xs: 3, sm: 4 },
+          textAlign: "center",
+          position: "relative",
+          px: { xs: 2, sm: 0 },
+        }}
+      >
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            mb: 1,
+            fontSize: { xs: "1.75rem", sm: "2rem", md: "2.125rem" },
+          }}
+        >
           Upload Intervention Report
         </Typography>
-        <Typography variant="body1" sx={{ color: "text.secondary" }}>
+        <Typography
+          variant="body1"
+          sx={{
+            color: "text.secondary",
+            fontSize: { xs: "0.875rem", sm: "1rem" },
+            maxWidth: { xs: "100%", sm: 600, md: 700 },
+            mx: "auto",
+            px: { xs: 1, sm: 0 },
+          }}
+        >
           Upload your road safety intervention report to get AI-powered cost
           estimates based on IRC standards
         </Typography>
@@ -178,10 +206,11 @@ export default function Upload() {
       <Paper
         elevation={0}
         sx={{
-          p: 4,
-          borderRadius: 3,
+          p: { xs: 2, sm: 3, md: 4 },
+          borderRadius: { xs: 2, sm: 3 },
           border: "1px solid",
           borderColor: "divider",
+          mx: { xs: 2, sm: 0 },
         }}
       >
         <Box
@@ -189,8 +218,8 @@ export default function Upload() {
           sx={{
             border: "2px dashed",
             borderColor: isDragActive ? "primary.main" : "divider",
-            borderRadius: 3,
-            p: 6,
+            borderRadius: { xs: 2, sm: 3 },
+            p: { xs: 3, sm: 4, md: 6 },
             textAlign: "center",
             cursor: isProcessingOrUploading ? "not-allowed" : "pointer",
             bgcolor: isDragActive
@@ -213,8 +242,8 @@ export default function Upload() {
 
           <Box
             sx={{
-              width: 80,
-              height: 80,
+              width: { xs: 64, sm: 80 },
+              height: { xs: 64, sm: 80 },
               borderRadius: "50%",
               bgcolor: isDragActive
                 ? "primary.main"
@@ -223,13 +252,13 @@ export default function Upload() {
               alignItems: "center",
               justifyContent: "center",
               margin: "0 auto",
-              mb: 3,
+              mb: { xs: 2, sm: 3 },
               transition: "all 0.3s ease-in-out",
             }}
           >
             <CloudUploadOutlinedIcon
               sx={{
-                fontSize: 40,
+                fontSize: { xs: 32, sm: 40 },
                 color: isDragActive ? "white" : "primary.main",
               }}
             />
@@ -238,23 +267,51 @@ export default function Upload() {
           {file ? (
             <Box>
               <CheckCircleOutlineIcon
-                sx={{ fontSize: 48, color: "success.main", mb: 2 }}
+                sx={{
+                  fontSize: { xs: 40, sm: 48 },
+                  color: "success.main",
+                  mb: { xs: 1.5, sm: 2 },
+                }}
               />
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 1,
+                  fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                }}
+              >
                 File Selected
               </Typography>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  fontSize: { xs: "0.875rem", sm: "1rem" },
+                }}
+              >
                 {file.name} ({(file.size / 1024).toFixed(2)} KB)
               </Typography>
             </Box>
           ) : (
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 1,
+                  fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                }}
+              >
                 {isDragActive ? "Drop the file here" : "No file chosen"}
               </Typography>
               <Typography
                 variant="body2"
-                sx={{ color: "text.secondary", mb: 2 }}
+                sx={{
+                  color: "text.secondary",
+                  mb: { xs: 1.5, sm: 2 },
+                  fontSize: { xs: "0.875rem", sm: "1rem" },
+                }}
               >
                 Drag & drop your file here or click to browse
               </Typography>
@@ -267,6 +324,7 @@ export default function Upload() {
                   fontWeight: 500,
                   border: "1px solid",
                   borderColor: "primary.main",
+                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
                 }}
               />
             </Box>
@@ -276,23 +334,43 @@ export default function Upload() {
         {file && (
           <Box
             sx={{
-              mt: 3,
-              p: 2.5,
+              mt: { xs: 2, sm: 3 },
+              p: { xs: 2, sm: 2.5 },
               borderRadius: 2,
               bgcolor: "success.light",
               color: "white",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
+              flexDirection: { xs: "column", sm: "row" },
+              gap: { xs: 1.5, sm: 0 },
+              textAlign: { xs: "center", sm: "left" },
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <InsertDriveFileOutlinedIcon sx={{ fontSize: 32 }} />
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: { xs: 1.5, sm: 2 },
+              }}
+            >
+              <InsertDriveFileOutlinedIcon
+                sx={{ fontSize: { xs: 28, sm: 32 } }}
+              />
               <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: { xs: "0.875rem", sm: "1rem" },
+                  }}
+                >
                   {file.name}
                 </Typography>
-                <Typography variant="caption">
+                <Typography
+                  variant="caption"
+                  sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem" } }}
+                >
                   {(file.size / 1024).toFixed(2)} KB •{" "}
                   {file.type || "Unknown type"}
                 </Typography>
@@ -307,6 +385,7 @@ export default function Upload() {
               disabled={isProcessingOrUploading}
               sx={{
                 color: "white",
+                fontSize: { xs: "0.875rem", sm: "1rem" },
                 "&:hover": { bgcolor: "rgba(255, 255, 255, 0.1)" },
               }}
             >
@@ -316,16 +395,33 @@ export default function Upload() {
         )}
 
         {uploading && uploadProgress > 0 && (
-          <Box sx={{ mt: 3 }}>
+          <Box sx={{ mt: { xs: 2, sm: 3 } }}>
             <Box
-              sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                mb: 1,
+                flexDirection: { xs: "column", sm: "row" },
+                gap: { xs: 0.5, sm: 0 },
+                textAlign: { xs: "center", sm: "left" },
+              }}
             >
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: { xs: "0.875rem", sm: "1rem" },
+                }}
+              >
                 Uploading document...
               </Typography>
               <Typography
                 variant="body2"
-                sx={{ fontWeight: 600, color: "primary.main" }}
+                sx={{
+                  fontWeight: 600,
+                  color: "primary.main",
+                  fontSize: { xs: "0.875rem", sm: "1rem" },
+                }}
               >
                 {uploadProgress}%
               </Typography>
@@ -334,7 +430,7 @@ export default function Upload() {
               variant="determinate"
               value={uploadProgress}
               sx={{
-                height: 8,
+                height: { xs: 6, sm: 8 },
                 borderRadius: 4,
                 bgcolor: "rgba(51, 65, 85, 0.5)",
                 "& .MuiLinearProgress-bar": {
@@ -348,8 +444,8 @@ export default function Upload() {
         {processing && (
           <Box
             sx={{
-              mt: 3,
-              p: 3,
+              mt: { xs: 2, sm: 3 },
+              p: { xs: 2, sm: 3 },
               borderRadius: 2,
               bgcolor: "rgba(16, 185, 129, 0.1)",
               border: "1px solid",
@@ -357,24 +453,54 @@ export default function Upload() {
               textAlign: "center",
             }}
           >
-            <CircularProgress size={40} sx={{ mb: 2 }} />
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+            <CircularProgress
+              size={isMobile ? 32 : 40}
+              sx={{ mb: { xs: 1.5, sm: 2 } }}
+            />
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 600,
+                mb: 1,
+                fontSize: { xs: "1.1rem", sm: "1.25rem" },
+              }}
+            >
               AI Analysis in Progress
             </Typography>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontSize: { xs: "0.875rem", sm: "1rem" },
+              }}
+            >
               Extracting interventions, mapping IRC standards, and calculating
               costs...
             </Typography>
             <Typography
               variant="caption"
-              sx={{ color: "text.secondary", mt: 1, display: "block" }}
+              sx={{
+                color: "text.secondary",
+                mt: 1,
+                display: "block",
+                fontSize: { xs: "0.7rem", sm: "0.75rem" },
+              }}
             >
               This may take a few minutes depending on the document size
             </Typography>
           </Box>
         )}
 
-        <Box sx={{ display: "flex", gap: 2, mt: 4, justifyContent: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: { xs: 1.5, sm: 2 },
+            mt: { xs: 3, sm: 4 },
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "stretch", sm: "center" },
+            justifyContent: "center",
+          }}
+        >
           <Button
             variant="contained"
             size="large"
@@ -382,15 +508,21 @@ export default function Upload() {
             disabled={!file || isProcessingOrUploading}
             startIcon={
               isProcessingOrUploading ? (
-                <CircularProgress size={20} color="inherit" />
+                <CircularProgress size={isMobile ? 16 : 20} color="inherit" />
               ) : (
-                <CloudUploadOutlinedIcon />
+                <CloudUploadOutlinedIcon
+                  sx={{ fontSize: { xs: 18, sm: 20 } }}
+                />
               )
             }
             sx={{
-              px: 4,
+              px: { xs: 3, sm: 4 },
+              py: { xs: 1.25, sm: 1.5 },
               fontWeight: 600,
+              fontSize: { xs: "0.95rem", sm: "1rem" },
               bgcolor: "#10B981",
+              minHeight: { xs: 48, sm: 56 },
+              flex: { xs: 1, sm: "none" },
               "&:hover": {
                 bgcolor: "#059669",
               },
@@ -408,9 +540,14 @@ export default function Upload() {
             onClick={removeFile}
             disabled={!file || isProcessingOrUploading}
             sx={{
+              px: { xs: 3, sm: 4 },
+              py: { xs: 1.25, sm: 1.5 },
               fontWeight: 600,
+              fontSize: { xs: "0.95rem", sm: "1rem" },
               borderColor: "#F59E0B",
               color: "#F59E0B",
+              minHeight: { xs: 48, sm: 56 },
+              flex: { xs: 1, sm: "none" },
               "&:hover": {
                 borderColor: "#D97706",
                 bgcolor: "rgba(245, 158, 11, 0.08)",
@@ -421,40 +558,73 @@ export default function Upload() {
           </Button>
         </Box>
 
-        <Divider sx={{ my: 4 }} />
+        <Divider sx={{ my: { xs: 3, sm: 4 } }} />
 
         <Box sx={{ textAlign: "center" }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 600,
+              mb: { xs: 2, sm: 3 },
+              fontSize: { xs: "1.1rem", sm: "1.25rem" },
+            }}
+          >
             Supported File Formats
           </Typography>
-          <List sx={{ maxWidth: 600, mx: "auto" }}>
+          <List sx={{ maxWidth: { xs: "100%", sm: 600 }, mx: "auto" }}>
             {supportedFormats.map((format, index) => (
               <ListItem
                 key={index}
                 sx={{
-                  px: 2,
-                  py: 1.5,
+                  px: { xs: 1.5, sm: 2 },
+                  py: { xs: 1, sm: 1.5 },
                   borderRadius: 2,
                   mb: 1,
                   bgcolor: "rgba(30, 41, 59, 0.5)",
                   "&:hover": { bgcolor: "rgba(16, 185, 129, 0.08)" },
                   display: "flex",
                   justifyContent: "center",
+                  flexDirection: { xs: "column", sm: "row" },
+                  textAlign: { xs: "center", sm: "left" },
+                  gap: { xs: 1, sm: 0 },
                 }}
               >
-                <ListItemIcon sx={{ minWidth: 48, justifyContent: "center" }}>
-                  <Box sx={{ fontSize: 28 }}>{format.icon}</Box>
+                <ListItemIcon
+                  sx={{
+                    minWidth: { xs: "auto", sm: 48 },
+                    justifyContent: "center",
+                    mb: { xs: 0.5, sm: 0 },
+                  }}
+                >
+                  <Box sx={{ fontSize: { xs: 24, sm: 28 } }}>{format.icon}</Box>
                 </ListItemIcon>
                 <ListItemText
                   primary={
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontWeight: 600,
+                        fontSize: { xs: "0.95rem", sm: "1rem" },
+                      }}
+                    >
                       {format.format}
                     </Typography>
                   }
                   secondary={format.description}
-                  sx={{ textAlign: "left" }}
+                  sx={{
+                    textAlign: { xs: "center", sm: "left" },
+                    "& .MuiListItemText-secondary": {
+                      fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                    },
+                  }}
                 />
-                <CheckCircleOutlineIcon sx={{ color: "success.main" }} />
+                <CheckCircleOutlineIcon
+                  sx={{
+                    color: "success.main",
+                    fontSize: { xs: 20, sm: 24 },
+                    ml: { xs: 0, sm: 1 },
+                  }}
+                />
               </ListItem>
             ))}
           </List>
@@ -462,8 +632,8 @@ export default function Upload() {
 
         <Box
           sx={{
-            mt: 4,
-            p: 3,
+            mt: { xs: 3, sm: 4 },
+            p: { xs: 2, sm: 3 },
             borderRadius: 2,
             bgcolor: "rgba(16, 185, 129, 0.05)",
             border: "1px solid",
@@ -475,16 +645,25 @@ export default function Upload() {
             variant="subtitle1"
             sx={{
               fontWeight: 600,
-              mb: 1.5,
+              mb: { xs: 1, sm: 1.5 },
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               gap: 1,
+              fontSize: { xs: "1rem", sm: "1.1rem" },
+              flexDirection: { xs: "column", sm: "row" },
             }}
           >
-            <DescriptionOutlinedIcon /> What happens after upload?
+            <DescriptionOutlinedIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
+            What happens after upload?
           </Typography>
-          <List sx={{ maxWidth: 700, mx: "auto", textAlign: "left" }}>
+          <List
+            sx={{
+              maxWidth: { xs: "100%", sm: 700 },
+              mx: "auto",
+              textAlign: "left",
+            }}
+          >
             {[
               "AI analyzes your intervention report and extracts all sections",
               "Identifies technical specifications from IRC standards (IRC 35, 67, 99, SP:73, SP:84, SP:87, 79, 82, 93)",
@@ -492,8 +671,22 @@ export default function Upload() {
               "Fetches current unit prices from CPWD SOR and GeM portal database",
               "Generates detailed cost estimate with IRC clause citations and rationale",
             ].map((step, index) => (
-              <ListItem key={index} sx={{ py: 0.5, pl: 0 }}>
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              <ListItem
+                key={index}
+                sx={{
+                  py: { xs: 0.25, sm: 0.5 },
+                  pl: { xs: 1, sm: 0 },
+                  alignItems: "flex-start",
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                    fontSize: { xs: "0.85rem", sm: "0.875rem" },
+                    lineHeight: { xs: 1.4, sm: 1.5 },
+                  }}
+                >
                   {index + 1}. {step}
                 </Typography>
               </ListItem>

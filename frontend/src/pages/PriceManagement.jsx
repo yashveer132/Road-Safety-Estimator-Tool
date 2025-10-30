@@ -29,6 +29,8 @@ import Tabs from "@mui/material/Tabs";
 import MenuItem from "@mui/material/MenuItem";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
 import axios from "axios";
 import SearchIcon from "@mui/icons-material/Search";
 import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
@@ -71,6 +73,9 @@ const SOURCE_COLORS = {
 };
 
 export default function PriceManagement() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -508,45 +513,84 @@ export default function PriceManagement() {
   };
 
   return (
-    <Box className="fade-in">
+    <Box className="fade-in" sx={{ px: { xs: 1, sm: 2, md: 0 } }}>
       <Box
         sx={{
-          mb: 4,
+          mb: { xs: 3, sm: 4 },
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           textAlign: "center",
         }}
       >
-        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-          💰 Price Management Dashboard
-        </Typography>
-        <Typography variant="body1" sx={{ color: "text.secondary", mb: 2 }}>
-          Manage material costs from CPWD SOR, GeM Portal, and other official
-          sources
-        </Typography>
-        <Box sx={{ display: "flex", gap: 1 }}>
+        <Box sx={{ flex: 1, textAlign: "center" }}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              mb: 1,
+              fontSize: { xs: "1.75rem", sm: "2.125rem", md: "2.25rem" },
+            }}
+          >
+            💰 Price Management Dashboard
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              color: "text.secondary",
+              mb: { xs: 2, sm: 3 },
+              fontSize: { xs: "0.875rem", sm: "1rem" },
+            }}
+          >
+            Manage material costs from CPWD SOR, GeM Portal, and other official
+            sources
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            gap: { xs: 1, sm: 1.5 },
+            flexDirection: { xs: "column", sm: "row" },
+            width: { xs: "100%", sm: "auto" },
+            alignItems: { xs: "center", sm: "flex-start" },
+          }}
+        >
           <Tooltip title="Refresh prices">
-            <IconButton
+            <Button
               onClick={handleRefresh}
               disabled={loading}
+              startIcon={<RefreshIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
               sx={{
                 bgcolor: "rgba(16, 185, 129, 0.1)",
                 color: "primary.main",
                 "&:hover": { bgcolor: "rgba(16, 185, 129, 0.2)" },
+                fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                py: { xs: 0.75, sm: 1 },
+                px: { xs: 1.5, sm: 2 },
+                minWidth: { xs: "auto", sm: "auto" },
+                textTransform: "none",
+                fontWeight: 600,
               }}
             >
-              <RefreshIcon />
-            </IconButton>
+              Refresh Prices
+            </Button>
           </Tooltip>
           <Tooltip title="Export to CSV">
             <Button
               variant="contained"
-              startIcon={<GetAppIcon />}
+              startIcon={<GetAppIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
               onClick={exportToCSV}
               disabled={results.length === 0}
               sx={{
                 background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
+                fontSize: { xs: "0.875rem", sm: "0.95rem" },
+                py: { xs: 1, sm: 1 },
+                px: { xs: 2, sm: 3 },
+                flex: { xs: 1, sm: "none" },
+                "&:hover": {
+                  background:
+                    "linear-gradient(135deg, #059669 0%, #047857 100%)",
+                },
               }}
             >
               Export
@@ -558,28 +602,37 @@ export default function PriceManagement() {
       <Paper
         elevation={0}
         sx={{
-          borderRadius: 3,
+          borderRadius: { xs: 2, sm: 3 },
           border: "1px solid",
           borderColor: "divider",
           mb: 3,
           display: "flex",
           justifyContent: "center",
+          overflow: "hidden",
         }}
       >
         <Tabs
           value={tabValue}
           onChange={(e, newValue) => setTabValue(newValue)}
+          variant={isMobile ? "scrollable" : "standard"}
+          scrollButtons={isMobile ? "auto" : false}
+          allowScrollButtonsMobile
           sx={{
             borderBottom: "1px solid",
             borderColor: "divider",
             "& .MuiTab-root": {
-              minWidth: 150,
+              minWidth: { xs: 120, sm: 150 },
               fontWeight: 600,
               textTransform: "none",
-              fontSize: "0.95rem",
+              fontSize: { xs: "0.8rem", sm: "0.95rem" },
               textAlign: "center",
+              py: { xs: 1.5, sm: 2 },
+              px: { xs: 1, sm: 2 },
             },
-            justifyContent: "center",
+            "& .MuiTabs-indicator": {
+              height: { xs: 3, sm: 4 },
+            },
+            minHeight: { xs: 48, sm: 56 },
           }}
         >
           <Tab label="📊 Dashboard" />
@@ -590,12 +643,12 @@ export default function PriceManagement() {
 
       {tabValue === 0 && (
         <>
-          <Grid container spacing={2} sx={{ mb: 4 }}>
+          <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} sx={{ mb: 4 }}>
             <Grid item xs={12} sm={6} md={3}>
               <Card
                 elevation={0}
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: { xs: 2, sm: 3 },
                   border: "1px solid",
                   borderColor: "divider",
                   background:
@@ -607,26 +660,26 @@ export default function PriceManagement() {
                   },
                 }}
               >
-                <CardContent sx={{ textAlign: "center" }}>
+                <CardContent sx={{ textAlign: "center", p: { xs: 2, sm: 3 } }}>
                   <Box
                     sx={{
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
-                      gap: 2,
+                      gap: { xs: 1.5, sm: 2 },
                     }}
                   >
                     <Box
                       sx={{
-                        width: 56,
-                        height: 56,
+                        width: { xs: 48, sm: 56 },
+                        height: { xs: 48, sm: 56 },
                         borderRadius: 2,
                         bgcolor: "primary.main",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         color: "white",
-                        fontSize: "1.5rem",
+                        fontSize: { xs: "1.25rem", sm: "1.5rem" },
                       }}
                     >
                       📦
@@ -634,13 +687,21 @@ export default function PriceManagement() {
                     <Box>
                       <Typography
                         variant="h5"
-                        sx={{ fontWeight: 700, color: "primary.main" }}
+                        sx={{
+                          fontWeight: 700,
+                          color: "primary.main",
+                          fontSize: { xs: "1.5rem", sm: "1.875rem" },
+                        }}
                       >
                         {stats.total}
                       </Typography>
                       <Typography
                         variant="body2"
-                        sx={{ color: "text.secondary", fontWeight: 500 }}
+                        sx={{
+                          color: "text.secondary",
+                          fontWeight: 500,
+                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                        }}
                       >
                         Total Items
                       </Typography>
@@ -654,7 +715,7 @@ export default function PriceManagement() {
               <Card
                 elevation={0}
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: { xs: 2, sm: 3 },
                   border: "1px solid",
                   borderColor: "divider",
                   background:
@@ -666,26 +727,26 @@ export default function PriceManagement() {
                   },
                 }}
               >
-                <CardContent sx={{ textAlign: "center" }}>
+                <CardContent sx={{ textAlign: "center", p: { xs: 2, sm: 3 } }}>
                   <Box
                     sx={{
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
-                      gap: 2,
+                      gap: { xs: 1.5, sm: 2 },
                     }}
                   >
                     <Box
                       sx={{
-                        width: 56,
-                        height: 56,
+                        width: { xs: 48, sm: 56 },
+                        height: { xs: 48, sm: 56 },
                         borderRadius: 2,
                         bgcolor: "secondary.main",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         color: "white",
-                        fontSize: "1.5rem",
+                        fontSize: { xs: "1.25rem", sm: "1.5rem" },
                       }}
                     >
                       🏷️
@@ -693,13 +754,21 @@ export default function PriceManagement() {
                     <Box>
                       <Typography
                         variant="h5"
-                        sx={{ fontWeight: 700, color: "secondary.main" }}
+                        sx={{
+                          fontWeight: 700,
+                          color: "secondary.main",
+                          fontSize: { xs: "1.5rem", sm: "1.875rem" },
+                        }}
                       >
                         {stats.categories}
                       </Typography>
                       <Typography
                         variant="body2"
-                        sx={{ color: "text.secondary", fontWeight: 500 }}
+                        sx={{
+                          color: "text.secondary",
+                          fontWeight: 500,
+                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                        }}
                       >
                         Categories
                       </Typography>
@@ -713,7 +782,7 @@ export default function PriceManagement() {
               <Card
                 elevation={0}
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: { xs: 2, sm: 3 },
                   border: "1px solid",
                   borderColor: "divider",
                   background:
@@ -725,26 +794,26 @@ export default function PriceManagement() {
                   },
                 }}
               >
-                <CardContent sx={{ textAlign: "center" }}>
+                <CardContent sx={{ textAlign: "center", p: { xs: 2, sm: 3 } }}>
                   <Box
                     sx={{
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
-                      gap: 2,
+                      gap: { xs: 1.5, sm: 2 },
                     }}
                   >
                     <Box
                       sx={{
-                        width: 56,
-                        height: 56,
+                        width: { xs: 48, sm: 56 },
+                        height: { xs: 48, sm: 56 },
                         borderRadius: 2,
                         bgcolor: "#22C55E",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         color: "white",
-                        fontSize: "1.5rem",
+                        fontSize: { xs: "1.25rem", sm: "1.5rem" },
                       }}
                     >
                       💹
@@ -752,13 +821,21 @@ export default function PriceManagement() {
                     <Box>
                       <Typography
                         variant="h5"
-                        sx={{ fontWeight: 700, color: "#22C55E" }}
+                        sx={{
+                          fontWeight: 700,
+                          color: "#22C55E",
+                          fontSize: { xs: "1.5rem", sm: "1.875rem" },
+                        }}
                       >
                         ₹{stats.avgPrice.toLocaleString("en-IN")}
                       </Typography>
                       <Typography
                         variant="body2"
-                        sx={{ color: "text.secondary", fontWeight: 500 }}
+                        sx={{
+                          color: "text.secondary",
+                          fontWeight: 500,
+                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                        }}
                       >
                         Avg Price
                       </Typography>
@@ -772,7 +849,7 @@ export default function PriceManagement() {
               <Card
                 elevation={0}
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: { xs: 2, sm: 3 },
                   border: "1px solid",
                   borderColor: "divider",
                   background:
@@ -784,26 +861,26 @@ export default function PriceManagement() {
                   },
                 }}
               >
-                <CardContent sx={{ textAlign: "center" }}>
+                <CardContent sx={{ textAlign: "center", p: { xs: 2, sm: 3 } }}>
                   <Box
                     sx={{
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
-                      gap: 2,
+                      gap: { xs: 1.5, sm: 2 },
                     }}
                   >
                     <Box
                       sx={{
-                        width: 56,
-                        height: 56,
+                        width: { xs: 48, sm: 56 },
+                        height: { xs: 48, sm: 56 },
                         borderRadius: 2,
                         bgcolor: "#3B82F6",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         color: "white",
-                        fontSize: "1.5rem",
+                        fontSize: { xs: "1.25rem", sm: "1.5rem" },
                       }}
                     >
                       📅
@@ -815,6 +892,7 @@ export default function PriceManagement() {
                           color: "text.secondary",
                           fontWeight: 500,
                           mb: 0.5,
+                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
                         }}
                       >
                         Last Updated
@@ -824,7 +902,7 @@ export default function PriceManagement() {
                         sx={{
                           color: "#3B82F6",
                           fontWeight: 600,
-                          fontSize: "0.75rem",
+                          fontSize: { xs: "0.7rem", sm: "0.75rem" },
                         }}
                       >
                         {stats.lastUpdated
@@ -838,15 +916,15 @@ export default function PriceManagement() {
             </Grid>
           </Grid>
 
-          <Grid container spacing={2} sx={{ mb: 4 }}>
+          <Grid container spacing={{ xs: 2, sm: 2 }} sx={{ mb: 4 }}>
             <Grid item xs={12} sm={6}>
               <Card
                 elevation={0}
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: { xs: 2, sm: 3 },
                   border: "1px solid",
                   borderColor: "divider",
-                  p: 2.5,
+                  p: { xs: 2, sm: 2.5 },
                 }}
               >
                 <Box
@@ -854,24 +932,36 @@ export default function PriceManagement() {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: 1,
+                    gap: { xs: 1.5, sm: 2 },
+                    textAlign: "center",
                   }}
                 >
                   <TrendingUpIcon
                     sx={{
-                      fontSize: 40,
+                      fontSize: { xs: 32, sm: 40 },
                       color: "#10B981",
                       opacity: 0.7,
+                      flexShrink: 0,
                     }}
                   />
-                  <Box sx={{ textAlign: "center" }}>
+                  <Box sx={{ flex: 1 }}>
                     <Typography
                       variant="body2"
-                      sx={{ color: "text.secondary", mb: 0.5 }}
+                      sx={{
+                        color: "text.secondary",
+                        mb: 0.5,
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                      }}
                     >
                       Highest Price
                     </Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                      }}
+                    >
                       ₹{stats.maxPrice.toLocaleString("en-IN")}
                     </Typography>
                   </Box>
@@ -883,10 +973,10 @@ export default function PriceManagement() {
               <Card
                 elevation={0}
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: { xs: 2, sm: 3 },
                   border: "1px solid",
                   borderColor: "divider",
-                  p: 2.5,
+                  p: { xs: 2, sm: 2.5 },
                 }}
               >
                 <Box
@@ -894,24 +984,36 @@ export default function PriceManagement() {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: 1,
+                    gap: { xs: 1.5, sm: 2 },
+                    textAlign: "center",
                   }}
                 >
                   <TrendingDownIcon
                     sx={{
-                      fontSize: 40,
+                      fontSize: { xs: 32, sm: 40 },
                       color: "#F59E0B",
                       opacity: 0.7,
+                      flexShrink: 0,
                     }}
                   />
-                  <Box sx={{ textAlign: "center" }}>
+                  <Box sx={{ flex: 1 }}>
                     <Typography
                       variant="body2"
-                      sx={{ color: "text.secondary", mb: 0.5 }}
+                      sx={{
+                        color: "text.secondary",
+                        mb: 0.5,
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                      }}
                     >
                       Lowest Price
                     </Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                      }}
+                    >
                       ₹{stats.minPrice.toLocaleString("en-IN")}
                     </Typography>
                   </Box>
@@ -920,13 +1022,13 @@ export default function PriceManagement() {
             </Grid>
           </Grid>
 
-          <Grid container spacing={2} sx={{ mb: 4 }}>
+          <Grid container spacing={{ xs: 2, sm: 2, md: 2 }} sx={{ mb: 4 }}>
             {Object.entries(sourceStats).map(([source, data]) => (
               <Grid item xs={12} sm={6} md={4} key={source}>
                 <Card
                   elevation={0}
                   sx={{
-                    borderRadius: 3,
+                    borderRadius: { xs: 2, sm: 3 },
                     border: "2px solid",
                     borderColor: SOURCE_COLORS[source],
                     bgcolor:
@@ -935,18 +1037,25 @@ export default function PriceManagement() {
                       ", 0.05)",
                   }}
                 >
-                  <CardContent sx={{ textAlign: "center" }}>
+                  <CardContent
+                    sx={{ textAlign: "center", p: { xs: 2, sm: 3 } }}
+                  >
                     <Box
                       sx={{
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
-                        gap: 1,
+                        gap: { xs: 1, sm: 1.5 },
                       }}
                     >
                       <Typography
                         variant="body2"
-                        sx={{ color: "text.secondary", mb: 1 }}
+                        sx={{
+                          color: "text.secondary",
+                          mb: { xs: 0.5, sm: 1 },
+                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                          fontWeight: 600,
+                        }}
                       >
                         {SOURCE_ICONS[source]} {source}
                       </Typography>
@@ -955,6 +1064,7 @@ export default function PriceManagement() {
                         sx={{
                           fontWeight: 700,
                           color: SOURCE_COLORS[source],
+                          fontSize: { xs: "1.25rem", sm: "1.5rem" },
                         }}
                       >
                         {data.count} items
@@ -964,7 +1074,8 @@ export default function PriceManagement() {
                         sx={{
                           color: "text.secondary",
                           display: "block",
-                          mt: 0.5,
+                          mt: { xs: 0.25, sm: 0.5 },
+                          fontSize: { xs: "0.7rem", sm: "0.75rem" },
                         }}
                       >
                         Avg: ₹
@@ -1204,6 +1315,311 @@ export default function PriceManagement() {
                   : "Enter keywords to search for material prices"}
               </Typography>
             </Box>
+          ) : isMobile ? (
+            <>
+              <Box sx={{ p: { xs: 2, sm: 3 } }}>
+                <Grid container spacing={{ xs: 2, sm: 2 }}>
+                  {results
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((item) => (
+                      <Grid item xs={12} key={item._id}>
+                        <Card
+                          elevation={0}
+                          sx={{
+                            borderRadius: { xs: 2, sm: 3 },
+                            border: "1px solid",
+                            borderColor: "divider",
+                            transition: "all 0.2s ease-in-out",
+                            "&:hover": {
+                              borderColor: "primary.main",
+                              transform: "translateY(-2px)",
+                              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                            },
+                          }}
+                        >
+                          <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: { xs: 1.5, sm: 2 },
+                              }}
+                            >
+                              <Checkbox
+                                checked={selectedRows.has(item._id)}
+                                onChange={() => handleRowSelect(item._id)}
+                                sx={{ mt: 0.5, flexShrink: 0 }}
+                              />
+                              <Box sx={{ flex: 1, minWidth: 0 }}>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "flex-start",
+                                    justifyContent: "space-between",
+                                    mb: { xs: 1.5, sm: 2 },
+                                  }}
+                                >
+                                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                                    <Typography
+                                      variant="subtitle1"
+                                      sx={{
+                                        fontWeight: 700,
+                                        mb: 0.5,
+                                        fontSize: { xs: "1rem", sm: "1.1rem" },
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
+                                      }}
+                                    >
+                                      {item.itemName}
+                                    </Typography>
+                                    {item.itemCode && (
+                                      <Typography
+                                        variant="caption"
+                                        sx={{
+                                          color: "text.secondary",
+                                          display: "block",
+                                          fontSize: {
+                                            xs: "0.75rem",
+                                            sm: "0.8rem",
+                                          },
+                                        }}
+                                      >
+                                        Code: {item.itemCode}
+                                      </Typography>
+                                    )}
+                                  </Box>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      gap: 0.5,
+                                      flexShrink: 0,
+                                    }}
+                                  >
+                                    <Tooltip title="View Details">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => handleOpenDetails(item)}
+                                        sx={{
+                                          color: "primary.main",
+                                          "&:hover": {
+                                            bgcolor: "rgba(16, 185, 129, 0.1)",
+                                          },
+                                        }}
+                                      >
+                                        <VisibilityIcon
+                                          sx={{ fontSize: { xs: 18, sm: 20 } }}
+                                        />
+                                      </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Edit">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => handleOpenEdit(item)}
+                                        sx={{
+                                          color: "info.main",
+                                          "&:hover": {
+                                            bgcolor: "rgba(59, 130, 246, 0.1)",
+                                          },
+                                        }}
+                                      >
+                                        <EditIcon
+                                          sx={{ fontSize: { xs: 18, sm: 20 } }}
+                                        />
+                                      </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Delete">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => handleOpenDelete(item)}
+                                        sx={{
+                                          color: "error.main",
+                                          "&:hover": {
+                                            bgcolor: "rgba(239, 68, 68, 0.1)",
+                                          },
+                                        }}
+                                      >
+                                        <DeleteIcon
+                                          sx={{ fontSize: { xs: 18, sm: 20 } }}
+                                        />
+                                      </IconButton>
+                                    </Tooltip>
+                                  </Box>
+                                </Box>
+
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: { xs: 1, sm: 1.5 },
+                                    mb: { xs: 1.5, sm: 2 },
+                                    flexWrap: "wrap",
+                                  }}
+                                >
+                                  <Typography
+                                    variant="h6"
+                                    sx={{
+                                      fontWeight: 700,
+                                      color: "primary.main",
+                                      fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                                    }}
+                                  >
+                                    ₹
+                                    {(item.unitPrice || 0).toLocaleString(
+                                      "en-IN"
+                                    )}
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
+                                      color: "text.secondary",
+                                      fontSize: {
+                                        xs: "0.8rem",
+                                        sm: "0.875rem",
+                                      },
+                                    }}
+                                  >
+                                    per {item.unit || "N/A"}
+                                  </Typography>
+                                </Box>
+
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: { xs: 1, sm: 1.5 },
+                                    mb: { xs: 1.5, sm: 2 },
+                                    flexWrap: "wrap",
+                                  }}
+                                >
+                                  <Chip
+                                    label={item.category || "General"}
+                                    size="small"
+                                    sx={{
+                                      fontWeight: 600,
+                                      fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                                      textTransform: "capitalize",
+                                      height: { xs: 24, sm: 28 },
+                                    }}
+                                  />
+                                  <Chip
+                                    label={`${SOURCE_ICONS[item.source]} ${
+                                      item.source
+                                    }`}
+                                    size="small"
+                                    sx={{
+                                      fontWeight: 600,
+                                      fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                                      bgcolor:
+                                        SOURCE_COLORS[item.source] + "20",
+                                      color: SOURCE_COLORS[item.source],
+                                      border: `1px solid ${
+                                        SOURCE_COLORS[item.source]
+                                      }`,
+                                      height: { xs: 24, sm: 28 },
+                                    }}
+                                  />
+                                  <Chip
+                                    label={getStatusLabel(item)}
+                                    size="small"
+                                    sx={{
+                                      fontWeight: 700,
+                                      fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                                      bgcolor: getStatusColor(item) + "20",
+                                      color: getStatusColor(item),
+                                      border: `1.5px solid ${getStatusColor(
+                                        item
+                                      )}`,
+                                      height: { xs: 24, sm: 28 },
+                                    }}
+                                  />
+                                </Box>
+
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: { xs: 1, sm: 1.5 },
+                                    flexWrap: "wrap",
+                                  }}
+                                >
+                                  <Typography
+                                    variant="caption"
+                                    sx={{
+                                      color: "text.secondary",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 0.5,
+                                      fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                                    }}
+                                  >
+                                    <EventNoteIcon
+                                      sx={{
+                                        fontSize: {
+                                          xs: "0.8rem",
+                                          sm: "0.9rem",
+                                        },
+                                      }}
+                                    />
+                                    Added:{" "}
+                                    {new Date(
+                                      item.createdAt
+                                    ).toLocaleDateString("en-IN")}
+                                  </Typography>
+                                  <Typography
+                                    variant="caption"
+                                    sx={{
+                                      color: "text.secondary",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 0.5,
+                                      fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                                    }}
+                                  >
+                                    <UpdateIcon
+                                      sx={{
+                                        fontSize: {
+                                          xs: "0.8rem",
+                                          sm: "0.9rem",
+                                        },
+                                      }}
+                                    />
+                                    Updated:{" "}
+                                    {new Date(
+                                      item.lastVerified
+                                    ).toLocaleDateString("en-IN")}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                </Grid>
+              </Box>
+              <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, 50, 100]}
+                  component="div"
+                  count={results.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  sx={{
+                    "& .MuiTablePagination-toolbar": {
+                      flexWrap: "wrap",
+                      justifyContent: "center",
+                    },
+                    "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
+                      {
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                      },
+                  }}
+                />
+              </Box>
+            </>
           ) : (
             <>
               <TableContainer>
@@ -1556,40 +1972,59 @@ export default function PriceManagement() {
       )}
 
       {tabValue === 2 && (
-        <Grid container spacing={3}>
+        <Grid container spacing={{ xs: 2, sm: 3, md: 3 }}>
           <Grid item xs={12}>
             <Card
               elevation={0}
               sx={{
-                borderRadius: 3,
+                borderRadius: { xs: 2, sm: 3 },
                 border: "1px solid",
                 borderColor: "divider",
-                p: 3,
+                p: { xs: 2, sm: 3 },
               }}
             >
               <Typography
                 variant="h6"
-                sx={{ fontWeight: 700, mb: 3, textAlign: "center" }}
+                sx={{
+                  fontWeight: 700,
+                  mb: { xs: 2, sm: 3 },
+                  textAlign: "center",
+                  fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                }}
               >
                 📊 Price Distribution Analysis
               </Typography>
-              <Grid container spacing={3}>
+              <Grid container spacing={{ xs: 2, sm: 3 }}>
                 <Grid item xs={12} sm={6}>
                   <Box
                     sx={{
-                      p: 2,
+                      p: { xs: 1.5, sm: 2 },
                       bgcolor: "rgba(16, 185, 129, 0.05)",
                       borderRadius: 2,
                       textAlign: "center",
+                      border: "1px solid",
+                      borderColor: "rgba(16, 185, 129, 0.2)",
                     }}
                   >
                     <Typography
                       variant="body2"
-                      sx={{ color: "text.secondary", mb: 1 }}
+                      sx={{
+                        color: "text.secondary",
+                        mb: 1,
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                        fontWeight: 600,
+                      }}
                     >
                       Price Range
                     </Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 700,
+                        mb: { xs: 1.5, sm: 2 },
+                        fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                      }}
+                    >
                       ₹{stats.minPrice.toLocaleString("en-IN")} - ₹
                       {stats.maxPrice.toLocaleString("en-IN")}
                     </Typography>
@@ -1603,7 +2038,7 @@ export default function PriceManagement() {
                           : 0
                       }
                       sx={{
-                        height: 8,
+                        height: { xs: 6, sm: 8 },
                         borderRadius: 4,
                         bgcolor: "rgba(16, 185, 129, 0.2)",
                         "& .MuiLinearProgress-bar": {
@@ -1619,19 +2054,32 @@ export default function PriceManagement() {
                 <Grid item xs={12} sm={6}>
                   <Box
                     sx={{
-                      p: 2,
+                      p: { xs: 1.5, sm: 2 },
                       bgcolor: "rgba(245, 158, 11, 0.05)",
                       borderRadius: 2,
                       textAlign: "center",
+                      border: "1px solid",
+                      borderColor: "rgba(245, 158, 11, 0.2)",
                     }}
                   >
                     <Typography
                       variant="body2"
-                      sx={{ color: "text.secondary", mb: 1 }}
+                      sx={{
+                        color: "text.secondary",
+                        mb: 1,
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                        fontWeight: 600,
+                      }}
                     >
                       Data Freshness
                     </Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                      }}
+                    >
                       {stats.lastUpdated
                         ? Math.floor(
                             (new Date() - new Date(stats.lastUpdated)) /
@@ -1641,7 +2089,12 @@ export default function PriceManagement() {
                     </Typography>
                     <Typography
                       variant="caption"
-                      sx={{ color: "text.secondary", display: "block", mt: 1 }}
+                      sx={{
+                        color: "text.secondary",
+                        display: "block",
+                        mt: 1,
+                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                      }}
                     >
                       Last comprehensive update
                     </Typography>
@@ -1655,71 +2108,65 @@ export default function PriceManagement() {
             <Card
               elevation={0}
               sx={{
-                borderRadius: 3,
+                borderRadius: { xs: 2, sm: 3 },
                 border: "1px solid",
                 borderColor: "divider",
-                p: 3,
+                p: { xs: 2, sm: 3 },
               }}
             >
               <Typography
                 variant="h6"
-                sx={{ fontWeight: 700, mb: 3, textAlign: "center" }}
+                sx={{
+                  fontWeight: 700,
+                  mb: { xs: 2, sm: 3 },
+                  textAlign: "center",
+                  fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                }}
               >
                 🔍 Data Sources Breakdown
               </Typography>
-              <Grid container spacing={2}>
+              <Grid container spacing={{ xs: 1.5, sm: 2 }}>
                 {Object.entries(sourceStats).map(([source, data]) => (
-                  <Grid item xs={12} key={source}>
+                  <Grid item xs={12} sm={6} md={4} key={source}>
                     <Box
                       sx={{
-                        p: 2,
+                        p: { xs: 1.5, sm: 2 },
                         bgcolor: SOURCE_COLORS[source] + "10",
                         borderRadius: 2,
                         border: `1px solid ${SOURCE_COLORS[source]}30`,
+                        textAlign: "center",
                       }}
                     >
-                      <Box
+                      <Typography
+                        variant="subtitle2"
                         sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          mb: 1,
-                          textAlign: "center",
+                          fontWeight: 700,
+                          mb: 0.5,
+                          fontSize: { xs: "0.9rem", sm: "1rem" },
                         }}
                       >
-                        <Typography
-                          variant="subtitle2"
-                          sx={{ fontWeight: 700 }}
-                        >
-                          {SOURCE_ICONS[source]} {source}
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                          {data.count} items
-                        </Typography>
-                      </Box>
-                      <LinearProgress
-                        variant="determinate"
-                        value={(data.count / stats.total) * 100}
+                        {SOURCE_ICONS[source]} {source}
+                      </Typography>
+                      <Typography
+                        variant="body2"
                         sx={{
-                          height: 6,
-                          borderRadius: 3,
-                          bgcolor: SOURCE_COLORS[source] + "30",
-                          "& .MuiLinearProgress-bar": {
-                            backgroundColor: SOURCE_COLORS[source],
-                            borderRadius: 3,
-                          },
+                          fontWeight: 700,
+                          color: SOURCE_COLORS[source],
+                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
                         }}
-                      />
+                      >
+                        {data.count} items
+                      </Typography>
                       <Typography
                         variant="caption"
                         sx={{
                           color: "text.secondary",
                           display: "block",
-                          mt: 1,
-                          textAlign: "center",
+                          mt: { xs: 0.25, sm: 0.5 },
+                          fontSize: { xs: "0.7rem", sm: "0.75rem" },
                         }}
                       >
-                        Average price: ₹
+                        Avg: ₹
                         {Math.round(data.total / data.count).toLocaleString(
                           "en-IN"
                         )}
@@ -2397,9 +2844,9 @@ export default function PriceManagement() {
 
       <Box
         sx={{
-          mt: 6,
-          p: 3,
-          borderRadius: 3,
+          mt: { xs: 4, sm: 6 },
+          p: { xs: 2, sm: 3 },
+          borderRadius: { xs: 2, sm: 3 },
           bgcolor:
             "linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(245, 158, 11, 0.05) 100%)",
           border: "1px solid",
@@ -2407,47 +2854,90 @@ export default function PriceManagement() {
           textAlign: "center",
         }}
       >
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
+        <Typography
+          variant="subtitle1"
+          sx={{
+            fontWeight: 700,
+            mb: { xs: 2, sm: 3 },
+            fontSize: { xs: "1rem", sm: "1.1rem" },
+          }}
+        >
           🔗 Integrated Data Sources
         </Typography>
-        <Grid container spacing={3} justifyContent="center">
-          <Grid item xs={12} sm={4}>
-            <Box>
+        <Grid container spacing={{ xs: 2, sm: 3 }} justifyContent="center">
+          <Grid item xs={12} sm={6} md={4}>
+            <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
               <Typography
                 variant="body2"
-                sx={{ fontWeight: 700, color: "text.primary", mb: 0.5 }}
+                sx={{
+                  fontWeight: 700,
+                  color: "text.primary",
+                  mb: 0.5,
+                  fontSize: { xs: "0.9rem", sm: "0.95rem" },
+                }}
               >
                 🏗️ CPWD SOR
               </Typography>
-              <Typography variant="caption" sx={{ color: "text.secondary" }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                  lineHeight: 1.4,
+                }}
+              >
                 Central Public Works Department Schedule of Rates - Official
                 government rates for construction materials
               </Typography>
             </Box>
           </Grid>
-          <Grid item xs={12} sm={4}>
-            <Box>
+          <Grid item xs={12} sm={6} md={4}>
+            <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
               <Typography
                 variant="body2"
-                sx={{ fontWeight: 700, color: "text.primary", mb: 0.5 }}
+                sx={{
+                  fontWeight: 700,
+                  color: "text.primary",
+                  mb: 0.5,
+                  fontSize: { xs: "0.9rem", sm: "0.95rem" },
+                }}
               >
                 🛍️ GeM Portal
               </Typography>
-              <Typography variant="caption" sx={{ color: "text.secondary" }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                  lineHeight: 1.4,
+                }}
+              >
                 Government e-Marketplace - Real-time pricing data from approved
                 vendors
               </Typography>
             </Box>
           </Grid>
-          <Grid item xs={12} sm={4}>
-            <Box>
+          <Grid item xs={12} sm={6} md={4}>
+            <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
               <Typography
                 variant="body2"
-                sx={{ fontWeight: 700, color: "text.primary", mb: 0.5 }}
+                sx={{
+                  fontWeight: 700,
+                  color: "text.primary",
+                  mb: 0.5,
+                  fontSize: { xs: "0.9rem", sm: "0.95rem" },
+                }}
               >
                 📋 AOR & Other Sources
               </Typography>
-              <Typography variant="caption" sx={{ color: "text.secondary" }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                  lineHeight: 1.4,
+                }}
+              >
                 Annual Rate Orders and verified official procurement sources
               </Typography>
             </Box>

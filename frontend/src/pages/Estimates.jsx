@@ -14,6 +14,10 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import LinearProgress from "@mui/material/LinearProgress";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import SearchIcon from "@mui/icons-material/Search";
@@ -21,6 +25,9 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 
 export default function Estimates() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
   const [list, setList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -106,48 +113,50 @@ export default function Estimates() {
   };
 
   return (
-    <Box className="fade-in">
+    <Box className="fade-in" sx={{ px: { xs: 1, sm: 2, md: 0 } }}>
       <Box
         sx={{
-          mb: 4,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
+          mb: { xs: 3, sm: 4 },
+          textAlign: "center",
         }}
       >
-        <Box sx={{ flex: 1, textAlign: "center" }}>
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-            All Estimates
-          </Typography>
-          <Typography variant="body1" sx={{ color: "text.secondary" }}>
-            View and manage all your intervention cost estimates
-          </Typography>
-        </Box>
-        <Chip
-          label={`${filteredList.length} Estimate${
-            filteredList.length !== 1 ? "s" : ""
-          }`}
-          color="primary"
+        <Typography
+          variant="h4"
           sx={{
-            fontWeight: 600,
-            fontSize: "0.875rem",
-            px: 1,
-            position: "absolute",
-            right: 0,
+            fontWeight: 700,
+            mb: 1,
+            fontSize: { xs: "1.75rem", sm: "2.125rem", md: "2.25rem" },
           }}
-        />
+        >
+          All Estimates
+        </Typography>
+        <Typography
+          variant="body1"
+          sx={{
+            color: "text.secondary",
+            fontSize: { xs: "0.875rem", sm: "1rem" },
+          }}
+        >
+          View and manage all your intervention cost estimates
+        </Typography>
       </Box>
 
       <Paper
         elevation={0}
         sx={{
-          borderRadius: 3,
+          borderRadius: { xs: 2, sm: 3 },
           border: "1px solid",
           borderColor: "divider",
           overflow: "hidden",
         }}
       >
-        <Box sx={{ p: 3, borderBottom: "1px solid", borderColor: "divider" }}>
+        <Box
+          sx={{
+            p: { xs: 2, sm: 3 },
+            borderBottom: "1px solid",
+            borderColor: "divider",
+          }}
+        >
           <TextField
             fullWidth
             placeholder="Search by document name or status..."
@@ -170,17 +179,23 @@ export default function Estimates() {
             sx={{
               "& .MuiOutlinedInput-root": {
                 bgcolor: "rgba(30, 41, 59, 0.5)",
+                fontSize: { xs: "0.875rem", sm: "1rem" },
               },
             }}
           />
         </Box>
 
         {loading ? (
-          <Box sx={{ p: 4 }}>
+          <Box sx={{ p: { xs: 3, sm: 4 } }}>
             <LinearProgress />
             <Typography
               variant="body2"
-              sx={{ textAlign: "center", mt: 2, color: "text.secondary" }}
+              sx={{
+                textAlign: "center",
+                mt: 2,
+                color: "text.secondary",
+                fontSize: { xs: "0.875rem", sm: "1rem" },
+              }}
             >
               Loading estimates...
             </Typography>
@@ -189,17 +204,34 @@ export default function Estimates() {
           <Box
             sx={{
               textAlign: "center",
-              py: 8,
-              px: 3,
+              py: { xs: 6, sm: 8 },
+              px: { xs: 2, sm: 3 },
             }}
           >
             <DescriptionOutlinedIcon
-              sx={{ fontSize: 64, color: "text.disabled", mb: 2 }}
+              sx={{
+                fontSize: { xs: 48, sm: 64 },
+                color: "text.disabled",
+                mb: 2,
+              }}
             />
-            <Typography variant="h6" sx={{ color: "text.secondary", mb: 1 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                color: "text.secondary",
+                mb: 1,
+                fontSize: { xs: "1.1rem", sm: "1.25rem" },
+              }}
+            >
               {searchQuery ? "No estimates found" : "No estimates yet"}
             </Typography>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontSize: { xs: "0.875rem", sm: "1rem" },
+              }}
+            >
               {searchQuery
                 ? "Try adjusting your search criteria"
                 : "Upload your first intervention report to get started"}
@@ -207,152 +239,124 @@ export default function Estimates() {
           </Box>
         ) : (
           <>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell
-                      align="center"
-                      sx={{ fontWeight: 600, fontSize: "0.875rem" }}
+            {isMobile ? (
+              <Box sx={{ p: { xs: 1, sm: 2 } }}>
+                {filteredList
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                    <Card
+                      key={row._id}
+                      sx={{
+                        mb: 2,
+                        cursor: "pointer",
+                        transition: "all 0.2s ease-in-out",
+                        "&:hover": {
+                          boxShadow: 3,
+                          transform: "translateY(-2px)",
+                        },
+                      }}
+                      onClick={() => navigate(`/estimates/${row._id}`)}
                     >
-                      Document Name
-                    </TableCell>
-                    <TableCell
-                      align="center"
-                      sx={{ fontWeight: 600, fontSize: "0.875rem" }}
-                    >
-                      Status
-                    </TableCell>
-                    <TableCell
-                      align="center"
-                      sx={{ fontWeight: 600, fontSize: "0.875rem" }}
-                    >
-                      Created Date
-                    </TableCell>
-                    <TableCell
-                      align="center"
-                      sx={{ fontWeight: 600, fontSize: "0.875rem" }}
-                    >
-                      Material Cost
-                    </TableCell>
-                    <TableCell
-                      align="center"
-                      sx={{ fontWeight: 600, fontSize: "0.875rem" }}
-                    >
-                      Actions
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredList
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row) => (
-                      <TableRow
-                        key={row._id}
-                        hover
-                        sx={{
-                          cursor: "pointer",
-                          transition: "all 0.2s ease-in-out",
-                          "&:hover": {
-                            bgcolor: "rgba(16, 185, 129, 0.04)",
-                          },
-                        }}
-                      >
-                        <TableCell
-                          align="center"
-                          onClick={() => navigate(`/estimates/${row._id}`)}
-                          sx={{ py: 2.5 }}
+                      <CardContent sx={{ p: 2 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 2,
+                            mb: 2,
+                          }}
                         >
                           <Box
                             sx={{
+                              width: 48,
+                              height: 48,
+                              borderRadius: 2,
+                              bgcolor: "primary.light",
                               display: "flex",
-                              flexDirection: "column",
                               alignItems: "center",
-                              gap: 1,
+                              justifyContent: "center",
+                              color: "white",
+                              flexShrink: 0,
                             }}
                           >
-                            <Box
-                              sx={{
-                                width: 40,
-                                height: 40,
-                                borderRadius: 2,
-                                bgcolor: "primary.light",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                color: "white",
-                              }}
-                            >
-                              <DescriptionOutlinedIcon sx={{ fontSize: 20 }} />
-                            </Box>
+                            <DescriptionOutlinedIcon sx={{ fontSize: 24 }} />
+                          </Box>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
                             <Typography
-                              variant="subtitle2"
-                              sx={{ fontWeight: 600, textAlign: "center" }}
+                              variant="subtitle1"
+                              sx={{
+                                fontWeight: 600,
+                                mb: 0.5,
+                                fontSize: "1rem",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
                             >
                               {row.documentName}
                             </Typography>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                                flexWrap: "wrap",
+                              }}
+                            >
+                              <Chip
+                                label={row.status}
+                                color={getStatusColor(row.status)}
+                                size="small"
+                                sx={{
+                                  textTransform: "capitalize",
+                                  fontWeight: 600,
+                                  fontSize: "0.7rem",
+                                  height: 24,
+                                }}
+                              />
+                              <Typography
+                                variant="caption"
+                                sx={{ color: "text.secondary" }}
+                              >
+                                {new Date(row.createdAt).toLocaleDateString(
+                                  "en-IN",
+                                  {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  }
+                                )}
+                              </Typography>
+                            </Box>
                           </Box>
-                        </TableCell>
-                        <TableCell
-                          align="center"
-                          onClick={() => navigate(`/estimates/${row._id}`)}
+                        </Box>
+
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                          }}
                         >
-                          <Chip
-                            label={row.status}
-                            color={getStatusColor(row.status)}
-                            size="small"
+                          <Typography
+                            variant="h6"
                             sx={{
-                              textTransform: "capitalize",
-                              fontWeight: 600,
-                              fontSize: "0.75rem",
+                              fontWeight: 700,
+                              color: "primary.main",
+                              fontSize: "1.1rem",
                             }}
-                          />
-                        </TableCell>
-                        <TableCell
-                          align="center"
-                          onClick={() => navigate(`/estimates/${row._id}`)}
-                        >
-                          <Typography variant="body2">
-                            {new Date(row.createdAt).toLocaleDateString(
-                              "en-IN",
-                              {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              }
-                            )}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            sx={{ color: "text.secondary" }}
-                          >
-                            {new Date(row.createdAt).toLocaleTimeString(
-                              "en-IN",
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              }
-                            )}
-                          </Typography>
-                        </TableCell>
-                        <TableCell
-                          align="center"
-                          onClick={() => navigate(`/estimates/${row._id}`)}
-                        >
-                          <Typography
-                            variant="subtitle1"
-                            sx={{ fontWeight: 700, color: "primary.main" }}
                           >
                             ₹
                             {(row.totalMaterialCost || 0).toLocaleString(
                               "en-IN"
                             )}
                           </Typography>
-                        </TableCell>
-                        <TableCell align="center">
                           <IconButton
                             size="small"
-                            onClick={() => navigate(`/estimates/${row._id}`)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/estimates/${row._id}`);
+                            }}
                             sx={{
                               bgcolor: "primary.main",
                               color: "white",
@@ -364,15 +368,208 @@ export default function Estimates() {
                           >
                             <VisibilityOutlinedIcon sx={{ fontSize: 18 }} />
                           </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <Box sx={{ display: "flex", justifyContent: "center" }}>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </Box>
+            ) : (
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                        }}
+                      >
+                        Document Name
+                      </TableCell>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                        }}
+                      >
+                        Status
+                      </TableCell>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                        }}
+                      >
+                        Created Date
+                      </TableCell>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                        }}
+                      >
+                        Material Cost
+                      </TableCell>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                        }}
+                      >
+                        Actions
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {filteredList
+                      .slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage
+                      )
+                      .map((row) => (
+                        <TableRow
+                          key={row._id}
+                          hover
+                          sx={{
+                            cursor: "pointer",
+                            transition: "all 0.2s ease-in-out",
+                            "&:hover": {
+                              bgcolor: "rgba(16, 185, 129, 0.04)",
+                            },
+                          }}
+                        >
+                          <TableCell
+                            align="center"
+                            onClick={() => navigate(`/estimates/${row._id}`)}
+                            sx={{ py: 2.5 }}
+                          >
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                gap: 1,
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  borderRadius: 2,
+                                  bgcolor: "primary.light",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  color: "white",
+                                }}
+                              >
+                                <DescriptionOutlinedIcon
+                                  sx={{ fontSize: 20 }}
+                                />
+                              </Box>
+                              <Typography
+                                variant="subtitle2"
+                                sx={{ fontWeight: 600, textAlign: "center" }}
+                              >
+                                {row.documentName}
+                              </Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell
+                            align="center"
+                            onClick={() => navigate(`/estimates/${row._id}`)}
+                          >
+                            <Chip
+                              label={row.status}
+                              color={getStatusColor(row.status)}
+                              size="small"
+                              sx={{
+                                textTransform: "capitalize",
+                                fontWeight: 600,
+                                fontSize: "0.75rem",
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell
+                            align="center"
+                            onClick={() => navigate(`/estimates/${row._id}`)}
+                          >
+                            <Typography variant="body2">
+                              {new Date(row.createdAt).toLocaleDateString(
+                                "en-IN",
+                                {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                }
+                              )}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "text.secondary" }}
+                            >
+                              {new Date(row.createdAt).toLocaleTimeString(
+                                "en-IN",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
+                            </Typography>
+                          </TableCell>
+                          <TableCell
+                            align="center"
+                            onClick={() => navigate(`/estimates/${row._id}`)}
+                          >
+                            <Typography
+                              variant="subtitle1"
+                              sx={{ fontWeight: 700, color: "primary.main" }}
+                            >
+                              ₹
+                              {(row.totalMaterialCost || 0).toLocaleString(
+                                "en-IN"
+                              )}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">
+                            <IconButton
+                              size="small"
+                              onClick={() => navigate(`/estimates/${row._id}`)}
+                              sx={{
+                                bgcolor: "primary.main",
+                                color: "white",
+                                "&:hover": {
+                                  bgcolor: "primary.dark",
+                                  transform: "scale(1.1)",
+                                },
+                              }}
+                            >
+                              <VisibilityOutlinedIcon sx={{ fontSize: 18 }} />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                borderTop: "1px solid",
+                borderColor: "divider",
+                p: { xs: 1, sm: 2 },
+              }}
+            >
               <TablePagination
-                rowsPerPageOptions={[5, 10, 25, 50]}
+                rowsPerPageOptions={isMobile ? [5, 10] : [5, 10, 25, 50]}
                 component="div"
                 count={filteredList.length}
                 rowsPerPage={rowsPerPage}
@@ -380,8 +577,14 @@ export default function Estimates() {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 sx={{
-                  borderTop: "1px solid",
-                  borderColor: "divider",
+                  "& .MuiTablePagination-toolbar": {
+                    flexWrap: { xs: "wrap", sm: "nowrap" },
+                    justifyContent: { xs: "center", sm: "flex-end" },
+                  },
+                  "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
+                    {
+                      fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                    },
                 }}
               />
             </Box>

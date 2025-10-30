@@ -13,6 +13,8 @@ import {
   Tab,
   Tabs,
   Alert,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import {
   BarChart,
@@ -89,7 +91,7 @@ function KPICard({
     <Paper
       elevation={0}
       sx={{
-        p: 2.5,
+        p: { xs: 2, sm: 2.5 },
         borderRadius: 3,
         border: "1px solid",
         borderColor: "divider",
@@ -97,19 +99,25 @@ function KPICard({
         transition: "all 0.3s ease-in-out",
         "&:hover": {
           borderColor: color,
-          transform: "translateY(-4px)",
-          boxShadow: `0 8px 24px ${color}25`,
+          transform: { xs: "none", sm: "translateY(-4px)" },
+          boxShadow: { xs: "none", sm: `0 8px 24px ${color}25` },
         },
       }}
     >
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1.5 }}>
-        <Typography variant="caption" sx={{ color: "text.secondary" }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            fontSize: { xs: "0.75rem", sm: "0.875rem" },
+          }}
+        >
           {title}
         </Typography>
         <Box
           sx={{
-            width: 40,
-            height: 40,
+            width: { xs: 32, sm: 40 },
+            height: { xs: 32, sm: 40 },
             borderRadius: 2,
             display: "flex",
             alignItems: "center",
@@ -117,7 +125,7 @@ function KPICard({
             bgcolor: `${color}20`,
           }}
         >
-          <Icon sx={{ color, fontSize: 20 }} />
+          <Icon sx={{ color, fontSize: { xs: 16, sm: 20 } }} />
         </Box>
       </Box>
 
@@ -132,6 +140,7 @@ function KPICard({
             display: "flex",
             alignItems: "baseline",
             gap: 0.5,
+            fontSize: { xs: "1rem", sm: "1.25rem" },
           }}
         >
           {value >= 1000 ? (
@@ -143,7 +152,13 @@ function KPICard({
               decimals={2}
             />
           )}
-          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+            }}
+          >
             {unit}
           </Typography>
         </Typography>
@@ -156,11 +171,18 @@ function KPICard({
             sx={{
               color: trendDirection === "up" ? "#10B981" : "#EF4444",
               fontWeight: 600,
+              fontSize: { xs: "0.7rem", sm: "0.75rem" },
             }}
           >
             {trendDirection === "up" ? "↑" : "↓"} {Math.abs(trend)}%
           </Typography>
-          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              fontSize: { xs: "0.7rem", sm: "0.75rem" },
+            }}
+          >
             vs last week
           </Typography>
         </Box>
@@ -180,6 +202,10 @@ export default function Dashboard() {
   const [activeAlerts, setActiveAlerts] = useState([]);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
 
   const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -248,13 +274,13 @@ export default function Dashboard() {
   };
 
   return (
-    <Box className="fade-in" sx={{ pb: 4 }}>
+    <Box className="fade-in" sx={{ pb: { xs: 2, sm: 4 } }}>
       <Box
         sx={{
           background: "linear-gradient(135deg, #1E293B 0%, #0F172A 100%)",
-          borderRadius: 4,
-          p: 4,
-          mb: 4,
+          borderRadius: { xs: 2, sm: 4 },
+          p: { xs: 2, sm: 3, md: 4 },
+          mb: { xs: 2, sm: 4 },
           color: "white",
           position: "relative",
           overflow: "hidden",
@@ -262,7 +288,14 @@ export default function Dashboard() {
         }}
       >
         <Box sx={{ position: "relative", zIndex: 1, textAlign: "center" }}>
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              mb: 1,
+              fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" },
+            }}
+          >
             🛣️ Road Safety Intervention Analytics Dashboard
           </Typography>
           <Typography
@@ -270,15 +303,25 @@ export default function Dashboard() {
             sx={{
               mb: 2,
               opacity: 0.95,
-              maxWidth: 700,
+              maxWidth: { xs: "100%", sm: 600, md: 700 },
               mx: "auto",
+              fontSize: { xs: "0.875rem", sm: "1rem" },
+              px: { xs: 1, sm: 0 },
             }}
           >
             Comprehensive analytics for material cost estimation with IRC
             standards compliance. Real-time insights into your estimates and
             cost distribution.
           </Typography>
-          <Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              gap: { xs: 1.5, sm: 2 },
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <Button
               variant="contained"
               size="large"
@@ -288,6 +331,8 @@ export default function Dashboard() {
                 background: "#EF4444",
                 color: "white",
                 fontWeight: 600,
+                width: { xs: "100%", sm: "auto" },
+                fontSize: { xs: "0.9rem", sm: "1rem" },
                 "&:hover": {
                   background: "#DC2626",
                   transform: "translateY(-2px)",
@@ -305,6 +350,8 @@ export default function Dashboard() {
                 borderColor: "white",
                 color: "white",
                 fontWeight: 600,
+                width: { xs: "100%", sm: "auto" },
+                fontSize: { xs: "0.9rem", sm: "1rem" },
                 "&:hover": {
                   background: "rgba(255, 255, 255, 0.1)",
                 },
@@ -318,10 +365,10 @@ export default function Dashboard() {
         <Box
           sx={{
             position: "absolute",
-            right: -50,
-            top: -50,
-            width: 200,
-            height: 200,
+            right: { xs: -25, sm: -50 },
+            top: { xs: -25, sm: -50 },
+            width: { xs: 120, sm: 200 },
+            height: { xs: 120, sm: 200 },
             borderRadius: "50%",
             bgcolor: "rgba(255, 255, 255, 0.1)",
             filter: "blur(40px)",
@@ -330,10 +377,10 @@ export default function Dashboard() {
         <Box
           sx={{
             position: "absolute",
-            right: 100,
-            bottom: -80,
-            width: 250,
-            height: 250,
+            right: { xs: 50, sm: 100 },
+            bottom: { xs: -40, sm: -80 },
+            width: { xs: 150, sm: 250 },
+            height: { xs: 150, sm: 250 },
             borderRadius: "50%",
             bgcolor: "rgba(255, 255, 255, 0.08)",
             filter: "blur(50px)",
@@ -342,7 +389,14 @@ export default function Dashboard() {
       </Box>
 
       {activeAlerts.length > 0 && (
-        <Box sx={{ mb: 3, display: "flex", flexDirection: "column", gap: 1.5 }}>
+        <Box
+          sx={{
+            mb: { xs: 2, sm: 3 },
+            display: "flex",
+            flexDirection: "column",
+            gap: { xs: 1, sm: 1.5 },
+          }}
+        >
           {activeAlerts.map((alert, idx) => (
             <Alert
               key={idx}
@@ -350,6 +404,9 @@ export default function Dashboard() {
               sx={{
                 borderRadius: 2,
                 animation: "slideInDown 0.3s ease-in-out",
+                fontSize: { xs: "0.875rem", sm: "1rem" },
+                py: { xs: 1, sm: 1.5 },
+                px: { xs: 2, sm: 3 },
               }}
             >
               {alert.message}
@@ -358,8 +415,12 @@ export default function Dashboard() {
         </Box>
       )}
 
-      <Grid container spacing={2.5} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+      <Grid
+        container
+        spacing={{ xs: 1.5, sm: 2, md: 2.5 }}
+        sx={{ mb: { xs: 2, sm: 4 } }}
+      >
+        <Grid item xs={12} sm={6} md={4} lg={3}>
           <KPICard
             title="Total Estimates"
             value={kpiData?.totalEstimates || 0}
@@ -370,7 +431,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4} lg={3}>
           <KPICard
             title="Total Material Cost"
             value={kpiData?.totalMaterialCost || 0}
@@ -381,7 +442,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4} lg={3}>
           <KPICard
             title="Completion Rate"
             value={kpiData?.completionRate || 0}
@@ -392,7 +453,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4} lg={3}>
           <KPICard
             title="Avg Cost/Estimate"
             value={kpiData?.averageCostPerEstimate || 0}
@@ -403,7 +464,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4} lg={3}>
           <KPICard
             title="Total Interventions"
             value={kpiData?.totalInterventions || 0}
@@ -414,7 +475,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4} lg={3}>
           <KPICard
             title="Unique Materials"
             value={kpiData?.uniqueMaterials || 0}
@@ -425,7 +486,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4} lg={3}>
           <KPICard
             title="Estimate Accuracy"
             value={kpiData?.estimateAccuracy || 0}
@@ -436,7 +497,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4} lg={3}>
           <KPICard
             title="Failed Estimates"
             value={kpiData?.failedEstimates || 0}
@@ -451,12 +512,13 @@ export default function Dashboard() {
       <Paper
         elevation={0}
         sx={{
-          borderRadius: 3,
+          borderRadius: { xs: 2, sm: 3 },
           border: "1px solid",
           borderColor: "divider",
-          mb: 3,
+          mb: { xs: 2, sm: 3 },
           display: "flex",
           justifyContent: "center",
+          overflow: "hidden",
         }}
       >
         <Tabs
@@ -464,15 +526,22 @@ export default function Dashboard() {
           onChange={handleTabChange}
           variant="scrollable"
           scrollButtons="auto"
+          allowScrollButtonsMobile
           sx={{
             borderBottom: "1px solid",
             borderColor: "divider",
+            minHeight: { xs: 48, sm: 64 },
             "& .MuiTab-root": {
-              minWidth: 150,
+              minWidth: { xs: 100, sm: 120, md: 150 },
               fontWeight: 600,
               textTransform: "none",
-              fontSize: "0.95rem",
+              fontSize: { xs: "0.8rem", sm: "0.875rem", md: "0.95rem" },
               textAlign: "center",
+              minHeight: { xs: 48, sm: 64 },
+              px: { xs: 1, sm: 2 },
+            },
+            "& .MuiTabs-scrollButtons": {
+              width: { xs: 32, sm: 48 },
             },
           }}
         >
@@ -484,12 +553,12 @@ export default function Dashboard() {
 
       <Box>
         <TabPanel value={tabValue} index={0}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} lg={5}>
+          <Grid container spacing={{ xs: 2, sm: 3 }}>
+            <Grid item xs={12} md={5}>
               <Paper
                 elevation={0}
                 sx={{
-                  p: 3,
+                  p: { xs: 2, sm: 3 },
                   border: "1px solid",
                   borderColor: "divider",
                   borderRadius: 2,
@@ -497,7 +566,12 @@ export default function Dashboard() {
               >
                 <Typography
                   variant="h6"
-                  sx={{ fontWeight: 600, mb: 2, textAlign: "center" }}
+                  sx={{
+                    fontWeight: 600,
+                    mb: 2,
+                    textAlign: "center",
+                    fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                  }}
                 >
                   Category Summary
                 </Typography>
@@ -506,7 +580,7 @@ export default function Dashboard() {
                     <Box
                       key={idx}
                       sx={{
-                        p: 1.5,
+                        p: { xs: 1.25, sm: 1.5 },
                         borderRadius: 1.5,
                         bgcolor: `${COLORS[idx % COLORS.length]}15`,
                         border: `1px solid`,
@@ -521,18 +595,30 @@ export default function Dashboard() {
                           mb: 0.5,
                         }}
                       >
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: { xs: "0.875rem", sm: "1rem" },
+                          }}
+                        >
                           {category.name}
                         </Typography>
                         <Chip
                           label={`${category.percentage}%`}
                           size="small"
-                          sx={{ bgcolor: `${COLORS[idx % COLORS.length]}30` }}
+                          sx={{
+                            bgcolor: `${COLORS[idx % COLORS.length]}30`,
+                            fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                          }}
                         />
                       </Box>
                       <Typography
                         variant="caption"
-                        sx={{ color: "text.secondary" }}
+                        sx={{
+                          color: "text.secondary",
+                          fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                        }}
                       >
                         ₹{category.totalCost.toLocaleString()} •{" "}
                         {category.itemCount} items
@@ -543,42 +629,58 @@ export default function Dashboard() {
               </Paper>
             </Grid>
 
-            <Grid item xs={12} lg={7}>
+            <Grid item xs={12} md={7}>
               <Paper
                 elevation={0}
                 sx={{
-                  p: 3,
+                  p: { xs: 2, sm: 3 },
                   border: "1px solid",
                   borderColor: "divider",
                   borderRadius: 2,
-                  mb: 3,
+                  mb: { xs: 2, sm: 3 },
                 }}
               >
                 <Typography
                   variant="h6"
-                  sx={{ fontWeight: 600, mb: 2, textAlign: "center" }}
+                  sx={{
+                    fontWeight: 600,
+                    mb: 2,
+                    textAlign: "center",
+                    fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                  }}
                 >
                   📝 Recent Estimates
                 </Typography>
                 {recentEstimates.length === 0 ? (
-                  <Box sx={{ textAlign: "center", py: 4 }}>
+                  <Box sx={{ textAlign: "center", py: { xs: 3, sm: 4 } }}>
                     <DescriptionOutlinedIcon
-                      sx={{ fontSize: 48, color: "text.disabled", mb: 1 }}
+                      sx={{
+                        fontSize: { xs: 36, sm: 48 },
+                        color: "text.disabled",
+                        mb: 1,
+                      }}
                     />
-                    <Typography color="text.secondary">
+                    <Typography
+                      color="text.secondary"
+                      sx={{ fontSize: { xs: "0.875rem", sm: "1rem" } }}
+                    >
                       No estimates yet. Upload your first report!
                     </Typography>
                   </Box>
                 ) : (
                   <Box
-                    sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: { xs: 1, sm: 1.5 },
+                    }}
                   >
                     {recentEstimates.map((estimate) => (
                       <Box
                         key={estimate.id}
                         onClick={() => navigate(`/estimates/${estimate.id}`)}
                         sx={{
-                          p: 2,
+                          p: { xs: 1.5, sm: 2 },
                           borderRadius: 1.5,
                           border: "1px solid",
                           borderColor: "divider",
@@ -595,18 +697,27 @@ export default function Dashboard() {
                             display: "flex",
                             justifyContent: "space-between",
                             alignItems: "center",
+                            flexDirection: { xs: "column", sm: "row" },
+                            gap: { xs: 1, sm: 0 },
+                            textAlign: { xs: "center", sm: "left" },
                           }}
                         >
                           <Box sx={{ flex: 1 }}>
                             <Typography
                               variant="body2"
-                              sx={{ fontWeight: 600 }}
+                              sx={{
+                                fontWeight: 600,
+                                fontSize: { xs: "0.875rem", sm: "1rem" },
+                              }}
                             >
                               {estimate.documentName}
                             </Typography>
                             <Typography
                               variant="caption"
-                              sx={{ color: "text.secondary" }}
+                              sx={{
+                                color: "text.secondary",
+                                fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                              }}
                             >
                               {estimate.interventionsCount} interventions •{" "}
                               {estimate.sectionsCount} sections
@@ -617,6 +728,7 @@ export default function Dashboard() {
                             sx={{
                               fontWeight: 700,
                               color: "primary.main",
+                              fontSize: { xs: "0.875rem", sm: "1rem" },
                             }}
                           >
                             ₹{estimate.totalCost.toLocaleString()}
@@ -633,7 +745,7 @@ export default function Dashboard() {
               <Paper
                 elevation={0}
                 sx={{
-                  p: 3,
+                  p: { xs: 2, sm: 3 },
                   border: "1px solid",
                   borderColor: "divider",
                   borderRadius: 2,
@@ -641,11 +753,19 @@ export default function Dashboard() {
               >
                 <Typography
                   variant="h6"
-                  sx={{ fontWeight: 600, mb: 2, textAlign: "center" }}
+                  sx={{
+                    fontWeight: 600,
+                    mb: 2,
+                    textAlign: "center",
+                    fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                  }}
                 >
                   💰 Cost Distribution by Category
                 </Typography>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer
+                  width="100%"
+                  height={isMobile ? 250 : isTablet ? 280 : 300}
+                >
                   <PieChart>
                     <Pie
                       data={categoryData}
@@ -653,8 +773,8 @@ export default function Dashboard() {
                       nameKey="name"
                       cx="50%"
                       cy="50%"
-                      outerRadius={100}
-                      label
+                      outerRadius={isMobile ? 70 : isTablet ? 85 : 100}
+                      label={!isMobile}
                     >
                       {categoryData.map((entry, index) => (
                         <Cell
@@ -665,8 +785,22 @@ export default function Dashboard() {
                     </Pie>
                     <Tooltip
                       formatter={(value) => `₹${value.toLocaleString()}`}
+                      contentStyle={{
+                        backgroundColor: "rgba(30, 41, 59, 0.95)",
+                        border: "1px solid rgba(148, 163, 184, 0.3)",
+                        borderRadius: "8px",
+                        color: "#ffffff",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                        fontSize: isMobile ? "0.7rem" : "0.875rem",
+                      }}
+                      labelStyle={{ color: "#ffffff" }}
                     />
-                    <Legend />
+                    <Legend
+                      wrapperStyle={{
+                        fontSize: isMobile ? "0.7rem" : "0.875rem",
+                        paddingTop: isMobile ? "8px" : "12px",
+                      }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </Paper>
@@ -675,71 +809,20 @@ export default function Dashboard() {
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 3,
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 2,
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 600, mb: 2, textAlign: "center" }}
-                >
-                  📊 Category Detailed Analysis
-                </Typography>
-                <ResponsiveContainer width="100%" height={350}>
-                  <BarChart data={categoryData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis yAxisId="left" />
-                    <YAxis yAxisId="right" orientation="right" />
-                    <Tooltip
-                      formatter={(value) =>
-                        value >= 1000
-                          ? `₹${(value / 1000).toFixed(1)}K`
-                          : `₹${value}`
-                      }
-                      contentStyle={{
-                        backgroundColor: "rgba(30, 41, 59, 0.95)",
-                        border: "1px solid rgba(148, 163, 184, 0.3)",
-                        borderRadius: "8px",
-                        color: "#ffffff",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                      }}
-                      labelStyle={{ color: "#ffffff" }}
-                    />
-                    <Legend />
-                    <Bar
-                      yAxisId="left"
-                      dataKey="totalCost"
-                      fill="#10B981"
-                      name="Total Cost"
-                      radius={[4, 4, 0, 0]}
-                    />
-                    <Bar
-                      yAxisId="right"
-                      dataKey="itemCount"
-                      fill="#3B82F6"
-                      name="Item Count"
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </Paper>
-            </Grid>
-
+          <Grid container spacing={{ xs: 2, sm: 3 }}>
             {categoryData.map((cat, idx) => (
-              <Grid item xs={12} sm={6} md={4} key={idx}>
+              <Grid item xs={12} sm={6} lg={4} key={idx}>
                 <Card
                   elevation={0}
-                  sx={{ border: "1px solid", borderColor: "divider" }}
+                  sx={{
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 2,
+                  }}
                 >
-                  <CardContent sx={{ textAlign: "center" }}>
+                  <CardContent
+                    sx={{ p: { xs: 2, sm: 3 }, textAlign: "center" }}
+                  >
                     <Box
                       sx={{
                         display: "flex",
@@ -750,14 +833,13 @@ export default function Dashboard() {
                     >
                       <Box
                         sx={{
-                          width: 40,
-                          height: 40,
+                          width: { xs: 36, sm: 40 },
+                          height: { xs: 36, sm: 40 },
                           borderRadius: 2,
                           bgcolor: `${COLORS[idx % COLORS.length]}20`,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          mr: 2,
                           mb: 1,
                         }}
                       >
@@ -765,6 +847,7 @@ export default function Dashboard() {
                           sx={{
                             fontWeight: 700,
                             color: COLORS[idx % COLORS.length],
+                            fontSize: { xs: "0.875rem", sm: "1rem" },
                           }}
                         >
                           {idx + 1}
@@ -772,12 +855,16 @@ export default function Dashboard() {
                       </Box>
                       <Typography
                         variant="h6"
-                        sx={{ fontWeight: 600, textAlign: "center" }}
+                        sx={{
+                          fontWeight: 600,
+                          textAlign: "center",
+                          fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                        }}
                       >
                         {cat.name}
                       </Typography>
                     </Box>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={{ xs: 1, sm: 2 }}>
                       <Grid item xs={6}>
                         <Box sx={{ textAlign: "center" }}>
                           <Typography
@@ -786,13 +873,18 @@ export default function Dashboard() {
                               color: "text.secondary",
                               display: "block",
                               mb: 0.5,
+                              fontSize: { xs: "0.7rem", sm: "0.75rem" },
                             }}
                           >
                             Total Cost
                           </Typography>
                           <Typography
                             variant="h6"
-                            sx={{ fontWeight: 700, color: "primary.main" }}
+                            sx={{
+                              fontWeight: 700,
+                              color: "primary.main",
+                              fontSize: { xs: "1rem", sm: "1.25rem" },
+                            }}
                           >
                             ₹{(cat.totalCost / 1000).toFixed(1)}K
                           </Typography>
@@ -806,11 +898,18 @@ export default function Dashboard() {
                               color: "text.secondary",
                               display: "block",
                               mb: 0.5,
+                              fontSize: { xs: "0.7rem", sm: "0.75rem" },
                             }}
                           >
                             Item Count
                           </Typography>
-                          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: { xs: "1rem", sm: "1.25rem" },
+                            }}
+                          >
                             {cat.itemCount}
                           </Typography>
                         </Box>
@@ -823,11 +922,18 @@ export default function Dashboard() {
                               color: "text.secondary",
                               display: "block",
                               mb: 0.5,
+                              fontSize: { xs: "0.7rem", sm: "0.75rem" },
                             }}
                           >
                             Share
                           </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: { xs: "0.875rem", sm: "1rem" },
+                            }}
+                          >
                             {cat.percentage}%
                           </Typography>
                         </Box>
@@ -840,11 +946,18 @@ export default function Dashboard() {
                               color: "text.secondary",
                               display: "block",
                               mb: 0.5,
+                              fontSize: { xs: "0.7rem", sm: "0.75rem" },
                             }}
                           >
                             Avg Cost
                           </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: { xs: "0.875rem", sm: "1rem" },
+                            }}
+                          >
                             ₹{cat.averageCostPerItem.toLocaleString()}
                           </Typography>
                         </Box>
@@ -858,12 +971,12 @@ export default function Dashboard() {
         </TabPanel>
 
         <TabPanel value={tabValue} index={2}>
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs: 2, sm: 3 }}>
             <Grid item xs={12}>
               <Paper
                 elevation={0}
                 sx={{
-                  p: 3,
+                  p: { xs: 2, sm: 3 },
                   border: "1px solid",
                   borderColor: "divider",
                   borderRadius: 2,
@@ -871,23 +984,32 @@ export default function Dashboard() {
               >
                 <Typography
                   variant="h6"
-                  sx={{ fontWeight: 600, mb: 2, textAlign: "center" }}
+                  sx={{
+                    fontWeight: 600,
+                    mb: 2,
+                    textAlign: "center",
+                    fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                  }}
                 >
                   📋 IRC Standards Usage
                 </Typography>
                 {ircData.length === 0 ? (
                   <Box
-                    sx={{ textAlign: "center", py: 4, color: "text.secondary" }}
+                    sx={{
+                      textAlign: "center",
+                      py: { xs: 3, sm: 4 },
+                      color: "text.secondary",
+                    }}
                   >
                     No IRC standards data available
                   </Box>
                 ) : (
-                  <Grid container spacing={2}>
+                  <Grid container spacing={{ xs: 1.5, sm: 2 }}>
                     {ircData.slice(0, 10).map((irc, idx) => (
-                      <Grid item xs={12} sm={6} md={4} key={idx}>
+                      <Grid item xs={12} sm={6} lg={4} key={idx}>
                         <Box
                           sx={{
-                            p: 2,
+                            p: { xs: 1.5, sm: 2 },
                             borderRadius: 1.5,
                             border: "1px solid",
                             borderColor: "divider",
@@ -898,12 +1020,16 @@ export default function Dashboard() {
                             flexDirection: "column",
                             alignItems: "center",
                             gap: 1,
+                            minHeight: { xs: 100, sm: 120 },
                           }}
                         >
                           <Chip
                             label={irc.code}
                             size="small"
-                            sx={{ fontWeight: 600 }}
+                            sx={{
+                              fontWeight: 600,
+                              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                            }}
                           />
                           <Typography
                             variant="caption"
@@ -913,13 +1039,19 @@ export default function Dashboard() {
                               minHeight: "2.5em",
                               display: "flex",
                               alignItems: "center",
+                              fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                              lineHeight: 1.3,
                             }}
                           >
                             {irc.clause}
                           </Typography>
                           <Typography
                             variant="body2"
-                            sx={{ fontWeight: 700, color: "primary.main" }}
+                            sx={{
+                              fontWeight: 700,
+                              color: "primary.main",
+                              fontSize: { xs: "0.875rem", sm: "1rem" },
+                            }}
                           >
                             {irc.usageCount} uses
                           </Typography>
