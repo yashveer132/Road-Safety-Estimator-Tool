@@ -104,16 +104,15 @@ function KPICard({
         },
       }}
     >
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1.5 }}>
-        <Typography
-          variant="caption"
-          sx={{
-            color: "text.secondary",
-            fontSize: { xs: "0.75rem", sm: "0.875rem" },
-          }}
-        >
-          {title}
-        </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          mb: 1.5,
+        }}
+      >
         <Box
           sx={{
             width: { xs: 32, sm: 40 },
@@ -123,10 +122,21 @@ function KPICard({
             alignItems: "center",
             justifyContent: "center",
             bgcolor: `${color}20`,
+            mb: 1,
           }}
         >
           <Icon sx={{ color, fontSize: { xs: 16, sm: 20 } }} />
         </Box>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            fontSize: { xs: "0.75rem", sm: "0.875rem" },
+            textAlign: "center",
+          }}
+        >
+          {title}
+        </Typography>
       </Box>
 
       {loading ? (
@@ -141,6 +151,7 @@ function KPICard({
             alignItems: "baseline",
             gap: 0.5,
             fontSize: { xs: "1rem", sm: "1.25rem" },
+            justifyContent: "center",
           }}
         >
           {value >= 1000 ? (
@@ -165,7 +176,14 @@ function KPICard({
       )}
 
       {trend !== undefined && (
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 0.5,
+          }}
+        >
           <Typography
             variant="caption"
             sx={{
@@ -420,7 +438,7 @@ export default function Dashboard() {
         spacing={{ xs: 1.5, sm: 2, md: 2.5 }}
         sx={{ mb: { xs: 2, sm: 4 } }}
       >
-        <Grid item xs={12} sm={6} md={4} lg={3}>
+        <Grid item xs={6} sm={6} md={4} lg={3}>
           <KPICard
             title="Total Estimates"
             value={kpiData?.totalEstimates || 0}
@@ -431,7 +449,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={4} lg={3}>
+        <Grid item xs={6} sm={6} md={4} lg={3}>
           <KPICard
             title="Total Material Cost"
             value={kpiData?.totalMaterialCost || 0}
@@ -442,7 +460,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={4} lg={3}>
+        <Grid item xs={6} sm={6} md={4} lg={3}>
           <KPICard
             title="Completion Rate"
             value={kpiData?.completionRate || 0}
@@ -453,7 +471,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={4} lg={3}>
+        <Grid item xs={6} sm={6} md={4} lg={3}>
           <KPICard
             title="Avg Cost/Estimate"
             value={kpiData?.averageCostPerEstimate || 0}
@@ -464,7 +482,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={4} lg={3}>
+        <Grid item xs={6} sm={6} md={4} lg={3}>
           <KPICard
             title="Total Interventions"
             value={kpiData?.totalInterventions || 0}
@@ -475,7 +493,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={4} lg={3}>
+        <Grid item xs={6} sm={6} md={4} lg={3}>
           <KPICard
             title="Unique Materials"
             value={kpiData?.uniqueMaterials || 0}
@@ -486,7 +504,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={4} lg={3}>
+        <Grid item xs={6} sm={6} md={4} lg={3}>
           <KPICard
             title="Estimate Accuracy"
             value={kpiData?.estimateAccuracy || 0}
@@ -497,7 +515,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={4} lg={3}>
+        <Grid item xs={6} sm={6} md={4} lg={3}>
           <KPICard
             title="Failed Estimates"
             value={kpiData?.failedEstimates || 0}
@@ -575,57 +593,48 @@ export default function Dashboard() {
                 >
                   Category Summary
                 </Typography>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <Grid container spacing={2}>
                   {categoryData.map((category, idx) => (
-                    <Box
-                      key={idx}
-                      sx={{
-                        p: { xs: 1.25, sm: 1.5 },
-                        borderRadius: 1.5,
-                        bgcolor: `${COLORS[idx % COLORS.length]}15`,
-                        border: `1px solid`,
-                        borderColor: `${COLORS[idx % COLORS.length]}30`,
-                      }}
-                    >
+                    <Grid item xs={6} sm={6} key={idx}>
                       <Box
                         sx={{
+                          p: { xs: 1.25, sm: 1.5 },
+                          borderRadius: 1.5,
+                          bgcolor: `${COLORS[idx % COLORS.length]}15`,
+                          border: `1px solid`,
+                          borderColor: `${COLORS[idx % COLORS.length]}30`,
+                          textAlign: "center",
+                          minHeight: { xs: 70, sm: 80 },
+                          width: "100%",
                           display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          mb: 0.5,
+                          flexDirection: "column",
+                          justifyContent: "center",
                         }}
                       >
                         <Typography
                           variant="body2"
                           sx={{
                             fontWeight: 600,
-                            fontSize: { xs: "0.875rem", sm: "1rem" },
+                            fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                            mb: 0.5,
                           }}
                         >
                           {category.name}
                         </Typography>
-                        <Chip
-                          label={`${category.percentage}%`}
-                          size="small"
+                        <Typography
+                          variant="caption"
                           sx={{
-                            bgcolor: `${COLORS[idx % COLORS.length]}30`,
+                            color: "text.secondary",
                             fontSize: { xs: "0.7rem", sm: "0.75rem" },
                           }}
-                        />
+                        >
+                          ₹{category.totalCost.toLocaleString()} •{" "}
+                          {category.itemCount} items
+                        </Typography>
                       </Box>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color: "text.secondary",
-                          fontSize: { xs: "0.7rem", sm: "0.75rem" },
-                        }}
-                      >
-                        ₹{category.totalCost.toLocaleString()} •{" "}
-                        {category.itemCount} items
-                      </Typography>
-                    </Box>
+                    </Grid>
                   ))}
-                </Box>
+                </Grid>
               </Paper>
             </Grid>
 
@@ -738,71 +747,6 @@ export default function Dashboard() {
                     ))}
                   </Box>
                 )}
-              </Paper>
-            </Grid>
-
-            <Grid item xs={12}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: { xs: 2, sm: 3 },
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 2,
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    mb: 2,
-                    textAlign: "center",
-                    fontSize: { xs: "1.1rem", sm: "1.25rem" },
-                  }}
-                >
-                  💰 Cost Distribution by Category
-                </Typography>
-                <ResponsiveContainer
-                  width="100%"
-                  height={isMobile ? 250 : isTablet ? 280 : 300}
-                >
-                  <PieChart>
-                    <Pie
-                      data={categoryData}
-                      dataKey="totalCost"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={isMobile ? 70 : isTablet ? 85 : 100}
-                      label={!isMobile}
-                    >
-                      {categoryData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value) => `₹${value.toLocaleString()}`}
-                      contentStyle={{
-                        backgroundColor: "rgba(30, 41, 59, 0.95)",
-                        border: "1px solid rgba(148, 163, 184, 0.3)",
-                        borderRadius: "8px",
-                        color: "#ffffff",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                        fontSize: isMobile ? "0.7rem" : "0.875rem",
-                      }}
-                      labelStyle={{ color: "#ffffff" }}
-                    />
-                    <Legend
-                      wrapperStyle={{
-                        fontSize: isMobile ? "0.7rem" : "0.875rem",
-                        paddingTop: isMobile ? "8px" : "12px",
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
               </Paper>
             </Grid>
           </Grid>

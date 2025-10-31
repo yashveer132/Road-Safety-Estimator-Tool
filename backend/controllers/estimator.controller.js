@@ -280,6 +280,7 @@ export const getEstimate = async (req, res) => {
           source: item.materials.length > 0 ? item.materials[0].source : "N/A",
           rationale: item.rationale,
           assumptions: item.assumptions,
+          notes: item.notes,
         })),
       })) || [];
 

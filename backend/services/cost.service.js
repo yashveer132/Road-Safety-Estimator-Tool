@@ -119,13 +119,36 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
         }
       }
 
-      const rationale = `Cost estimate based on ${mapping.ircCode} ${mapping.clause}: ${mapping.specification}. Materials priced from CPWD SOR/GeM portal.`;
-      const assumptions = [
+      let aiRationale = null;
+      try {
+        aiRationale = await generateCostRationale(
+          {
+            name: intervention.recommendation,
+            description: intervention.observation,
+          },
+          itemsWithPrices,
+          mapping,
+          Math.round(totalCost * 100) / 100
+        );
+      } catch (error) {
+        console.warn(`⚠️ Failed to generate AI rationale: ${error.message}`);
+        aiRationale = null;
+      }
+
+      const rationale =
+        aiRationale?.rationale ||
+        `Cost estimate based on ${mapping.ircCode} ${mapping.clause}: ${mapping.specification}. Materials priced from CPWD SOR/GeM portal.`;
+
+      const assumptions = aiRationale?.assumptions || [
         `IRC specification: ${mapping.specification}`,
         "Standard quality materials as per IRC guidelines",
         "Prices exclude GST, labor, and installation",
         `Location: ${intervention.chainage} ${intervention.side} ${intervention.road}`,
       ];
+
+      const notes =
+        aiRationale?.notes ||
+        "Excludes labor, installation, and taxes. Material costs only.";
 
       sectionGroups[intervention.sectionId].items.push({
         no: intervention.serialNo,
@@ -139,6 +162,7 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
         totalCost: Math.round(totalCost * 100) / 100,
         rationale: rationale,
         assumptions: assumptions,
+        notes: notes,
       });
 
       sectionGroups[intervention.sectionId].totalCost += totalCost;

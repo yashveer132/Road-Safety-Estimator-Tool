@@ -118,7 +118,7 @@ export default function EstimateDetails() {
   const totalCategories = estimate.categories?.length || 0;
 
   return (
-    <Box className="fade-in">
+    <Box className="fade-in" sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
       <Box sx={{ mb: 4, textAlign: "center" }}>
         <Box
           sx={{
@@ -131,8 +131,8 @@ export default function EstimateDetails() {
         >
           <Box
             sx={{
-              width: 80,
-              height: 80,
+              width: { xs: 60, sm: 80 },
+              height: { xs: 60, sm: 80 },
               borderRadius: "50%",
               bgcolor: "primary.main",
               display: "flex",
@@ -140,13 +140,20 @@ export default function EstimateDetails() {
               justifyContent: "center",
               mb: 2,
               color: "white",
-              fontSize: "2rem",
+              fontSize: { xs: "1.5rem", sm: "2rem" },
               fontWeight: 700,
             }}
           >
             🚦
           </Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              mb: 1,
+              fontSize: { xs: "1.75rem", sm: "2.125rem" },
+            }}
+          >
             {estimate.documentName}
           </Typography>
           <Box
@@ -161,9 +168,19 @@ export default function EstimateDetails() {
             <Chip
               label={estimate.status}
               color={getStatusColor(estimate.status)}
-              sx={{ textTransform: "capitalize", fontWeight: 600 }}
+              sx={{
+                textTransform: "capitalize",
+                fontWeight: 600,
+                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              }}
             />
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              }}
+            >
               Created:{" "}
               {new Date(estimate.createdAt).toLocaleDateString("en-IN", {
                 day: "numeric",
@@ -176,15 +193,28 @@ export default function EstimateDetails() {
           </Box>
         </Box>
 
-        <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1,
+            justifyContent: "center",
+            flexWrap: "wrap",
+          }}
+        >
           <Button
             variant="outlined"
             startIcon={<PrintIcon />}
             onClick={() => window.print()}
-            sx={{ fontWeight: 600 }}
+            sx={{
+              fontWeight: 600,
+              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              minWidth: { xs: "auto", sm: "auto" },
+              px: { xs: 1, sm: 2 },
+            }}
             className="no-print"
           >
-            Print
+            <Box sx={{ display: { xs: "none", sm: "block" } }}>Print</Box>
+            <Box sx={{ display: { xs: "block", sm: "none" } }}>🖨️</Box>
           </Button>
           <Button
             variant="contained"
@@ -575,10 +605,16 @@ export default function EstimateDetails() {
               printWindow.document.close();
               printWindow.print();
             }}
-            sx={{ fontWeight: 600 }}
+            sx={{
+              fontWeight: 600,
+              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              minWidth: { xs: "auto", sm: "auto" },
+              px: { xs: 1, sm: 2 },
+            }}
             className="no-print"
           >
-            Export PDF
+            <Box sx={{ display: { xs: "none", sm: "block" } }}>Export PDF</Box>
+            <Box sx={{ display: { xs: "block", sm: "none" } }}>📄</Box>
           </Button>
         </Box>
       </Box>
@@ -586,7 +622,7 @@ export default function EstimateDetails() {
       <Paper
         elevation={0}
         sx={{
-          p: 3,
+          p: { xs: 2, sm: 3 },
           mb: 4,
           borderRadius: 3,
           border: "1px solid",
@@ -596,18 +632,34 @@ export default function EstimateDetails() {
       >
         <Typography
           variant="h5"
-          sx={{ fontWeight: 700, mb: 3, color: "white", textAlign: "center" }}
+          sx={{
+            fontWeight: 700,
+            mb: 3,
+            color: "white",
+            textAlign: "center",
+            fontSize: { xs: "1.25rem", sm: "1.5rem" },
+          }}
         >
           📊 Road Safety Intervention Report
         </Typography>
         <Box sx={{ textAlign: "center" }}>
           <Typography
             variant="h6"
-            sx={{ color: "rgba(255,255,255,0.9)", mb: 1 }}
+            sx={{
+              color: "rgba(255,255,255,0.9)",
+              mb: 1,
+              fontSize: { xs: "1rem", sm: "1.25rem" },
+            }}
           >
             <strong>Total Interventions Detected:</strong> {totalInterventions}
           </Typography>
-          <Typography variant="h6" sx={{ color: "rgba(255,255,255,0.9)" }}>
+          <Typography
+            variant="h6"
+            sx={{
+              color: "rgba(255,255,255,0.9)",
+              fontSize: { xs: "1rem", sm: "1.25rem" },
+            }}
+          >
             <strong>Categories Identified:</strong> {totalCategories}
           </Typography>
         </Box>
@@ -617,11 +669,20 @@ export default function EstimateDetails() {
         <Box sx={{ mb: 4 }}>
           <Typography
             variant="h6"
-            sx={{ fontWeight: 600, mb: 2, textAlign: "center" }}
+            sx={{
+              fontWeight: 600,
+              mb: 2,
+              textAlign: "center",
+              fontSize: { xs: "1.1rem", sm: "1.25rem" },
+            }}
           >
             Categories Overview
           </Typography>
-          <Grid container spacing={2} sx={{ justifyContent: "center" }}>
+          <Grid
+            container
+            spacing={{ xs: 1, sm: 2 }}
+            sx={{ justifyContent: "center" }}
+          >
             {estimate.categories.map((category) => (
               <Grid item xs={12} sm={6} md={4} key={category.id}>
                 <Card
@@ -650,24 +711,45 @@ export default function EstimateDetails() {
                     }
                   }}
                 >
-                  <CardContent>
+                  <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                     <Box sx={{ textAlign: "center" }}>
-                      <Typography variant="h4" sx={{ mb: 1 }}>
+                      <Typography
+                        variant="h4"
+                        sx={{
+                          mb: 1,
+                          fontSize: { xs: "2rem", sm: "2.5rem" },
+                        }}
+                      >
                         {category.emoji}
                       </Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: 600,
+                          mb: 1,
+                          fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                        }}
+                      >
                         {category.name}
                       </Typography>
                       <Typography
                         variant="body2"
-                        sx={{ color: "text.secondary", mb: 1 }}
+                        sx={{
+                          color: "text.secondary",
+                          mb: 1,
+                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                        }}
                       >
                         {category.count} intervention
                         {category.count !== 1 ? "s" : ""}
                       </Typography>
                       <Typography
                         variant="h6"
-                        sx={{ fontWeight: 700, color: "primary.main" }}
+                        sx={{
+                          fontWeight: 700,
+                          color: "primary.main",
+                          fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                        }}
                       >
                         ₹{category.totalCost.toLocaleString("en-IN")}
                       </Typography>
@@ -680,7 +762,11 @@ export default function EstimateDetails() {
         </Box>
       )}
 
-      <Grid container spacing={3} sx={{ mb: 4, justifyContent: "center" }}>
+      <Grid
+        container
+        spacing={{ xs: 2, sm: 3 }}
+        sx={{ mb: 4, justifyContent: "center" }}
+      >
         <Grid item xs={12} sm={6} md={3}>
           <Card
             elevation={0}
@@ -691,7 +777,7 @@ export default function EstimateDetails() {
               textAlign: "center",
             }}
           >
-            <CardContent>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
               <Box
                 sx={{
                   display: "flex",
@@ -702,8 +788,8 @@ export default function EstimateDetails() {
               >
                 <Box
                   sx={{
-                    width: 48,
-                    height: 48,
+                    width: { xs: 40, sm: 48 },
+                    height: { xs: 40, sm: 48 },
                     borderRadius: 2,
                     bgcolor: "rgba(16, 185, 129, 0.1)",
                     display: "flex",
@@ -712,16 +798,28 @@ export default function EstimateDetails() {
                     color: "primary.main",
                   }}
                 >
-                  <TrendingUpIcon />
+                  <TrendingUpIcon
+                    sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
+                  />
                 </Box>
                 <Box>
                   <Typography
                     variant="h5"
-                    sx={{ fontWeight: 700, color: "primary.main" }}
+                    sx={{
+                      fontWeight: 700,
+                      color: "primary.main",
+                      fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                    }}
                   >
                     ₹{totalCost.toLocaleString("en-IN")}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                    }}
+                  >
                     Total Cost
                   </Typography>
                 </Box>
@@ -740,7 +838,7 @@ export default function EstimateDetails() {
               textAlign: "center",
             }}
           >
-            <CardContent>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
               <Box
                 sx={{
                   display: "flex",
@@ -751,8 +849,8 @@ export default function EstimateDetails() {
               >
                 <Box
                   sx={{
-                    width: 48,
-                    height: 48,
+                    width: { xs: 40, sm: 48 },
+                    height: { xs: 40, sm: 48 },
                     borderRadius: 2,
                     bgcolor: "rgba(230, 126, 34, 0.1)",
                     display: "flex",
@@ -761,13 +859,27 @@ export default function EstimateDetails() {
                     color: "secondary.main",
                   }}
                 >
-                  <DescriptionOutlinedIcon />
+                  <DescriptionOutlinedIcon
+                    sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
+                  />
                 </Box>
                 <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                    }}
+                  >
                     {totalInterventions}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                    }}
+                  >
                     Interventions
                   </Typography>
                 </Box>
@@ -786,7 +898,7 @@ export default function EstimateDetails() {
               textAlign: "center",
             }}
           >
-            <CardContent>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
               <Box
                 sx={{
                   display: "flex",
@@ -797,8 +909,8 @@ export default function EstimateDetails() {
               >
                 <Box
                   sx={{
-                    width: 48,
-                    height: 48,
+                    width: { xs: 40, sm: 48 },
+                    height: { xs: 40, sm: 48 },
                     borderRadius: 2,
                     bgcolor: "rgba(39, 174, 96, 0.1)",
                     display: "flex",
@@ -807,13 +919,27 @@ export default function EstimateDetails() {
                     color: "success.main",
                   }}
                 >
-                  <CategoryOutlinedIcon />
+                  <CategoryOutlinedIcon
+                    sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
+                  />
                 </Box>
                 <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                    }}
+                  >
                     {totalCategories}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                    }}
+                  >
                     Categories
                   </Typography>
                 </Box>
@@ -832,7 +958,7 @@ export default function EstimateDetails() {
               textAlign: "center",
             }}
           >
-            <CardContent>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
               <Box
                 sx={{
                   display: "flex",
@@ -843,8 +969,8 @@ export default function EstimateDetails() {
               >
                 <Box
                   sx={{
-                    width: 48,
-                    height: 48,
+                    width: { xs: 40, sm: 48 },
+                    height: { xs: 40, sm: 48 },
                     borderRadius: 2,
                     bgcolor: "rgba(23, 162, 184, 0.1)",
                     display: "flex",
@@ -853,13 +979,27 @@ export default function EstimateDetails() {
                     color: "info.main",
                   }}
                 >
-                  <VerifiedOutlinedIcon />
+                  <VerifiedOutlinedIcon
+                    sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
+                  />
                 </Box>
                 <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                    }}
+                  >
                     IRC
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                    }}
+                  >
                     Standards
                   </Typography>
                 </Box>
@@ -872,7 +1012,12 @@ export default function EstimateDetails() {
       <Box>
         <Typography
           variant="h6"
-          sx={{ fontWeight: 600, mb: 3, textAlign: "center" }}
+          sx={{
+            fontWeight: 600,
+            mb: 3,
+            textAlign: "center",
+            fontSize: { xs: "1.1rem", sm: "1.25rem" },
+          }}
         >
           Detailed Intervention Breakdown
         </Typography>
@@ -893,72 +1038,115 @@ export default function EstimateDetails() {
             >
               <Box
                 sx={{
-                  p: 3,
+                  p: { xs: 2, sm: 3 },
                   bgcolor: "#1E293B",
                   color: "white",
                   textAlign: "center",
                 }}
               >
-                <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 0.5,
+                    fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                  }}
+                >
                   {category.categoryEmoji} {category.categoryName}
                 </Typography>
               </Box>
 
-              <TableContainer>
+              <Box sx={{ overflowX: "auto" }}>
                 <Table size="small">
                   <TableHead>
                     <TableRow sx={{ bgcolor: "rgba(30, 41, 59, 0.3)" }}>
                       <TableCell
                         align="center"
-                        sx={{ fontWeight: 700, fontSize: "0.85rem" }}
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                          minWidth: { xs: 40, sm: 50 },
+                        }}
                       >
                         #
                       </TableCell>
                       <TableCell
                         align="left"
-                        sx={{ fontWeight: 700, fontSize: "0.85rem" }}
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                          minWidth: { xs: 120, sm: 150 },
+                        }}
                       >
                         Intervention
                       </TableCell>
                       <TableCell
                         align="center"
-                        sx={{ fontWeight: 700, fontSize: "0.85rem" }}
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                          minWidth: { xs: 80, sm: 100 },
+                        }}
                       >
                         IRC Reference
                       </TableCell>
                       <TableCell
                         align="left"
-                        sx={{ fontWeight: 700, fontSize: "0.85rem" }}
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                          minWidth: { xs: 100, sm: 120 },
+                        }}
                       >
                         Materials
                       </TableCell>
                       <TableCell
                         align="center"
-                        sx={{ fontWeight: 700, fontSize: "0.85rem" }}
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                          minWidth: { xs: 80, sm: 100 },
+                        }}
                       >
                         Quantity
                       </TableCell>
                       <TableCell
                         align="center"
-                        sx={{ fontWeight: 700, fontSize: "0.85rem" }}
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                          minWidth: { xs: 90, sm: 110 },
+                        }}
                       >
                         Unit Rate (₹)
                       </TableCell>
                       <TableCell
                         align="center"
-                        sx={{ fontWeight: 700, fontSize: "0.85rem" }}
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                          minWidth: { xs: 90, sm: 110 },
+                        }}
                       >
                         Total (₹)
                       </TableCell>
                       <TableCell
                         align="center"
-                        sx={{ fontWeight: 700, fontSize: "0.85rem" }}
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                          minWidth: { xs: 70, sm: 80 },
+                        }}
                       >
                         Source
                       </TableCell>
                       <TableCell
                         align="left"
-                        sx={{ fontWeight: 700, fontSize: "0.85rem" }}
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                          minWidth: { xs: 120, sm: 150 },
+                        }}
                       >
                         Rationale
                       </TableCell>
@@ -975,11 +1163,23 @@ export default function EstimateDetails() {
                           },
                         }}
                       >
-                        <TableCell align="center" sx={{ fontWeight: 600 }}>
+                        <TableCell
+                          align="center"
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                          }}
+                        >
                           {item.no}
                         </TableCell>
                         <TableCell align="left">
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 600,
+                              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                            }}
+                          >
                             {item.intervention}
                           </Typography>
                         </TableCell>
@@ -988,33 +1188,49 @@ export default function EstimateDetails() {
                             label={item.ircReference}
                             size="small"
                             sx={{
-                              fontSize: "0.7rem",
+                              fontSize: { xs: "0.6rem", sm: "0.7rem" },
                               fontWeight: 600,
                               bgcolor: "rgba(16, 185, 129, 0.1)",
                               color: "primary.main",
+                              height: { xs: 24, sm: 28 },
                             }}
                           />
                         </TableCell>
                         <TableCell align="left">
                           <Typography
                             variant="body2"
-                            sx={{ fontSize: "0.8rem" }}
+                            sx={{
+                              fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                            }}
                           >
                             {item.materials}
                           </Typography>
                         </TableCell>
                         <TableCell align="center">
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 600,
+                              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                            }}
+                          >
                             {item.quantity} {item.unit}
                           </Typography>
                         </TableCell>
-                        <TableCell align="center">
+                        <TableCell
+                          align="center"
+                          sx={{ fontSize: { xs: "0.75rem", sm: "0.875rem" } }}
+                        >
                           ₹{(item.unitRate || 0).toLocaleString("en-IN")}
                         </TableCell>
                         <TableCell align="center">
                           <Typography
                             variant="body2"
-                            sx={{ fontWeight: 700, color: "primary.main" }}
+                            sx={{
+                              fontWeight: 700,
+                              color: "primary.main",
+                              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                            }}
                           >
                             ₹{(item.totalCost || 0).toLocaleString("en-IN")}
                           </Typography>
@@ -1024,30 +1240,109 @@ export default function EstimateDetails() {
                             label={item.source || "N/A"}
                             size="small"
                             variant="outlined"
-                            sx={{ fontSize: "0.7rem", fontWeight: 500 }}
+                            sx={{
+                              fontSize: { xs: "0.6rem", sm: "0.7rem" },
+                              fontWeight: 500,
+                              height: { xs: 24, sm: 28 },
+                            }}
                           />
                         </TableCell>
                         <TableCell align="left">
-                          <Typography
-                            variant="body2"
+                          <Box
                             sx={{
-                              fontSize: "0.8rem",
-                              color: "#d4af37",
-                              fontWeight: 600,
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 1,
                             }}
                           >
-                            {item.rationale}
-                          </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                                color: "#d4af37",
+                                fontWeight: 600,
+                              }}
+                            >
+                              {item.rationale}
+                            </Typography>
+                            {item.assumptions &&
+                              item.assumptions.length > 0 && (
+                                <Box
+                                  sx={{
+                                    mt: 1,
+                                    pt: 1,
+                                    borderTop:
+                                      "1px solid rgba(212, 175, 55, 0.3)",
+                                  }}
+                                >
+                                  <Typography
+                                    variant="caption"
+                                    sx={{
+                                      display: "block",
+                                      fontWeight: 700,
+                                      color: "rgba(212, 175, 55, 0.8)",
+                                      mb: 0.5,
+                                      fontSize: { xs: "0.65rem", sm: "0.7rem" },
+                                    }}
+                                  >
+                                    Assumptions:
+                                  </Typography>
+                                  <Box sx={{ ml: 1 }}>
+                                    {item.assumptions.map(
+                                      (assumption, aidx) => (
+                                        <Typography
+                                          key={aidx}
+                                          variant="caption"
+                                          sx={{
+                                            display: "block",
+                                            fontSize: {
+                                              xs: "0.65rem",
+                                              sm: "0.7rem",
+                                            },
+                                            color: "rgba(226, 232, 240, 0.7)",
+                                            mb: 0.3,
+                                          }}
+                                        >
+                                          • {assumption}
+                                        </Typography>
+                                      )
+                                    )}
+                                  </Box>
+                                </Box>
+                              )}
+                            {item.notes && (
+                              <Box
+                                sx={{
+                                  mt: 0.5,
+                                  pt: 0.5,
+                                  borderTop:
+                                    "1px solid rgba(212, 175, 55, 0.3)",
+                                }}
+                              >
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    display: "block",
+                                    fontWeight: 700,
+                                    color: "rgba(212, 175, 55, 0.8)",
+                                    fontSize: { xs: "0.65rem", sm: "0.7rem" },
+                                  }}
+                                >
+                                  Notes: {item.notes}
+                                </Typography>
+                              </Box>
+                            )}
+                          </Box>
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
-              </TableContainer>
+              </Box>
 
               <Box
                 sx={{
-                  p: 2,
+                  p: { xs: 1.5, sm: 2 },
                   bgcolor: "rgba(16, 185, 129, 0.05)",
                   borderTop: "2px solid",
                   borderColor: "divider",
@@ -1056,7 +1351,11 @@ export default function EstimateDetails() {
               >
                 <Typography
                   variant="h6"
-                  sx={{ fontWeight: 700, color: "primary.main" }}
+                  sx={{
+                    fontWeight: 700,
+                    color: "primary.main",
+                    fontSize: { xs: "1rem", sm: "1.25rem" },
+                  }}
                 >
                   Subtotal ({category.categoryId}): ₹
                   {(category.totalCost || 0).toLocaleString("en-IN")}
@@ -1068,14 +1367,20 @@ export default function EstimateDetails() {
           <Paper
             elevation={0}
             sx={{
-              p: 4,
+              p: { xs: 3, sm: 4 },
               textAlign: "center",
               borderRadius: 3,
               border: "1px solid",
               borderColor: "divider",
             }}
           >
-            <Typography variant="body1" sx={{ color: "text.secondary" }}>
+            <Typography
+              variant="body1"
+              sx={{
+                color: "text.secondary",
+                fontSize: { xs: "0.9rem", sm: "1rem" },
+              }}
+            >
               No interventions available yet
             </Typography>
           </Paper>
@@ -1093,7 +1398,7 @@ export default function EstimateDetails() {
             overflow: "hidden",
           }}
         >
-          <TableContainer>
+          <Box sx={{ overflowX: "auto" }}>
             <Table>
               <TableHead>
                 <TableRow sx={{ bgcolor: "rgba(30, 41, 59, 0.8)" }}>
@@ -1102,13 +1407,20 @@ export default function EstimateDetails() {
                       fontWeight: 700,
                       color: "white",
                       textAlign: "center",
+                      fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                      minWidth: { xs: 120, sm: 150 },
                     }}
                   >
                     Category
                   </TableCell>
                   <TableCell
                     align="center"
-                    sx={{ fontWeight: 700, color: "white" }}
+                    sx={{
+                      fontWeight: 700,
+                      color: "white",
+                      fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                      minWidth: { xs: 100, sm: 120 },
+                    }}
                   >
                     Total (₹)
                   </TableCell>
@@ -1117,31 +1429,67 @@ export default function EstimateDetails() {
               <TableBody>
                 {estimate.categories.map((cat) => (
                   <TableRow key={cat.id} hover>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    <TableCell
+                      sx={{
+                        textAlign: "center",
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                        }}
+                      >
                         {cat.id}. {cat.name}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    <TableCell
+                      align="center"
+                      sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                        }}
+                      >
                         ₹{cat.totalCost.toLocaleString("en-IN")}
                       </Typography>
                     </TableCell>
                   </TableRow>
                 ))}
                 <TableRow sx={{ bgcolor: "#1E293B" }}>
-                  <TableCell sx={{ textAlign: "center" }}>
+                  <TableCell
+                    sx={{
+                      textAlign: "center",
+                      fontSize: { xs: "0.9rem", sm: "1rem" },
+                    }}
+                  >
                     <Typography
                       variant="h6"
-                      sx={{ fontWeight: 700, color: "white" }}
+                      sx={{
+                        fontWeight: 700,
+                        color: "white",
+                        fontSize: { xs: "1rem", sm: "1.25rem" },
+                      }}
                     >
                       Grand Total (Material Cost)
                     </Typography>
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell
+                    align="center"
+                    sx={{ fontSize: { xs: "0.9rem", sm: "1rem" } }}
+                  >
                     <Typography
                       variant="h6"
-                      sx={{ fontWeight: 700, color: "white" }}
+                      sx={{
+                        fontWeight: 700,
+                        color: "white",
+                        fontSize: { xs: "1rem", sm: "1.25rem" },
+                      }}
                     >
                       ₹{totalCost.toLocaleString("en-IN")}
                     </Typography>
@@ -1149,14 +1497,14 @@ export default function EstimateDetails() {
                 </TableRow>
               </TableBody>
             </Table>
-          </TableContainer>
+          </Box>
         </Paper>
       )}
 
       <Paper
         elevation={0}
         sx={{
-          p: 3,
+          p: { xs: 2, sm: 3 },
           mt: 4,
           borderRadius: 3,
           background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
@@ -1172,13 +1520,33 @@ export default function EstimateDetails() {
             textAlign: "center",
           }}
         >
-          <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 700,
+              mb: 1,
+              fontSize: { xs: "1.25rem", sm: "1.5rem" },
+            }}
+          >
             💰 FINAL MATERIAL COST ESTIMATE
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.95, mb: 2 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              opacity: 0.95,
+              mb: 2,
+              fontSize: { xs: "0.8rem", sm: "0.875rem" },
+            }}
+          >
             Excludes labour, installation, and taxes
           </Typography>
-          <Typography variant="h3" sx={{ fontWeight: 700 }}>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 700,
+              fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
+            }}
+          >
             ₹{totalCost.toLocaleString("en-IN")}
           </Typography>
         </Box>

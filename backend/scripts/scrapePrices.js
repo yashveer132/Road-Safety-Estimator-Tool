@@ -97,7 +97,7 @@ The script will:
 4. Provide fallback data when AI services fail
 
 Results are stored in the Price collection and can be used
-as reliable fallback data for the road safety estimator.
+as reliable fallback data for the Estimator Tool For Intervention.
   `);
   process.exit(0);
 }

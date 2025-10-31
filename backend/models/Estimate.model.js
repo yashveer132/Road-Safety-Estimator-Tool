@@ -78,6 +78,7 @@ const estimateSchema = new mongoose.Schema(
             totalCost: Number,
             rationale: String,
             assumptions: [String],
+            notes: String,
           },
         ],
         totalCost: Number,

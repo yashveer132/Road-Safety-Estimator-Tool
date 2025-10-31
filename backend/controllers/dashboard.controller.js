@@ -242,26 +242,31 @@ export const getCategoryBreakdown = async (req, res) => {
     const categoryData = {};
 
     estimates.forEach((estimate) => {
-      estimate.materialEstimates?.forEach((section) => {
-        if (!categoryData[section.sectionId]) {
-          categoryData[section.sectionId] = {
-            name: section.sectionName,
+      estimate.interventions?.forEach((intervention) => {
+        const sectionId = intervention.sectionId;
+        if (!categoryData[sectionId]) {
+          categoryData[sectionId] = {
+            name: intervention.sectionName,
             count: 0,
             totalCost: 0,
             items: [],
           };
         }
+        categoryData[sectionId].count += 1;
+      });
 
-        categoryData[section.sectionId].count += section.items?.length || 0;
-        categoryData[section.sectionId].totalCost += section.totalCost || 0;
+      estimate.materialEstimates?.forEach((section) => {
+        if (categoryData[section.sectionId]) {
+          categoryData[section.sectionId].totalCost += section.totalCost || 0;
 
-        section.items?.forEach((item) => {
-          categoryData[section.sectionId].items.push({
-            intervention: item.recommendation,
-            cost: item.totalCost,
-            materials: item.materials?.length || 0,
+          section.items?.forEach((item) => {
+            categoryData[section.sectionId].items.push({
+              intervention: item.recommendation,
+              cost: item.totalCost,
+              materials: item.materials?.length || 0,
+            });
           });
-        });
+        }
       });
     });
 

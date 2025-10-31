@@ -189,7 +189,7 @@ const generateHTMLReport = (estimate) => {
   </div>
 
   <div class="footer">
-    <p><strong>Road Safety Estimator Tool</strong></p>
+    <p><strong>Estimator Tool For Intervention</strong></p>
     <p>Powered by AI | Based on IRC Standards and CPWD/GeM Price Data</p>
     <p>Report ID: ${estimate._id} | Generated: ${new Date().toLocaleString(
     "en-IN"

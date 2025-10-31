@@ -36,7 +36,7 @@ app.use(
 app.get("/api/health", (req, res) => {
   res.json({
     status: "OK",
-    message: "Road Safety Estimator API is running",
+    message: "Estimator Tool For Intervention API is running",
     timestamp: new Date().toISOString(),
   });
 });

@@ -84,7 +84,7 @@ export default function TopBar() {
                 letterSpacing: "-0.02em",
               }}
             >
-              Road Safety Estimator
+              Estimator Tool For Intervention{" "}
             </Typography>
           </Box>
         </Box>
@@ -182,7 +182,7 @@ export default function TopBar() {
               letterSpacing: "-0.02em",
             }}
           >
-            Road Safety Estimator
+            Estimator Tool For Intervention{" "}
           </Typography>
         </Box>
 
@@ -267,7 +267,7 @@ export default function TopBar() {
               fontSize: "0.75rem",
             }}
           >
-            © 2025 Road Safety Estimator
+            © 2025 Estimator Tool For Intervention
           </Typography>
         </Box>
       </Drawer>
