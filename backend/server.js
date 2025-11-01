@@ -6,6 +6,7 @@ import connectDB from "./config/database.js";
 import estimatorRoutes from "./routes/estimator.routes.js";
 import priceRoutes from "./routes/price.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
+import interventionRoutes from "./routes/intervention.routes.js";
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/estimator", estimatorRoutes);
 app.use("/api/prices", priceRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/interventions", interventionRoutes);
 
 app.use((err, req, res, next) => {
   console.error("Error:", err);

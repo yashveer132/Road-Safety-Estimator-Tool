@@ -9,7 +9,8 @@
     "dev": "nodemon server.js",
     "scrape": "node scripts/scrapePrices.js",
     "populate": "node scripts/populatePrices.js",
-    "setup-dashboard": "node scripts/setupDashboard.js"
+    "setup-dashboard": "node scripts/setupDashboard.js",
+    "seed-interventions": "node scripts/seedInterventions.js"
   },
   "keywords": [
     "road-safety",

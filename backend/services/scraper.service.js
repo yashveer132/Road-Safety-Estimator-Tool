@@ -198,7 +198,6 @@ export const scrapeCPWDPrices = async (items = []) => {
         isActive: true,
       },
 
-      // TRAFFIC SIGNALS & LIGHTING
       {
         itemName: "LED Traffic Signal Light",
         itemCode: "CPWD-2024-TL-001",

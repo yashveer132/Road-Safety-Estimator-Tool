@@ -1,0 +1,72 @@
+[
+  {
+    "problem": "Damaged",
+    "category": "Road Sign",
+    "interventionType": "STOP Sign",
+    "description": "The 'STOP' sign, used on minor roads intersecting major roads, must be octagonal with a red background and white border and legend as per specifications.",
+    "code": "IRC:67-2022",
+    "clause": "14.4",
+    "tags": ["signage", "stop", "priority", "regulatory"],
+    "context": {
+      "roadType": ["urban", "rural", "major", "minor"],
+      "environment": ["intersection", "junction"],
+      "issueKeywords": ["damaged", "missing", "non functional", "non standard"]
+    }
+  },
+  {
+    "problem": "Height Issue",
+    "category": "Road Sign",
+    "interventionType": "Minimum Speed Limit Sign",
+    "description": "Minimum speed limit sign shall be installed to maintain the minimum required clearance from the road surface to the bottom of the signboard.",
+    "code": "IRC:67-2022",
+    "clause": "14.10.6",
+    "tags": ["signage", "speed", "regulatory"],
+    "context": {
+      "roadType": ["expressway", "highway"],
+      "environment": ["controlled access", "arterial"],
+      "issueKeywords": ["height", "clearance", "placement"]
+    }
+  },
+  {
+    "problem": "Faded",
+    "category": "Road Sign",
+    "interventionType": "Hospital Sign",
+    "description": "Hospital sign should be used to notify drivers of the location of a hospital or medical facility ahead. It should be rectangular with a blue background and white legend.",
+    "code": "IRC:67-2022",
+    "clause": "17.8",
+    "tags": ["signage", "service", "information"],
+    "context": {
+      "roadType": ["urban", "suburban"],
+      "environment": ["hospital", "emergency", "institution"],
+      "issueKeywords": ["faded", "unreadable", "worn"]
+    }
+  },
+  {
+    "problem": "Spacing Issue",
+    "category": "Road Sign",
+    "interventionType": "U-Turn Ahead Sign",
+    "description": "When multiple signs need to be placed along the same road, they should be installed with adequate spacing to ensure visibility and readability.",
+    "code": "IRC:67-2022",
+    "clause": "4.8",
+    "tags": ["signage", "warning", "spacing"],
+    "context": {
+      "roadType": ["urban", "arterial"],
+      "environment": ["corridor", "multiple signs"],
+      "issueKeywords": ["spacing", "clutter", "visibility"]
+    }
+  },
+  {
+    "problem": "Improper Placement",
+    "category": "Road Sign",
+    "interventionType": "Gap in Median Sign",
+    "description": "Gap in median sign shall be installed ahead of the median opening to alert drivers about the median break and possible turning traffic.",
+    "code": "IRC:67-2022",
+    "clause": "15.26",
+    "tags": ["signage", "warning", "median"],
+    "context": {
+      "roadType": ["divided highway", "arterial"],
+      "environment": ["median", "turning traffic"],
+      "issueKeywords": ["placement", "visibility", "advance warning"]
+    }
+  }
+]

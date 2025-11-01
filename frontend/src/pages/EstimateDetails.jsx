@@ -1071,7 +1071,7 @@ export default function EstimateDetails() {
                         #
                       </TableCell>
                       <TableCell
-                        align="left"
+                        align="center"
                         sx={{
                           fontWeight: 700,
                           fontSize: { xs: "0.75rem", sm: "0.85rem" },
@@ -1091,7 +1091,7 @@ export default function EstimateDetails() {
                         IRC Reference
                       </TableCell>
                       <TableCell
-                        align="left"
+                        align="center"
                         sx={{
                           fontWeight: 700,
                           fontSize: { xs: "0.75rem", sm: "0.85rem" },
@@ -1141,11 +1141,11 @@ export default function EstimateDetails() {
                         Source
                       </TableCell>
                       <TableCell
-                        align="left"
+                        align="center"
                         sx={{
                           fontWeight: 700,
                           fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                          minWidth: { xs: 120, sm: 150 },
+                          minWidth: { xs: 150, sm: 200 },
                         }}
                       >
                         Rationale
@@ -1172,7 +1172,7 @@ export default function EstimateDetails() {
                         >
                           {item.no}
                         </TableCell>
-                        <TableCell align="left">
+                        <TableCell align="center">
                           <Typography
                             variant="body2"
                             sx={{
@@ -1196,7 +1196,7 @@ export default function EstimateDetails() {
                             }}
                           />
                         </TableCell>
-                        <TableCell align="left">
+                        <TableCell align="center">
                           <Typography
                             variant="body2"
                             sx={{
@@ -1247,12 +1247,29 @@ export default function EstimateDetails() {
                             }}
                           />
                         </TableCell>
-                        <TableCell align="left">
+                        <TableCell align="center">
                           <Box
                             sx={{
                               display: "flex",
                               flexDirection: "column",
                               gap: 1,
+                              maxHeight: "220px",
+                              overflowY: "auto",
+                              pr: 1,
+                              "&::-webkit-scrollbar": {
+                                width: "6px",
+                              },
+                              "&::-webkit-scrollbar-track": {
+                                background: "rgba(0,0,0,0.1)",
+                                borderRadius: "3px",
+                              },
+                              "&::-webkit-scrollbar-thumb": {
+                                background: "rgba(212, 175, 55, 0.5)",
+                                borderRadius: "3px",
+                              },
+                              "&::-webkit-scrollbar-thumb:hover": {
+                                background: "rgba(212, 175, 55, 0.7)",
+                              },
                             }}
                           >
                             <Typography

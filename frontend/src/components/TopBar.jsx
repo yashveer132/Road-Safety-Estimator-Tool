@@ -16,12 +16,18 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import SettingsIcon from "@mui/icons-material/Settings";
+import TrafficIcon from "@mui/icons-material/Traffic";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const menuItems = [
   { text: "Dashboard", path: "/", icon: DashboardIcon },
   { text: "Upload Report", path: "/upload", icon: CloudUploadIcon },
   { text: "Estimates", path: "/estimates", icon: AssessmentIcon },
+  {
+    text: "Safety Interventions GPT",
+    path: "/road-safety-gpt",
+    icon: TrafficIcon,
+  },
   { text: "Price Management", path: "/prices", icon: SettingsIcon },
 ];
 

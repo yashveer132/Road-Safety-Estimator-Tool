@@ -6,6 +6,8 @@ import Upload from "./pages/Upload.jsx";
 import Estimates from "./pages/Estimates.jsx";
 import EstimateDetails from "./pages/EstimateDetails.jsx";
 import PriceManagement from "./pages/PriceManagement.jsx";
+import RoadSafetyGPT from "./pages/RoadSafetyGPT.jsx";
+import RecommendationHistory from "./pages/RecommendationHistory.jsx";
 
 export default function App() {
   return (
@@ -16,6 +18,11 @@ export default function App() {
         <Route path="estimates" element={<Estimates />} />
         <Route path="estimates/:id" element={<EstimateDetails />} />
         <Route path="prices" element={<PriceManagement />} />
+        <Route path="road-safety-gpt" element={<RoadSafetyGPT />} />
+        <Route
+          path="recommendation-history"
+          element={<RecommendationHistory />}
+        />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
