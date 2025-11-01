@@ -68,5 +68,79 @@
       "environment": ["median", "turning traffic"],
       "issueKeywords": ["placement", "visibility", "advance warning"]
     }
+  },
+  {
+    "problem": "Missing Pedestrian Signals",
+    "category": "Pedestrian Facility",
+    "interventionType": "Pedestrian Crossing Signals",
+    "description": "Pedestrian signals shall be provided at crossings with high pedestrian flow. Signals must comply with IRC:103-2012 specifications for timing and visibility.",
+    "code": "IRC:103-2012",
+    "clause": "4.2",
+    "tags": ["pedestrian", "signal", "crossing", "safety"],
+    "context": {
+      "roadType": ["urban", "arterial"],
+      "environment": ["pedestrian-heavy", "school zone", "commercial"],
+      "issueKeywords": [
+        "missing signals",
+        "pedestrian conflict",
+        "crossing safety"
+      ]
+    }
+  },
+  {
+    "problem": "Inadequate Pedestrian Facilities",
+    "category": "Pedestrian Facility",
+    "interventionType": "Refuge Islands and Markings",
+    "description": "Refuge islands shall be provided on roads with more than two lanes in each direction. Zebra crossings and tactile paving as per IRC:99-2018.",
+    "code": "IRC:99-2018",
+    "clause": "6.3",
+    "tags": ["pedestrian", "refuge", "marking", "facility"],
+    "context": {
+      "roadType": ["urban", "divided"],
+      "environment": ["high pedestrian flow", "school zone"],
+      "issueKeywords": ["no refuge", "wide road", "pedestrian safety"]
+    }
+  },
+  {
+    "problem": "Poor Lighting",
+    "category": "Lighting",
+    "interventionType": "Street Lighting Installation",
+    "description": "Street lighting shall be installed along pedestrian paths and crossings with minimum illumination levels as per IRC:SP:90 and MoRTH guidelines.",
+    "code": "IRC:SP:90",
+    "clause": "5.1",
+    "tags": ["lighting", "pedestrian", "visibility", "night safety"],
+    "context": {
+      "roadType": ["urban", "suburban"],
+      "environment": ["pedestrian area", "low visibility", "night time"],
+      "issueKeywords": ["dark", "poor lighting", "visibility issue"]
+    }
+  },
+  {
+    "problem": "Inadequate Lighting Coverage",
+    "category": "Lighting",
+    "interventionType": "Pedestrian Path Lighting",
+    "description": "Pedestrian paths and crossings require dedicated lighting with uniform illumination. LED fixtures with solar options for cost-effectiveness.",
+    "code": "IRC:SP:90",
+    "clause": "7.2",
+    "tags": ["lighting", "pedestrian path", "uniform illumination"],
+    "context": {
+      "roadType": ["urban", "residential"],
+      "environment": ["pedestrian corridor", "park", "school"],
+      "issueKeywords": ["uneven lighting", "dark spots", "pedestrian safety"]
+    }
+  },
+  {
+    "problem": "Poor Visibility Aids",
+    "category": "Visibility Aid",
+    "interventionType": "Road Delineators and Chevron Signs",
+    "description": "Install road delineators and chevron signs at curves and hazardous locations as per IRC:79-2019 to enhance visibility and guide drivers.",
+    "code": "IRC:79-2019",
+    "clause": "4",
+    "tags": ["delineator", "chevron", "visibility", "curve"],
+    "context": {
+      "roadType": ["highway", "rural", "mountain"],
+      "environment": ["curves", "foggy areas", "high speed"],
+      "issueKeywords": ["poor visibility", "curve safety", "night driving"]
+    }
   }
 ]

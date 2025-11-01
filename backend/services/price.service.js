@@ -39,6 +39,25 @@ export const searchWebPrices = async (itemName, unit) => {
       `🌐 Searching REAL web prices for: ${itemName} (${normalizedUnit})`
     );
 
+    let existingPrice = await Price.findOne({
+      itemName: new RegExp(`^${itemName}$`, "i"),
+      unit: normalizedUnit,
+      source: { $in: ["CPWD_SOR", "GeM"] },
+      isActive: true,
+    });
+
+    if (existingPrice) {
+      console.log(
+        `   ✅ Found existing web price in database: ₹${existingPrice.unitPrice}`
+      );
+      return {
+        unitPrice: existingPrice.unitPrice,
+        source: existingPrice.source,
+        sourceUrl: existingPrice.sourceUrl,
+        confidence: "high",
+      };
+    }
+
     console.log(`   📊 Checking CPWD SOR...`);
     const cpwdPrices = await scrapeCPWDPrices([itemName]);
     const cpwdMatch = cpwdPrices.find(

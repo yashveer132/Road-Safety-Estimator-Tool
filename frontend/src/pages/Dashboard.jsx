@@ -262,13 +262,6 @@ export default function Dashboard() {
   const generateAlerts = (kpi, performance) => {
     const alerts = [];
 
-    if (performance && performance.successRate < 80) {
-      alerts.push({
-        type: "warning",
-        message: `Success rate is ${performance.successRate}%. Consider reviewing failed estimates.`,
-      });
-    }
-
     if (kpi && kpi.failedEstimates > 5) {
       alerts.push({
         type: "error",

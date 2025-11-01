@@ -1,4 +1,9 @@
 ﻿import { generateContent, cleanJsonResponse } from "../config/gemini.js";
+import {
+  fetchIRCStandards,
+  validateInterventionAgainstIRC,
+  getIRCQuantityGuidelines,
+} from "./irc.service.js";
 
 export const parseInterventions = async (documentText) => {
   try {
@@ -110,6 +115,11 @@ export const mapToIRCStandards = async (interventions) => {
     console.log("=".repeat(60));
     console.log(`📚 Processing ${interventions.length} interventions...`);
 
+    const ircStandards = await fetchIRCStandards();
+    console.log(
+      `📋 Loaded ${ircStandards.length} IRC standards for validation`
+    );
+
     const interventionsBySection = interventions.reduce((acc, int) => {
       if (!acc[int.sectionId]) {
         acc[int.sectionId] = [];
@@ -207,9 +217,37 @@ IMPORTANT:
       );
     }
 
-    console.log(`\n✅ Total IRC mappings created: ${allMappings.length}`);
+    console.log("\n🔍 Validating interventions against IRC standards...");
+    const validatedMappings = allMappings.map((mapping) => {
+      const intervention = interventions.find(
+        (int) =>
+          int.sectionId === mapping.sectionId &&
+          int.serialNo === mapping.serialNo
+      );
+
+      if (intervention) {
+        const validation = validateInterventionAgainstIRC(
+          { type: intervention.sectionName, parameters: mapping.specification },
+          ircStandards
+        );
+
+        return {
+          ...mapping,
+          validation: {
+            isValid: validation.valid,
+            issues: validation.issues,
+            recommendations: validation.recommendations,
+            standard: validation.standard,
+          },
+        };
+      }
+
+      return mapping;
+    });
+
+    console.log(`\n✅ Total IRC mappings created: ${validatedMappings.length}`);
     console.log("=".repeat(60) + "\n");
-    return allMappings;
+    return validatedMappings;
   } catch (error) {
     console.error("❌ Error mapping to IRC standards:", error);
     console.log("🔄 Using fallback data from database for IRC mappings...");

@@ -4,6 +4,10 @@ import {
 } from "./ai.service.js";
 import { searchPriceData, estimatePriceIfNotFound } from "./price.service.js";
 import { isCountableUnit, normalizeUnit } from "../utils/unit.js";
+import {
+  getIRCQuantityGuidelines,
+  validateInterventionAgainstIRC,
+} from "./irc.service.js";
 
 export const calculateMaterialCosts = async (interventions, ircMappings) => {
   try {
@@ -115,7 +119,6 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
             lastUpdated: new Date(),
           });
 
-          await new Promise((resolve) => setTimeout(resolve, 500));
         }
       }
 
@@ -170,6 +173,49 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
       console.log(
         `   ✅ Total cost for this intervention: ₹${totalCost.toFixed(2)}`
       );
+
+      const quantityGuidelines = getIRCQuantityGuidelines(
+        intervention.sectionName
+      );
+      const quantityValidation = [];
+
+      if (quantityGuidelines) {
+        console.log(`   🔍 Validating quantities against IRC guidelines...`);
+
+        itemsWithPrices.forEach((item) => {
+          const guideline =
+            quantityGuidelines[
+              item.itemName.toLowerCase().replace(/\s+/g, "")
+            ] ||
+            Object.values(quantityGuidelines).find(
+              (g) =>
+                g.formula &&
+                item.itemName
+                  .toLowerCase()
+                  .includes(g.formula.split(" ")[0].toLowerCase())
+            );
+
+          if (guideline) {
+            const isReasonable = item.quantity > 0 && item.quantity < 10000; // Basic sanity check
+            quantityValidation.push({
+              item: item.itemName,
+              quantity: item.quantity,
+              unit: item.unit,
+              guideline: guideline.formula || "Standard IRC specification",
+              isValid: isReasonable,
+              notes: isReasonable
+                ? "Quantity within reasonable range"
+                : "Quantity may need review",
+            });
+          }
+        });
+      }
+
+      const lastItem =
+        sectionGroups[intervention.sectionId].items[
+          sectionGroups[intervention.sectionId].items.length - 1
+        ];
+      lastItem.quantityValidation = quantityValidation;
     }
 
     const materialEstimates = Object.values(sectionGroups).map((section) => ({
