@@ -113,25 +113,28 @@ export const calculateDashboardMetrics = async (period = "all-time") => {
 
     estimates.forEach((estimate) => {
       estimate.ircMappings?.forEach((mapping) => {
-        if (!ircUsage[mapping.ircCode]) {
-          ircUsage[mapping.ircCode] = {
+        const sanitizedCode = mapping.ircCode.replace(/\./g, "_");
+
+        if (!ircUsage[sanitizedCode]) {
+          ircUsage[sanitizedCode] = {
             usageCount: 0,
             totalCost: 0,
             estimatesCount: new Set(),
+            originalCode: mapping.ircCode,
           };
         }
-        ircUsage[mapping.ircCode].usageCount++;
-        ircUsage[mapping.ircCode].estimatesCount.add(estimate._id.toString());
-        ircCostMap[mapping.ircCode] =
-          (ircCostMap[mapping.ircCode] || 0) +
+        ircUsage[sanitizedCode].usageCount++;
+        ircUsage[sanitizedCode].estimatesCount.add(estimate._id.toString());
+        ircCostMap[sanitizedCode] =
+          (ircCostMap[sanitizedCode] || 0) +
           (mapping.materials?.reduce((sum, m) => sum + (m.quantity || 0), 0) ||
             0);
       });
     });
 
     const topIRC = Object.entries(ircUsage)
-      .map(([code, data]) => ({
-        code,
+      .map(([sanitizedCode, data]) => ({
+        code: data.originalCode,
         usageCount: data.usageCount,
         percentage:
           estimates.length > 0
@@ -257,11 +260,12 @@ export const calculateDashboardMetrics = async (period = "all-time") => {
       interventions: interventionStats,
       ircStandards: {
         byCode: Object.fromEntries(
-          Object.entries(ircUsage).map(([code, data]) => [
-            code,
+          Object.entries(ircUsage).map(([sanitizedCode, data]) => [
+            sanitizedCode,
             {
               usageCount: data.usageCount,
               estimatesCount: data.estimatesCount.size,
+              originalCode: data.originalCode,
             },
           ])
         ),

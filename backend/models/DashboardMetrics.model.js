@@ -18,7 +18,7 @@ const dashboardMetricsSchema = new mongoose.Schema(
       completed: { type: Number, default: 0 },
       processing: { type: Number, default: 0 },
       failed: { type: Number, default: 0 },
-      completionRate: { type: Number, default: 0 }, 
+      completionRate: { type: Number, default: 0 },
     },
 
     costs: {
@@ -52,6 +52,7 @@ const dashboardMetricsSchema = new mongoose.Schema(
           usageCount: Number,
           totalCost: Number,
           estimatesCount: Number,
+          originalCode: String,
         },
       },
       topUsed: [
@@ -113,7 +114,7 @@ const dashboardMetricsSchema = new mongoose.Schema(
       avgCostCalculationTime: { type: Number, default: 0 },
       totalProcessingTime: { type: Number, default: 0 },
       apiCallsCount: { type: Number, default: 0 },
-      cacheHitRate: { type: Number, default: 0 }, 
+      cacheHitRate: { type: Number, default: 0 },
     },
 
     trends: [
@@ -127,8 +128,8 @@ const dashboardMetricsSchema = new mongoose.Schema(
     ],
 
     quality: {
-      priceDataAccuracy: { type: Number, default: 95 }, 
-      estimateAccuracy: { type: Number, default: 92 }, 
+      priceDataAccuracy: { type: Number, default: 95 },
+      estimateAccuracy: { type: Number, default: 92 },
       dataFreshness: { type: Number, default: 100 },
     },
 
