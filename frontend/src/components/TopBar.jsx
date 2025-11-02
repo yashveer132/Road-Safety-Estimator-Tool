@@ -61,25 +61,42 @@ export default function TopBar() {
       <Toolbar sx={{ justifyContent: "space-between", px: { xs: 2, sm: 3 } }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Box
+            onClick={() => navigate("/")}
             sx={{
-              width: 40,
-              height: 40,
-              borderRadius: 2,
+              width: 50,
+              height: 50,
+              borderRadius: "50%",
               background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "white",
-              fontWeight: 700,
-              fontSize: "1.2rem",
+              overflow: "hidden",
               boxShadow: "0px 4px 12px rgba(16, 185, 129, 0.5)",
+              cursor: "pointer",
+              transition: "all 0.3s ease-in-out",
+              "&:hover": {
+                transform: "scale(1.1) rotate(5deg)",
+                boxShadow: "0px 6px 20px rgba(16, 185, 129, 0.7)",
+              },
+              "&:active": {
+                transform: "scale(0.95)",
+              },
             }}
           >
-            RS
+            <img
+              src="/road-safety-sign-with-yellow-black-color-isolated-transparent-background_1299371-8251.jpg"
+              alt="Road Safety Logo"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
           </Box>
           <Box sx={{ display: { xs: "none", sm: "block" } }}>
             <Typography
               variant="h6"
+              onClick={() => navigate("/")}
               sx={{
                 fontWeight: 700,
                 fontSize: "1.25rem",
@@ -88,6 +105,15 @@ export default function TopBar() {
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
                 letterSpacing: "-0.02em",
+                cursor: "pointer",
+                transition: "all 0.3s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.05) translateY(-2px)",
+                  textShadow: "0px 4px 12px rgba(16, 185, 129, 0.5)",
+                },
+                "&:active": {
+                  transform: "scale(0.98)",
+                },
               }}
             >
               Estimator Tool For Intervention{" "}
