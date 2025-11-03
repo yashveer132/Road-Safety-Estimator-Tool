@@ -10,6 +10,22 @@ const httpsAgent = new https.Agent({
 const scrapedPricesCache = new Map();
 const CACHE_DURATION = 30 * 60 * 1000;
 
+const retryWithBackoff = async (fn, maxRetries = 3, baseDelay = 1000) => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (attempt === maxRetries) {
+        throw error;
+      }
+
+      const delay = baseDelay * Math.pow(2, attempt - 1);
+      console.log(`   ⏳ Retry ${attempt}/${maxRetries} after ${delay}ms...`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+};
+
 const getCachedScrapedPrices = (source) => {
   const cached = scrapedPricesCache.get(source);
   if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
@@ -36,16 +52,21 @@ export const scrapeCPWDPrices = async (items = []) => {
     }
 
     try {
-      const response = await axios.get(
-        "https://cpwd.gov.in/Documents/cpwd_publication.aspx",
-        {
-          timeout: 5000,
-          httpsAgent: httpsAgent,
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-          },
-        }
+      const response = await retryWithBackoff(
+        async () =>
+          await axios.get(
+            "https://cpwd.gov.in/Documents/cpwd_publication.aspx",
+            {
+              timeout: 5000,
+              httpsAgent: httpsAgent,
+              headers: {
+                "User-Agent":
+                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+              },
+            }
+          ),
+        3,
+        1000
       );
 
       const $ = cheerio.load(response.data);

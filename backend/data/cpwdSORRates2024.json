@@ -1,0 +1,278 @@
+{
+  "version": "CPWD SOR 2024",
+  "lastUpdated": "2024-11-02",
+  "source": "Central Public Works Department - Schedule of Rates 2024",
+  "disclaimer": "Rates are indicative and subject to location, market conditions, and official CPWD revisions",
+  "rates": [
+    {
+      "itemCode": "14.15",
+      "category": "Road Signs & Markings",
+      "itemName": "Retroreflective Sheeting Type III",
+      "description": "High intensity grade retroreflective sheeting for traffic signs",
+      "unitPrice": 1350,
+      "unit": "sqm",
+      "specification": "IRC:67-2022 compliant, Type III sheeting",
+      "keywords": ["retroreflective", "sheeting", "reflective", "sign"]
+    },
+    {
+      "itemCode": "14.16",
+      "category": "Road Signs & Markings",
+      "itemName": "Aluminum Sheets for Road Signs",
+      "description": "Aluminum sheets 2mm thick for fabricating road signs",
+      "unitPrice": 650,
+      "unit": "sqm",
+      "specification": "As per IRC:67-2022",
+      "keywords": ["aluminum", "aluminium", "sheet", "sign", "board"]
+    },
+    {
+      "itemCode": "14.17",
+      "category": "Road Signs & Markings",
+      "itemName": "MS Pipe Support for Signs",
+      "description": "Mild steel pipe 75mm dia for sign post support",
+      "unitPrice": 285,
+      "unit": "m",
+      "specification": "Galvanized MS pipe as per IS:1239",
+      "keywords": ["pipe", "post", "support", "galvanized", "ms"]
+    },
+    {
+      "itemCode": "14.18",
+      "category": "Road Signs & Markings",
+      "itemName": "Thermoplastic Road Marking Paint",
+      "description": "Hot applied thermoplastic compound for road markings",
+      "unitPrice": 285,
+      "unit": "kg",
+      "specification": "IRC:35-2015 compliant",
+      "keywords": ["thermoplastic", "paint", "marking", "road"]
+    },
+    {
+      "itemCode": "14.19",
+      "category": "Road Signs & Markings",
+      "itemName": "Glass Beads for Road Markings",
+      "description": "Type-A glass beads for retroreflectivity in road markings",
+      "unitPrice": 85,
+      "unit": "kg",
+      "specification": "IRC:35-2015, Type-A beads",
+      "keywords": ["glass", "bead", "reflective", "marking"]
+    },
+    {
+      "itemCode": "14.20",
+      "category": "Road Safety Barriers",
+      "itemName": "W-Beam Metal Crash Barrier",
+      "description": "W-beam guardrail barrier with posts and fittings",
+      "unitPrice": 3500,
+      "unit": "m",
+      "specification": "IRC:SP-73-2018 compliant",
+      "keywords": ["barrier", "crash", "guard", "rail", "w-beam", "metal"]
+    },
+    {
+      "itemCode": "14.21",
+      "category": "Road Safety Barriers",
+      "itemName": "Concrete Safety Barrier",
+      "description": "Precast concrete barrier New Jersey profile",
+      "unitPrice": 4200,
+      "unit": "m",
+      "specification": "IRC:SP-73-2018, M30 grade concrete",
+      "keywords": ["concrete", "barrier", "jersey", "precast"]
+    },
+    {
+      "itemCode": "14.22",
+      "category": "Delineators & Markers",
+      "itemName": "Flexible Post Delineator",
+      "description": "Flexible polymer delineator post with retroreflective tape",
+      "unitPrice": 425,
+      "unit": "nos",
+      "specification": "IRC:79-2019 compliant",
+      "keywords": ["delineator", "post", "flexible", "marker"]
+    },
+    {
+      "itemCode": "14.23",
+      "category": "Delineators & Markers",
+      "itemName": "Road Studs (Cat Eye)",
+      "description": "Ceramic/polymer road studs with reflectors",
+      "unitPrice": 185,
+      "unit": "nos",
+      "specification": "IRC:35-2015",
+      "keywords": ["stud", "cat eye", "reflector", "marker"]
+    },
+    {
+      "itemCode": "14.24",
+      "category": "Traffic Control",
+      "itemName": "Solar LED Blinker",
+      "description": "Solar powered LED blinker for hazard warning",
+      "unitPrice": 2800,
+      "unit": "nos",
+      "specification": "IRC:93-2019 compliant",
+      "keywords": ["solar", "led", "blinker", "warning", "light"]
+    },
+    {
+      "itemCode": "14.25",
+      "category": "Traffic Control",
+      "itemName": "Traffic Cone PVC",
+      "description": "PVC traffic cone 750mm height",
+      "unitPrice": 285,
+      "unit": "nos",
+      "specification": "As per IRC standards",
+      "keywords": ["cone", "traffic", "pvc", "safety"]
+    },
+    {
+      "itemCode": "14.26",
+      "category": "Pavement",
+      "itemName": "Bitumen Tack Coat",
+      "description": "Bitumen emulsion for tack coat application",
+      "unitPrice": 45,
+      "unit": "litre",
+      "specification": "IRC:SP-11-2014",
+      "keywords": ["bitumen", "tack", "coat", "emulsion"]
+    },
+    {
+      "itemCode": "14.27",
+      "category": "Pavement",
+      "itemName": "Epoxy Adhesive for Markings",
+      "description": "Two-component epoxy adhesive for road stud installation",
+      "unitPrice": 750,
+      "unit": "kg",
+      "specification": "High strength epoxy as per IRC:35",
+      "keywords": ["epoxy", "adhesive", "resin", "glue"]
+    },
+    {
+      "itemCode": "14.28",
+      "category": "Traffic Signals",
+      "itemName": "LED Traffic Signal Module",
+      "description": "LED traffic signal light module 300mm",
+      "unitPrice": 8500,
+      "unit": "nos",
+      "specification": "IRC:93-2019",
+      "keywords": ["led", "signal", "light", "traffic"]
+    },
+    {
+      "itemCode": "14.29",
+      "category": "Traffic Signals",
+      "itemName": "Traffic Signal Pole",
+      "description": "Galvanized MS pole 6m height for traffic signals",
+      "unitPrice": 12500,
+      "unit": "nos",
+      "specification": "As per IRC:93-2019",
+      "keywords": ["pole", "signal", "post", "galvanized"]
+    },
+    {
+      "itemCode": "14.30",
+      "category": "Traffic Signals",
+      "itemName": "Signal Controller",
+      "description": "Microprocessor based traffic signal controller",
+      "unitPrice": 45000,
+      "unit": "nos",
+      "specification": "IRC:93-2019 compliant",
+      "keywords": ["controller", "signal", "processor", "control"]
+    },
+    {
+      "itemCode": "14.31",
+      "category": "Lighting",
+      "itemName": "LED Street Light 60W",
+      "description": "LED street light luminaire 60W with driver",
+      "unitPrice": 6500,
+      "unit": "nos",
+      "specification": "As per IS:16104",
+      "keywords": ["led", "light", "street", "luminaire"]
+    },
+    {
+      "itemCode": "14.32",
+      "category": "Lighting",
+      "itemName": "Lighting Pole 9m",
+      "description": "MS lighting pole 9m height with foundation",
+      "unitPrice": 18500,
+      "unit": "nos",
+      "specification": "As per IS:1944",
+      "keywords": ["pole", "light", "post", "street"]
+    },
+    {
+      "itemCode": "14.33",
+      "category": "Road Signs & Markings",
+      "itemName": "Road Marking Paint (Cold Plastic)",
+      "description": "Cold plastic paint for durable road markings",
+      "unitPrice": 195,
+      "unit": "kg",
+      "specification": "IRC:35-2015",
+      "keywords": ["paint", "marking", "cold", "plastic"]
+    },
+    {
+      "itemCode": "14.34",
+      "category": "Road Safety Barriers",
+      "itemName": "Plastic Water Filled Barrier",
+      "description": "Portable plastic water filled barrier",
+      "unitPrice": 2200,
+      "unit": "nos",
+      "specification": "For temporary traffic management",
+      "keywords": ["barrier", "plastic", "water", "portable"]
+    },
+    {
+      "itemCode": "14.35",
+      "category": "Delineators & Markers",
+      "itemName": "Chevron Sign Board",
+      "description": "Chevron sign board with retroreflective sheeting",
+      "unitPrice": 4500,
+      "unit": "nos",
+      "specification": "IRC:67-2022, Type III sheeting",
+      "keywords": ["chevron", "sign", "curve", "warning"]
+    },
+    {
+      "itemCode": "14.36",
+      "category": "Traffic Control",
+      "itemName": "Speed Breaker (Rubber)",
+      "description": "Modular rubber speed breaker",
+      "unitPrice": 3200,
+      "unit": "m",
+      "specification": "IRC:99-2018 compliant",
+      "keywords": ["speed", "breaker", "bump", "rubber", "hump"]
+    },
+    {
+      "itemCode": "14.37",
+      "category": "Traffic Control",
+      "itemName": "Parking Bollard",
+      "description": "Fixed MS parking bollard 1m height",
+      "unitPrice": 1850,
+      "unit": "nos",
+      "specification": "Galvanized finish",
+      "keywords": ["bollard", "parking", "post"]
+    },
+    {
+      "itemCode": "14.38",
+      "category": "Road Signs & Markings",
+      "itemName": "Sign Board Mounting Hardware",
+      "description": "Complete mounting hardware kit for sign boards",
+      "unitPrice": 650,
+      "unit": "set",
+      "specification": "SS304 bolts and clamps",
+      "keywords": ["hardware", "mounting", "bolt", "clamp", "fitting"]
+    },
+    {
+      "itemCode": "14.39",
+      "category": "Pavement",
+      "itemName": "Primer for Thermoplastic",
+      "description": "Primer for thermoplastic road marking application",
+      "unitPrice": 125,
+      "unit": "litre",
+      "specification": "IRC:35-2015",
+      "keywords": ["primer", "thermoplastic", "marking"]
+    },
+    {
+      "itemCode": "14.40",
+      "category": "Traffic Cables",
+      "itemName": "Electrical Cable 4-Core",
+      "description": "Armoured electrical cable 4-core 10 sq mm",
+      "unitPrice": 185,
+      "unit": "m",
+      "specification": "As per IS:1554",
+      "keywords": ["cable", "electrical", "wire", "armoured"]
+    }
+  ],
+  "categories": {
+    "Road Signs & Markings": "Items related to traffic signs, sign boards, and road markings",
+    "Road Safety Barriers": "Crash barriers, guard rails, and safety barriers",
+    "Delineators & Markers": "Road delineators, studs, and edge markers",
+    "Traffic Control": "Speed breakers, cones, blinkers, and traffic control devices",
+    "Traffic Signals": "Traffic signal lights, poles, controllers, and components",
+    "Lighting": "Street lights, poles, and lighting infrastructure",
+    "Pavement": "Pavement treatment materials including adhesives and coatings",
+    "Traffic Cables": "Electrical cables and wiring for traffic infrastructure"
+  }
+}

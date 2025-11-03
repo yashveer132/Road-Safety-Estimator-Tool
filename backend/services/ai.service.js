@@ -479,51 +479,102 @@ export const generateCostRationale = async (
     const materialsText = materials
       .map(
         (m) =>
-          `${m.itemName}: ${m.quantity} ${m.unit} @ ₹${m.unitPrice} = ₹${m.totalPrice}`
+          `${m.itemName}: ${m.quantity} ${m.unit} @ ₹${m.unitPrice} = ₹${
+            m.totalPrice
+          } (${m.source || "CPWD SOR"})`
       )
       .join("\n");
 
     const prompt = `
-Generate a clear, professional rationale explaining how this cost estimate was derived.
+Generate a professional, audit-ready rationale for this road safety intervention cost estimate. Follow this exact format:
 
+**Format Template:**
+📌 **Rationale:**
+[One paragraph explaining what’s being costed and which IRC standard governs it. Include specific clause reference.]
+
+**Key Assumptions:**
+• [Source and version of rates with SOR item codes if available]
+• [Reference to IRC clause for size/type specifications]
+• [Special design or material notes]
+• [Price tolerance or validity note]
+
+[Confidence tag: 🟢 Fully validated / 🟡 Fallback rate used / 🔴 Assumed]
+
+**Technical Details:**
 Intervention: ${intervention.name}
 IRC Reference: ${ircMapping.ircCode} - ${ircMapping.clause}
-Materials:
-${materialsText}
+Materials: ${materialsText}
+Total Cost: ₹${totalCost}
 
-Total Material Cost: ₹${totalCost}
-
-Provide:
-1. A clear explanation of the costing methodology
-2. Key assumptions made
-3. IRC clause used and why
-4. Any limitations or notes
+Requirements:
+1. Start rationale with varied, professional openers (avoid "The cost estimate is derived...")
+2. Include specific IRC clause numbers and SOR item codes
+3. Limit assumptions to 3-4 most relevant bullets
+4. Add confidence tag based on data source reliability
+5. Keep rationale concise (under 150 words)
+6. Use proper formatting for technical references
+7. Add brief context about why this intervention matters
 
 Return a JSON object with this structure:
 {
-  "rationale": "The cost estimate is based on IRC:67 specifications for warning signs...",
+  "rationale": "This intervention's cost has been computed using IRC:67–2022 specifications for regulatory signage. Quantities follow standard sign dimensions while material rates are taken from CPWD SOR 2024 (Items 16.53, 14.28, 18.12).",
   "assumptions": [
-    "Material prices sourced from CPWD SOR 2024",
-    "Standard sign size as per IRC:67 clause 4.3.2",
-    "5% wastage factor included"
+    "Retroreflective Sheeting Type III used for regulatory sign as per IRC:67 Cl. 4.3.2",
+    "Standard GI pipe post (50 mm dia) with 0.1 m³ concrete footing for stable foundation",
+    "Prices reflect CPWD SOR 2024 (Delhi Region) rates inclusive of standard wastage",
+    "±5% cost tolerance due to regional rate variation"
   ],
-  "notes": "Excludes installation labor and signpost foundation"
+  "confidence": "high",
+  "confidenceTag": "🟢 Fully validated using CPWD SOR 2024 items",
+  "ircClause": "${ircMapping.ircCode}, ${ircMapping.clause}",
+  "sorItems": ["16.53", "14.28", "18.12"]
 }
 
-Return valid JSON only.
+IMPORTANT:
+- Make it sound human and professional, not AI-generic
+- Include specific clause numbers and SOR codes
+- Add context about intervention importance
+- Use confidence tags (🟢🟡🔴)
+- Keep assumptions focused and relevant
+- Return valid JSON only
 `;
 
     const response = await generateContent(prompt);
     const result = cleanJsonResponse(response);
 
-    return result;
+    return {
+      rationale:
+        result.rationale ||
+        `Cost calculated for ${intervention.name} based on ${ircMapping.ircCode} specifications and current market rates.`,
+      assumptions: result.assumptions || [
+        "Standard specifications applied as per IRC guidelines",
+        "Material costs only (excludes labor and installation)",
+        "Prices sourced from CPWD SOR 2024",
+      ],
+      confidence: result.confidence || "medium",
+      confidenceTag:
+        result.confidenceTag || "🟡 Fallback rate used (verify with DPR)",
+      ircClause:
+        result.ircClause || `${ircMapping.ircCode}, ${ircMapping.clause}`,
+      sorItems: result.sorItems || [],
+      notes: result.notes || "Excludes labor, installation, and taxes",
+    };
   } catch (error) {
     console.error("Error generating rationale:", error);
     return {
-      rationale:
-        "Cost calculated based on IRC specifications and current market rates",
-      assumptions: ["Standard specifications applied", "Material costs only"],
-      notes: "Excludes labor and installation costs",
+      rationale: `This intervention provides essential road safety improvements as per ${ircMapping.ircCode} specifications. Material quantities and rates are determined in accordance with current engineering standards.`,
+      assumptions: [
+        "Standard specifications applied as per IRC guidelines",
+        "Material costs only (excludes labor and installation)",
+        "Prices reflect CPWD SOR 2024 rates where available",
+      ],
+      confidence: "medium",
+      confidenceTag:
+        "🟡 Fallback rate used (check with detailed project report)",
+      ircClause: `${ircMapping.ircCode}, ${ircMapping.clause}`,
+      sorItems: [],
+      notes:
+        "Excludes labor, installation, equipment rental, transportation, and taxes",
     };
   }
 };

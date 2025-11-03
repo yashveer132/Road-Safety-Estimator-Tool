@@ -1,6 +1,12 @@
 import Price from "../models/Price.model.js";
 import { scrapeCPWDPrices, scrapeGeMPrices } from "./scraper.service.js";
 import { normalizeUnit } from "../utils/unit.js";
+import {
+  searchCPWDOffline,
+  getCategoryFallback,
+  sanitycheckPrice,
+} from "./cpwd.service.js";
+import { roundToDecimals } from "../utils/format.js";
 
 const priceEstimateCache = new Map();
 const CACHE_TTL = 24 * 60 * 60 * 1000;
@@ -168,22 +174,80 @@ export const estimatePriceIfNotFound = async (material) => {
       return cachedResult;
     }
 
-    console.log(`   🌐 Searching web sources...`);
-    const webPrice = await searchWebPrices(material.itemName, material.unit);
-    if (webPrice) {
-      setCachedEstimate(material.itemName, material.unit, webPrice);
+    console.log(`   📚 Checking offline CPWD SOR cache...`);
+    const offlineMatch = searchCPWDOffline(material.itemName, material.unit);
+    if (offlineMatch) {
+      const sanitized = sanitycheckPrice(
+        offlineMatch.unitPrice,
+        material.unit,
+        material.itemName
+      );
+
+      const result = {
+        unitPrice: roundToDecimals(sanitized.price, 2),
+        source: offlineMatch.source,
+        itemId: offlineMatch.itemId,
+        year: offlineMatch.year,
+        sourceUrl: offlineMatch.sourceUrl,
+        confidence: sanitized.isValid ? offlineMatch.confidence : "medium",
+        specification: offlineMatch.specification,
+      };
+
+      setCachedEstimate(material.itemName, material.unit, result);
 
       try {
         const newPrice = new Price({
           itemName: material.itemName,
-          itemCode: `${webPrice.source}-${Date.now()}`,
-          category: "other",
-          unitPrice: webPrice.unitPrice,
+          itemCode: offlineMatch.itemId || `CPWD-${Date.now()}`,
+          category: "road_safety",
+          unitPrice: result.unitPrice,
           unit: normalizedUnit,
           currency: "₹",
-          source: webPrice.source,
-          sourceUrl: webPrice.sourceUrl,
+          source: result.source,
+          sourceUrl: result.sourceUrl,
+          description: material.description || offlineMatch.description,
+          rateYear: result.year,
+          validFrom: new Date(),
+          isActive: true,
+        });
+        await newPrice.save();
+        console.log(`   💾 Saved CPWD offline price to database`);
+      } catch (dbError) {
+        console.log(`   ⚠️ Could not save to DB:`, dbError.message);
+      }
+
+      return result;
+    }
+
+    console.log(`   🌐 Searching web sources...`);
+    const webPrice = await searchWebPrices(material.itemName, material.unit);
+    if (webPrice) {
+      const sanitized = sanitycheckPrice(
+        webPrice.unitPrice,
+        material.unit,
+        material.itemName
+      );
+
+      const result = {
+        ...webPrice,
+        unitPrice: roundToDecimals(sanitized.price, 2),
+        confidence: sanitized.isValid ? webPrice.confidence : "medium",
+      };
+
+      setCachedEstimate(material.itemName, material.unit, result);
+
+      try {
+        const newPrice = new Price({
+          itemName: material.itemName,
+          itemCode: webPrice.itemId || `${webPrice.source}-${Date.now()}`,
+          category: "road_safety",
+          unitPrice: result.unitPrice,
+          unit: normalizedUnit,
+          currency: "₹",
+          source: result.source,
+          sourceUrl: result.sourceUrl,
           description: material.description,
+          rateYear: webPrice.year || "2024",
           validFrom: new Date(),
           isActive: true,
         });
@@ -193,7 +257,7 @@ export const estimatePriceIfNotFound = async (material) => {
         console.log(`   ⚠️ Could not save to DB:`, dbError.message);
       }
 
-      return webPrice;
+      return result;
     }
 
     console.log(`   📊 Searching for similar items in database...`);
@@ -205,12 +269,14 @@ export const estimatePriceIfNotFound = async (material) => {
       console.log(
         `   ✅ Found ${
           similarItems.length
-        } similar items, avg price: ₹${avgPrice.toFixed(2)}`
+        } similar items, avg price: ₹${roundToDecimals(avgPrice, 2)}`
       );
 
       const result = {
-        unitPrice: Math.round(avgPrice * 100) / 100,
+        unitPrice: roundToDecimals(avgPrice, 2),
         source: "DB_SIMILAR_ITEMS",
+        itemId: null,
+        year: "2024",
         confidence: "medium",
       };
 
@@ -218,29 +284,28 @@ export const estimatePriceIfNotFound = async (material) => {
       return result;
     }
 
-    console.log(`   ⚠️ No web/DB prices found, using category fallback`);
-    const categoryFallbackPrices = {
-      signage: { sqm: 1250, nos: 850, m: 285 },
-      marking: { kg: 285, sqm: 180, m: 150 },
-      barrier: { m: 3500, nos: 2500 },
-      lighting: { nos: 8500 },
-      equipment: { nos: 425, m: 2200 },
-      other: { sqm: 500, nos: 500, m: 250, kg: 200, litre: 220 },
-    };
-
-    const category = detectCategory(material.itemName);
-    const fallbackPrice =
-      categoryFallbackPrices[category]?.[normalizedUnit] ||
-      categoryFallbackPrices.other[normalizedUnit] ||
-      500;
-
-    console.log(`   📌 Using ${category} category fallback: ₹${fallbackPrice}`);
+    console.log(
+      `   ⚠️ No matches found, using category fallback with sanity checks`
+    );
+    const fallback = getCategoryFallback(
+      material.itemName,
+      material.unit,
+      detectCategory(material.itemName)
+    );
 
     const result = {
-      unitPrice: fallbackPrice,
-      source: "CATEGORY_FALLBACK",
-      confidence: "low",
+      unitPrice: roundToDecimals(fallback.unitPrice, 2),
+      source: fallback.source,
+      itemId: fallback.itemId,
+      year: fallback.year,
+      confidence: fallback.confidence,
+      category: fallback.category,
+      priceRange: fallback.range,
     };
+
+    console.log(
+      `   📌 Using ${fallback.category} category fallback: ₹${result.unitPrice} (range: ₹${fallback.range.min}-${fallback.range.max})`
+    );
 
     setCachedEstimate(material.itemName, normalizedUnit, result);
     return result;
@@ -250,6 +315,8 @@ export const estimatePriceIfNotFound = async (material) => {
     return {
       unitPrice: 500,
       source: "DEFAULT_FALLBACK",
+      itemId: null,
+      year: "2024",
       confidence: "very_low",
     };
   }
