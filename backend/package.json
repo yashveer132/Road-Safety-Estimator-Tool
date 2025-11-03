@@ -30,10 +30,10 @@
     "mammoth": "^1.8.0",
     "mongoose": "^8.8.1",
     "pdf-parse": "^1.1.1",
-    "puppeteer": "^23.6.0"
+    "puppeteer": "^23.6.0",
+    "dotenv": "^16.6.1"
   },
   "devDependencies": {
-    "dotenv": "^16.6.1",
     "nodemon": "^3.1.7"
   }
 }
