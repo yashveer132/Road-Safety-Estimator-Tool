@@ -1540,6 +1540,7 @@ export default function PriceManagement() {
                                     display: "flex",
                                     alignItems: "center",
                                     gap: { xs: 1, sm: 1.5 },
+                                    mb: { xs: 1.5, sm: 2 },
                                     flexWrap: "wrap",
                                   }}
                                 >
@@ -1553,19 +1554,22 @@ export default function PriceManagement() {
                                       fontSize: { xs: "0.7rem", sm: "0.75rem" },
                                     }}
                                   >
-                                    <EventNoteIcon
-                                      sx={{
-                                        fontSize: {
-                                          xs: "0.8rem",
-                                          sm: "0.9rem",
-                                        },
-                                      }}
-                                    />
-                                    Added:{" "}
-                                    {new Date(
-                                      item.createdAt
-                                    ).toLocaleDateString("en-IN")}
+                                    📚 IRC:{" "}
+                                    {item.ircReference &&
+                                    item.ircReference.length > 0
+                                      ? item.ircReference.join(", ")
+                                      : "N/A"}
                                   </Typography>
+                                </Box>
+
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: { xs: 1, sm: 1.5 },
+                                    flexWrap: "wrap",
+                                  }}
+                                >
                                   <Typography
                                     variant="caption"
                                     sx={{
@@ -1676,7 +1680,7 @@ export default function PriceManagement() {
                         align="center"
                         sx={{ fontWeight: 700, fontSize: "0.85rem" }}
                       >
-                        Added
+                        IRC References
                       </TableCell>
                       <TableCell
                         align="center"
@@ -1806,51 +1810,49 @@ export default function PriceManagement() {
                           </TableCell>
 
                           <TableCell align="center">
-                            <Tooltip
-                              title={formatDate(item.createdAt)}
-                              placement="top"
-                            >
+                            {item.ircReference &&
+                            item.ircReference.length > 0 ? (
                               <Box
                                 sx={{
                                   display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                  gap: 0.25,
+                                  gap: 0.5,
+                                  flexWrap: "wrap",
+                                  justifyContent: "center",
                                 }}
                               >
-                                <Typography
-                                  variant="caption"
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 0.5,
-                                    color: "text.secondary",
-                                    fontSize: "0.75rem",
-                                  }}
-                                >
-                                  <EventNoteIcon sx={{ fontSize: "0.8rem" }} />
-                                  {new Date(item.createdAt).toLocaleDateString(
-                                    "en-IN"
-                                  )}
-                                </Typography>
-                                <Typography
-                                  variant="caption"
-                                  sx={{
-                                    color: "text.secondary",
-                                    fontSize: "0.7rem",
-                                    fontWeight: 500,
-                                  }}
-                                >
-                                  {new Date(item.createdAt).toLocaleTimeString(
-                                    "en-IN",
-                                    {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    }
-                                  )}
-                                </Typography>
+                                {item.ircReference
+                                  .slice(0, 2)
+                                  .map((ref, idx) => (
+                                    <Chip
+                                      key={idx}
+                                      label={ref}
+                                      size="small"
+                                      variant="outlined"
+                                      sx={{
+                                        fontSize: "0.65rem",
+                                        height: "20px",
+                                      }}
+                                    />
+                                  ))}
+                                {item.ircReference.length > 2 && (
+                                  <Chip
+                                    label={`+${item.ircReference.length - 2}`}
+                                    size="small"
+                                    sx={{ fontSize: "0.65rem", height: "20px" }}
+                                  />
+                                )}
                               </Box>
-                            </Tooltip>
+                            ) : (
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: "text.secondary",
+                                  fontSize: "0.7rem",
+                                }}
+                              >
+                                N/A
+                              </Typography>
+                            )}
                           </TableCell>
 
                           <TableCell align="center">
