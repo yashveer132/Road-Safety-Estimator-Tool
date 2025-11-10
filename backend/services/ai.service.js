@@ -13,73 +13,130 @@ export const parseInterventions = async (documentText) => {
     console.log(`📄 Document length: ${documentText.length} characters`);
 
     const prompt = `
-You are an expert road safety engineer analyzing intervention reports formatted in sections (A, B, C, etc.) with tables.
+You are an expert road safety engineer analyzing intervention reports from road safety audits. Your task is to extract EVERY intervention with 100% accuracy.
 
-Document:
+**DOCUMENT FORMATS YOU MAY ENCOUNTER:**
+
+**FORMAT 1: Table-based (Common in safety audit reports)**
+Sections A, B, C, etc. with columns:
+# | Chainage | Side | Road | Observation | Recommendation | IRC Reference
+
+**FORMAT 2: Line-by-line (NH45 style)**
+Category A | Chainage: 10+120 | Side: LHS
+Observation: Speed limit sign faded
+Recommended Intervention: Replace with new 50 km/h regulatory sign
+IRC Reference: IRC:67-2022, Cl. 14.8.8
+
+**FORMAT 3: Narrative style**
+"At chainage 10+120 on the LHS, the speed limit sign is faded and needs replacement as per IRC:67-2022..."
+
+**DOCUMENT TO ANALYZE:**
 """
 ${documentText.substring(0, 15000)} 
 """
 
-The document contains sections like:
-- SECTION A — ROAD SIGNS
-- SECTION B — ROAD MARKINGS  
-- SECTION C — PAVEMENT CONDITION
-- SECTION D — TRAFFIC SIGNAL
-- SECTION E — FACILITIES
-- SECTION F — ROADSIDE FURNITURE
+**EXTRACTION REQUIREMENTS:**
 
-Each section has a table with columns:
-- # (serial number)
-- Chainage (location marker)
-- Side (LHS/RHS)
-- Road (road name/type)
-- Observation (problem description)
-- Recommendation (suggested intervention)
-- IRC Clause (IRC standard reference)
+Extract ALL interventions found. For each, provide:
 
-Extract ALL interventions and organize them by section. For each intervention:
-1. Section ID (A, B, C, etc.)
-2. Section Name (Road Signs, Road Markings, etc.)
-3. Serial number within section
-4. Chainage + Side + Road combined as location
-5. Observation (what was found)
-6. Recommendation (what needs to be done)
-7. IRC Clause reference
+1. **sectionId** - Category letter or infer from type:
+   - A = Road Signs (regulatory, warning, informatory signs)
+   - B = Road Markings (lane markings, crossings, arrows, text)
+   - C = Pavement (potholes, cracks, surface repairs, resurfacing)
+   - D = Traffic Signals & Blinkers (LED signals, solar blinkers, flashers)
+   - E = Street Lighting (LED lights, poles, electrical work)
+   - F = Delineators & Safety Furniture (chevrons, guideposts, bollards, barriers)
+   - G = Pedestrian Facilities (crossings, refuges, footpaths)
+   - H = Drainage & Utilities (drains, manholes, culverts)
 
-Return ONLY a JSON array with this exact structure:
+2. **sectionName** - Full descriptive name (e.g., "ROAD SIGNS", "PAVEMENT CONDITION")
+
+3. **serialNo** - Sequential number starting from 1 within each section
+
+4. **chainage** - Exact location (e.g., "10+120", "4+200 to 4+350", "Km 45")
+   - Extract from "Chainage: X+XXX" or "Ch. X+XXX" or table columns
+   - If range given, use start point
+
+5. **side** - Road side indicator:
+   - Extract: LHS, RHS, Both, Median, Centre, Ped Cross, Island
+   - Default to "Both" if not specified
+
+6. **road** - Road identifier:
+   - Extract: MCW, NH-45, SH-17, Main Carriageway, Service Road
+   - Default to "Main Carriageway" if not mentioned
+
+7. **observation** - Exact problem observed (copy verbatim if possible)
+   - Include condition, severity, any measurements
+
+8. **recommendation** - Detailed intervention needed
+   - BE SPECIFIC: Include sizes, types, quantities if mentioned
+   - Examples:
+     ✅ "Replace with new 50 km/h regulatory sign (600mm dia)"
+     ✅ "Install 20 flexible guideposts at 10m intervals"
+     ❌ "Fix the sign" (too vague)
+
+9. **ircClause** - IRC standard reference
+   - Format: "IRC:XX-YYYY, Cl. X.X.X"
+   - Combine if split: "IRC 67-2022" + "Cl. 14.8.8" = "IRC:67-2022, Cl. 14.8.8"
+   - Common standards: IRC:35, IRC:67, IRC:79, IRC:82, IRC:93, IRC:99, IRC:SP:73
+
+**PARSING INTELLIGENCE:**
+
+✅ DO:
+- Extract EVERY single intervention (even minor ones)
+- Preserve exact measurements, quantities, specifications
+- Combine split IRC references intelligently
+- Infer section from intervention type if not labeled
+- Handle variations: "Ch.", "Chainage", "km", "KM"
+- Extract from tables, lists, paragraphs equally well
+
+❌ DON'T:
+- Skip any interventions
+- Modify recommendations (keep original wording)
+- Guess IRC clauses if not provided (leave as "Not specified")
+- Merge separate interventions into one
+
+**EXAMPLES:**
+
+Input: "Category A | Chainage: 10+120 | Side: LHS
+Observation: Speed limit sign faded
+Recommended Intervention: Replace with new 50 km/h regulatory sign
+IRC Reference: IRC:67-2022, Cl. 14.8.8"
+
+Output:
+{
+  "sectionId": "A",
+  "sectionName": "ROAD SIGNS",
+  "serialNo": 1,
+  "chainage": "10+120",
+  "side": "LHS",
+  "road": "Main Carriageway",
+  "observation": "Speed limit sign faded",
+  "recommendation": "Replace with new 50 km/h regulatory sign",
+  "ircClause": "IRC:67-2022, Cl. 14.8.8"
+}
+
+**OUTPUT FORMAT:**
+
+Return ONLY a valid JSON array. No markdown, no code blocks, no explanations.
+
 [
   {
     "sectionId": "A",
     "sectionName": "ROAD SIGNS",
     "serialNo": 1,
-    "chainage": "4+200",
+    "chainage": "10+120",
     "side": "LHS",
-    "road": "MCW",
-    "observation": "The speed limit sign is absent before the academic zone.",
-    "recommendation": "The maximum speed limit sign shall be provided for the school zone.",
+    "road": "Main Carriageway",
+    "observation": "Speed limit sign faded",
+    "recommendation": "Replace with new 50 km/h regulatory sign (600mm dia)",
     "ircClause": "IRC:67-2022, Cl. 14.8.8"
-  },
-  {
-    "sectionId": "A",
-    "sectionName": "ROAD SIGNS",
-    "serialNo": 2,
-    "chainage": "4+250",
-    "side": "LHS",
-    "road": "MCW",
-    "observation": "The school ahead sign provided on MCW is non-standard.",
-    "recommendation": "The non-standard school ahead sign shall be replaced by the standard sign.",
-    "ircClause": "IRC:67-2022, Cl. 15.28"
   }
 ]
 
-IMPORTANT:
-- Extract ALL interventions from ALL sections
-- Maintain the section grouping
-- Keep serial numbers within each section
-- Combine chainage, side, and road for complete location context
-- Keep recommendation and IRC clause separate (they will be combined in display)
-- Return valid JSON only, no additional text
-- If no interventions found, return empty array []
+If no interventions found, return: []
+
+**CRITICAL:** Extract 100% of interventions. Missing even one intervention is unacceptable for hackathon evaluation.
 `;
 
     const response = await generateContent(prompt);
@@ -145,67 +202,154 @@ export const mapToIRCStandards = async (interventions) => {
         .join("\n");
 
       const prompt = `
-You are an expert on Indian Roads Congress (IRC) standards. For each intervention below, provide detailed technical specifications and material requirements.
+You are an expert IRC standards engineer specializing in road safety material quantification. Analyze each intervention and provide EXACT material requirements.
+
+**INTERVENTIONS TO ANALYZE:**
 
 Section ${sectionId} - ${sectionInterventions[0].sectionName}:
 ${interventionsList}
 
-Available IRC Standards:
-- IRC:35 (Code of Practice for Road Markings)
-- IRC:67 (Code of Practice for Road Signs)
-- IRC:99 (Tentative Guidelines on the Provision of Safety Barriers)
-- IRC:SP:73 (Manual on Road Safety Measures and Safety Audit)
-- IRC:SP:84 (Manual for Survey, Investigation and Preparation of Road Projects)
-- IRC:SP:87 (Guidelines for the Design, Installation and Maintenance of Road Safety Audit)
-- IRC:79 (Recommended Practice for Road Delineators)
-- IRC:82 (Code of Practice for Maintenance of Bituminous Road Surfaces)
-- IRC:93 (Guidelines on Design and Installation of Road Traffic Signals)
+**IRC STANDARDS DATABASE:**
+
+IRC:35-2015 - Road Markings
+• Thermoplastic paint: 3mm thickness, 150mm width for edge lines
+• Glass beads Type A: 300-400 gm/sqm for retroreflectivity
+• Pedestrian crossings: White paint, 250mm stripe width
+
+IRC:67-2022 - Road Signs
+• Speed limit signs: 600mm dia for 50 km/h, Type III sheeting (0.28 sqm)
+• Warning signs: 900mm triangle/square, Type III sheeting (0.81 sqm)
+• GI Pipe post: 50mm dia, 2.5m height, M20 concrete base (0.1 cum)
+
+IRC:79-2019 - Delineators
+• Flexible guideposts: FP-750 type, 750mm height
+• Chevron boards: 900x600mm with Type III sheeting
+• Spacing: 10-20m on curves, 50m on straights
+
+IRC:82-2023 - Pavement Maintenance
+• Cold mix asphalt: Pothole repair, compact to 50mm depth
+• Hot mix: Overlay 40-50mm thickness
+• Tack coat: SS-1 emulsion at 0.25 kg/sqm
+
+IRC:93-2019 - Traffic Signals
+• LED signal module: 300mm, 10W consumption
+• Solar blinker: 10W panel + 12V 7Ah battery + LED module
+
+IRC:SP:73-2018 - Street Lighting
+• LED luminaire: 40-60W for local roads, 80-120W for highways
+• Pole: 6-9m height, hot-dip galvanized
+• Spacing: 30-40m for urban roads
+
+**YOUR TASK:**
 
 For each intervention, provide:
-1. The IRC standard code and clause already mentioned
-2. Specific technical specification details from that clause
-3. Material requirements based on the specification
-4. Estimated quantity needed (calculate from description if possible)
 
-Return ONLY a JSON array with this exact structure:
+1. **ircCode** - IRC standard (use the one already mentioned in intervention)
+2. **clause** - Specific clause from IRC (preserve exact reference)
+3. **specification** - Technical details per IRC standard
+   - Include: sizes, dimensions, material grades, types
+   - Be specific: "600mm dia" not "medium size"
+
+4. **materials** - Complete material breakdown
+   - Calculate quantities accurately based on IRC specifications
+   - Include ALL components needed
+   - Use exact CPWD SOR item names when possible
+
+**MATERIAL CALCULATION RULES:**
+
+Road Signs (600mm dia):
+→ Retroreflective Sheeting Type III: 0.28 sqm
+→ Aluminum Plate 600mm: 1 nos
+→ GI Pipe Post 50mm: 1 nos
+→ Concrete M20: 0.1 cum
+
+Road Signs (900mm square):
+→ Retroreflective Sheeting Type III: 0.81 sqm
+→ Aluminum Plate 900mm: 1 nos
+→ GI Pipe Post 50mm: 1 nos
+→ Concrete M20: 0.1 cum
+
+Thermoplastic Markings (per 100m x 150mm):
+→ Thermoplastic Paint: 4.5 kg (3mm thick)
+→ Glass Beads Type A: 1.5 kg
+→ Primer: 0.5 litre
+
+Pedestrian Crossing (4m x 3m zebra):
+→ Pedestrian Crossing Paint: 36 kg
+→ Glass Beads Type B: 4.8 kg
+
+Solar Blinker (1 unit):
+→ Solar Panel 10W: 1 nos
+→ Battery 12V 7Ah: 1 nos
+→ LED Module Amber: 1 nos
+→ Wiring Kit: 1 set
+
+Street Light (per pole):
+→ LED Luminaire 50W: 1 nos
+→ Lighting Pole 6m: 1 nos
+→ Underground Cable 2-Core: 5 m
+→ Earthing Electrode: 1 nos
+
+Flexible Guidepost:
+→ Flexible Guidepost: 1 nos
+→ Adhesive for Delineator: 0.5 kg
+→ Fasteners: 1 set
+
+Chevron Board:
+→ Chevron Board Type III: 1 nos (comes complete with sheeting)
+→ GI Pipe Post 50mm: 1 nos
+→ Concrete M20: 0.1 cum
+
+**OUTPUT FORMAT:**
+
+Return ONLY valid JSON array:
+
 [
   {
     "sectionId": "A",
     "serialNo": 1,
-    "recommendation": "The maximum speed limit sign shall be provided for the school zone.",
+    "recommendation": "Replace with new 50 km/h regulatory sign",
     "ircCode": "IRC:67-2022",
     "clause": "Cl. 14.8.8",
-    "specification": "Speed limit regulatory sign, Type B, Size 600mm dia, Class III retroreflective sheeting",
+    "specification": "Speed limit regulatory sign, Type B, 600mm dia, Class III retroreflective sheeting as per IRC:67-2022 Table 14.1",
     "materials": [
       {
         "item": "Retroreflective Sheeting Type III",
         "quantity": 0.28,
         "unit": "sqm",
-        "details": "High intensity grade for speed limit sign"
+        "details": "High intensity grade for 600mm circular sign"
       },
       {
-        "item": "Aluminum Sign Plate 2mm",
+        "item": "Aluminum Plate 600mm Dia",
         "quantity": 1,
         "unit": "nos",
-        "details": "600mm diameter circular plate"
+        "details": "2mm thick aluminum substrate"
       },
       {
         "item": "GI Pipe Post 50mm",
         "quantity": 1,
         "unit": "nos",
-        "details": "2.5m height including foundation"
+        "details": "2.5m height galvanized iron post"
+      },
+      {
+        "item": "Concrete for Sign Foundation",
+        "quantity": 0.1,
+        "unit": "cum",
+        "details": "M20 grade concrete for base"
       }
     ]
   }
 ]
 
-IMPORTANT:
-- Use the IRC clause already provided in the intervention
-- Provide accurate technical specifications
-- Break down materials into individual items
-- Calculate realistic quantities
-- Use standard units (sqm, m, kg, nos, etc.)
-- Return valid JSON only
+**CRITICAL REQUIREMENTS:**
+✅ Use exact item names from CPWD database when possible
+✅ Calculate quantities accurately (don't guess)
+✅ Include ALL materials (sheeting, substrate, post, foundation)
+✅ Preserve original IRC clause from intervention
+✅ Be consistent with units (sqm, m, kg, nos, cum, litre)
+✅ Return only valid JSON, no markdown
+
+This is for HACKATHON EVALUATION - accuracy is critical!
 `;
 
       const response = await generateContent(prompt);

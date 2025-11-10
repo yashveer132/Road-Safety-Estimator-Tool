@@ -106,7 +106,7 @@
     "category": "Lighting",
     "interventionType": "Street Lighting Installation",
     "description": "Street lighting shall be installed along pedestrian paths and crossings with minimum illumination levels as per IRC:SP:90 and MoRTH guidelines.",
-    "code": "IRC:SP:90",
+    "code": "IRC:SP:90-2019",
     "clause": "5.1",
     "tags": ["lighting", "pedestrian", "visibility", "night safety"],
     "context": {
@@ -120,7 +120,7 @@
     "category": "Lighting",
     "interventionType": "Pedestrian Path Lighting",
     "description": "Pedestrian paths and crossings require dedicated lighting with uniform illumination. LED fixtures with solar options for cost-effectiveness.",
-    "code": "IRC:SP:90",
+    "code": "IRC:SP:90-2019",
     "clause": "7.2",
     "tags": ["lighting", "pedestrian path", "uniform illumination"],
     "context": {

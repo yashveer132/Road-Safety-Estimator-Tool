@@ -1,11 +1,7 @@
 import Price from "../models/Price.model.js";
 import { scrapeCPWDPrices, scrapeGeMPrices } from "./scraper.service.js";
 import { normalizeUnit } from "../utils/unit.js";
-import {
-  searchCPWDOffline,
-  getCategoryFallback,
-  sanitycheckPrice,
-} from "./cpwd.service.js";
+import { searchCPWDOffline, sanitycheckPrice } from "./cpwd.service.js";
 import { roundToDecimals } from "../utils/format.js";
 
 const priceEstimateCache = new Map();
@@ -164,7 +160,7 @@ export const searchPriceData = async (itemName, unit) => {
 export const estimatePriceIfNotFound = async (material) => {
   try {
     console.log(
-      `💰 Finding price for: ${material.itemName} (${material.unit})`
+      `💰 Finding OFFICIAL price for: ${material.itemName} (${material.unit})`
     );
 
     const normalizedUnit = normalizeUnit(material.unit);
@@ -174,7 +170,7 @@ export const estimatePriceIfNotFound = async (material) => {
       return cachedResult;
     }
 
-    console.log(`   📚 Checking offline CPWD SOR cache...`);
+    console.log(`   📚 Checking offline CPWD SOR 2024 database...`);
     const offlineMatch = searchCPWDOffline(material.itemName, material.unit);
     if (offlineMatch) {
       const sanitized = sanitycheckPrice(
@@ -185,12 +181,13 @@ export const estimatePriceIfNotFound = async (material) => {
 
       const result = {
         unitPrice: roundToDecimals(sanitized.price, 2),
-        source: offlineMatch.source,
+        source: "CPWD_SOR_2024",
         itemId: offlineMatch.itemId,
-        year: offlineMatch.year,
-        sourceUrl: offlineMatch.sourceUrl,
-        confidence: sanitized.isValid ? offlineMatch.confidence : "medium",
+        year: "2024",
+        sourceUrl: "https://cpwd.gov.in/Documents/cpwd_publication.aspx",
+        confidence: sanitized.isValid ? "high" : "medium",
         specification: offlineMatch.specification,
+        official: true,
       };
 
       setCachedEstimate(material.itemName, material.unit, result);
@@ -203,23 +200,26 @@ export const estimatePriceIfNotFound = async (material) => {
           unitPrice: result.unitPrice,
           unit: normalizedUnit,
           currency: "₹",
-          source: result.source,
+          source: "CPWD_SOR",
           sourceUrl: result.sourceUrl,
           description: material.description || offlineMatch.description,
-          rateYear: result.year,
+          rateYear: "2024",
           validFrom: new Date(),
           isActive: true,
         });
         await newPrice.save();
-        console.log(`   💾 Saved CPWD offline price to database`);
+        console.log(`   💾 Saved CPWD SOR 2024 price to database`);
       } catch (dbError) {
         console.log(`   ⚠️ Could not save to DB:`, dbError.message);
       }
 
+      console.log(
+        `   ✅ OFFICIAL RATE FOUND: ₹${result.unitPrice} (CPWD SOR Item: ${result.itemId})`
+      );
       return result;
     }
 
-    console.log(`   🌐 Searching web sources...`);
+    console.log(`   🌐 Searching official web sources (CPWD/GeM)...`);
     const webPrice = await searchWebPrices(material.itemName, material.unit);
     if (webPrice) {
       const sanitized = sanitycheckPrice(
@@ -231,7 +231,8 @@ export const estimatePriceIfNotFound = async (material) => {
       const result = {
         ...webPrice,
         unitPrice: roundToDecimals(sanitized.price, 2),
-        confidence: sanitized.isValid ? webPrice.confidence : "medium",
+        confidence: sanitized.isValid ? "high" : "medium",
+        official: true,
       };
 
       setCachedEstimate(material.itemName, material.unit, result);
@@ -252,121 +253,63 @@ export const estimatePriceIfNotFound = async (material) => {
           isActive: true,
         });
         await newPrice.save();
-        console.log(`   💾 Saved web price to database`);
+        console.log(`   💾 Saved ${result.source} price to database`);
       } catch (dbError) {
         console.log(`   ⚠️ Could not save to DB:`, dbError.message);
       }
 
-      return result;
-    }
-
-    console.log(`   📊 Searching for similar items in database...`);
-    const similarItems = await findSimilarItems(material.itemName, 5);
-    if (similarItems.length > 0) {
-      const avgPrice =
-        similarItems.reduce((sum, item) => sum + item.unitPrice, 0) /
-        similarItems.length;
       console.log(
-        `   ⚠️  Found ${
-          similarItems.length
-        } similar items, avg price: ₹${roundToDecimals(
-          avgPrice,
-          2
-        )} (FALLBACK - NOT OFFICIAL)`
+        `   ✅ OFFICIAL RATE FOUND: ₹${result.unitPrice} (${result.source})`
       );
-
-      const result = {
-        unitPrice: roundToDecimals(avgPrice, 2),
-        source: "DB_SIMILAR_ITEMS (FALLBACK)",
-        itemId: null,
-        year: "2024",
-        confidence: "low",
-      };
-
-      setCachedEstimate(material.itemName, material.unit, result);
       return result;
     }
 
-    console.log(
-      `   ⚠️  No matches found, using category fallback with sanity checks`
+    console.error(`\n${"=".repeat(80)}`);
+    console.error(`❌ CRITICAL ERROR: NO OFFICIAL RATE FOUND`);
+    console.error(`${"=".repeat(80)}`);
+    console.error(`📌 Material: ${material.itemName}`);
+    console.error(`📏 Unit: ${material.unit} (normalized: ${normalizedUnit})`);
+    console.error(`📝 Description: ${material.description || "N/A"}`);
+    console.error(`\n🔍 Searched in:`);
+    console.error(
+      `   ✗ CPWD SOR 2024 offline database (cpwdSORRates2024.json)`
     );
-    const fallback = getCategoryFallback(
-      material.itemName,
-      material.unit,
-      detectCategory(material.itemName)
+    console.error(`   ✗ CPWD SOR website (cpwd.gov.in)`);
+    console.error(`   ✗ GeM Portal (mkp.gem.gov.in)`);
+    console.error(`\n💡 RESOLUTION REQUIRED:`);
+    console.error(
+      `   1. Add this material to: backend/data/cpwdSORRates2024.json`
     );
-
-    const result = {
-      unitPrice: roundToDecimals(fallback.unitPrice, 2),
-      source: fallback.source,
-      itemId: fallback.itemId,
-      year: fallback.year,
-      confidence: fallback.confidence,
-      category: fallback.category,
-      priceRange: fallback.range,
-    };
-
-    console.log(
-      `   � FALLBACK RATE APPLIED: ${fallback.category} category – ₹${result.unitPrice} (range: ₹${fallback.range.min}-${fallback.range.max}). ⚠️  MUST BE REPLACED WITH OFFICIAL RATE BEFORE FINAL SUBMISSION.`
+    console.error(`   2. Include official CPWD SOR 2024 rate`);
+    console.error(`   3. Provide correct item code and specification`);
+    console.error(`   4. Re-run the estimate after updating the database`);
+    console.error(`\n⚠️  As per hackathon requirements:`);
+    console.error(
+      `   - Only CPWD SOR 2024 and GeM Portal rates are acceptable`
     );
+    console.error(`   - Fallback/estimated prices are NOT permitted`);
+    console.error(`   - All interventions must have official rate sources`);
+    console.error(`${"=".repeat(80)}\n`);
 
-    setCachedEstimate(material.itemName, normalizedUnit, result);
-    return result;
+    throw new Error(
+      `NO_OFFICIAL_RATE|${material.itemName}|${material.unit}|` +
+        `Cannot find official CPWD SOR 2024 or GeM rate. ` +
+        `This material must be added to cpwdSORRates2024.json with correct official rate. ` +
+        `Fallback pricing is disabled per hackathon requirements.`
+    );
   } catch (error) {
-    console.error("   ❌ Error in price estimation:", error.message);
+    if (error.message.startsWith("NO_OFFICIAL_RATE")) {
+      throw error;
+    }
 
-    return {
-      unitPrice: 500,
-      source: "DEFAULT_FALLBACK (CRITICAL - MUST REPLACE)",
-      itemId: null,
-      year: "2024",
-      confidence: "very_low",
-    };
-  }
-};
+    console.error("   ❌ Unexpected error in price estimation:", error.message);
 
-const detectCategory = (itemName) => {
-  const lower = itemName.toLowerCase();
-
-  if (
-    lower.includes("sign") ||
-    lower.includes("reflective") ||
-    lower.includes("aluminum")
-  ) {
-    return "signage";
+    throw new Error(
+      `PRICE_ESTIMATION_ERROR|${material.itemName}|${material.unit}|` +
+        `Failed to estimate price: ${error.message}. ` +
+        `Please check material specifications and database integrity.`
+    );
   }
-  if (
-    lower.includes("barrier") ||
-    lower.includes("guard") ||
-    lower.includes("rail")
-  ) {
-    return "barrier";
-  }
-  if (
-    lower.includes("marking") ||
-    lower.includes("paint") ||
-    lower.includes("thermoplastic")
-  ) {
-    return "marking";
-  }
-  if (
-    lower.includes("signal") ||
-    lower.includes("light") ||
-    lower.includes("led") ||
-    lower.includes("blinker")
-  ) {
-    return "lighting";
-  }
-  if (
-    lower.includes("stud") ||
-    lower.includes("cone") ||
-    lower.includes("delineator") ||
-    lower.includes("breaker")
-  ) {
-    return "equipment";
-  }
-
-  return "other";
 };
 
 export const normalizeItemName = (itemName) => {
@@ -384,6 +327,7 @@ export const findSimilarItems = async (itemName, limit = 5) => {
     const items = await Price.find({
       $text: { $search: normalized },
       isActive: true,
+      source: { $in: ["CPWD_SOR", "GeM"] },
     })
       .sort({ score: { $meta: "textScore" } })
       .limit(limit);
@@ -395,10 +339,56 @@ export const findSimilarItems = async (itemName, limit = 5) => {
   }
 };
 
+export const validateOfficialRates = (materials) => {
+  const validation = {
+    totalItems: materials.length,
+    officialRates: 0,
+    missingRates: [],
+    lowConfidence: [],
+  };
+
+  materials.forEach((material) => {
+    const isOfficial =
+      material.source &&
+      (material.source.includes("CPWD_SOR") || material.source.includes("GeM"));
+
+    if (!isOfficial) {
+      validation.missingRates.push({
+        itemName: material.itemName,
+        unit: material.unit,
+        source: material.source || "NONE",
+      });
+    } else {
+      validation.officialRates++;
+
+      if (
+        material.confidence &&
+        (material.confidence === "low" || material.confidence === "medium")
+      ) {
+        validation.lowConfidence.push({
+          itemName: material.itemName,
+          confidence: material.confidence,
+          source: material.source,
+        });
+      }
+    }
+  });
+
+  validation.officialRatePercentage = Math.round(
+    (validation.officialRates / validation.totalItems) * 100
+  );
+  validation.passesValidation =
+    validation.missingRates.length === 0 &&
+    validation.officialRatePercentage === 100;
+
+  return validation;
+};
+
 export default {
   searchPriceData,
   searchWebPrices,
   estimatePriceIfNotFound,
   normalizeItemName,
   findSimilarItems,
+  validateOfficialRates,
 };

@@ -65,6 +65,7 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
 
       const itemsWithPrices = [];
       let totalCost = 0;
+      const missingOfficialRates = [];
 
       if (mapping.materials && Array.isArray(mapping.materials)) {
         console.log(
@@ -72,98 +73,160 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
         );
 
         for (const material of mapping.materials) {
-          console.log(`\n   📦 Material: ${material.item}`);
+          try {
+            console.log(`\n   📦 Material: ${material.item}`);
 
-          const canonicalUnit = normalizeUnit(material.unit);
+            const canonicalUnit = normalizeUnit(material.unit);
 
-          let normalizedQuantity = material.quantity;
-          if (isCountableUnit(canonicalUnit)) {
-            normalizedQuantity = Math.max(
-              0,
-              Math.round(Number(material.quantity) || 0)
-            );
-            if (normalizedQuantity === 0) {
-              console.warn(
-                `      ⚠️ WARNING: Quantity rounded to 0 for countable item`
+            let normalizedQuantity = material.quantity;
+            if (isCountableUnit(canonicalUnit)) {
+              normalizedQuantity = Math.max(
+                0,
+                Math.round(Number(material.quantity) || 0)
               );
-              continue;
+              if (normalizedQuantity === 0) {
+                console.warn(
+                  `      ⚠️ WARNING: Quantity rounded to 0 for countable item`
+                );
+                continue;
+              }
+            } else {
+              normalizedQuantity = formatQuantity(
+                material.quantity,
+                canonicalUnit
+              );
             }
-          } else {
-            normalizedQuantity = formatQuantity(
-              material.quantity,
-              canonicalUnit
+
+            console.log(
+              `      Quantity: ${normalizedQuantity} ${material.unit}`
             );
-          }
 
-          console.log(`      Quantity: ${normalizedQuantity} ${material.unit}`);
+            const priceInfo = await searchPriceData(
+              material.item,
+              material.unit
+            );
 
-          const priceInfo = await searchPriceData(material.item, material.unit);
+            let unitPrice = 0;
+            let source = null;
+            let sourceUrl = null;
+            let itemId = null;
+            let rateYear = "2024";
+            let confidence = "high";
+            let sorCode = null;
 
-          let unitPrice = 0;
-          let source = null;
-          let sourceUrl = null;
-          let itemId = null;
-          let rateYear = "2024";
-          let confidence = "high";
-          let sorCode = null;
+            if (!priceInfo) {
+              console.log(`      ⚠️ Not in database, fetching from web...`);
+              const estimatedPrice = await estimatePriceIfNotFound({
+                itemName: material.item,
+                description: material.details,
+                unit: material.unit,
+              });
+              unitPrice = roundToDecimals(estimatedPrice.unitPrice, 2);
+              source = estimatedPrice.source;
+              sourceUrl = estimatedPrice.sourceUrl || null;
+              itemId = estimatedPrice.itemId || null;
+              rateYear = estimatedPrice.year || "2024";
+              confidence = estimatedPrice.confidence || "low";
+              sorCode = getSORItemCode(material.item, null)?.code;
+            } else {
+              console.log(`      ✅ Found in database: ${priceInfo.source}`);
+              unitPrice = roundToDecimals(priceInfo.unitPrice, 2);
+              source = priceInfo.source;
+              sourceUrl = priceInfo.sourceUrl || null;
+              itemId = priceInfo.itemCode || null;
+              rateYear = priceInfo.rateYear || "2024";
+              confidence = "high";
+              sorCode =
+                priceInfo.itemCode || getSORItemCode(material.item, null)?.code;
+            }
 
-          if (!priceInfo) {
-            console.log(`      ⚠️ Not in database, fetching from web...`);
-            const estimatedPrice = await estimatePriceIfNotFound({
+            const totalPrice = roundToDecimals(
+              normalizedQuantity * unitPrice,
+              2
+            );
+            totalCost += totalPrice;
+
+            console.log(
+              `      💵 Unit Price: ${formatCurrency(unitPrice)} per ${
+                material.unit
+              }`
+            );
+            console.log(`      💰 Total: ${formatCurrency(totalPrice)}`);
+            console.log(
+              `      📌 Source: ${source}${itemId ? ` (Item: ${itemId})` : ""}${
+                sorCode ? ` [SOR: ${sorCode}]` : ""
+              }`
+            );
+
+            itemsWithPrices.push({
               itemName: material.item,
               description: material.details,
+              quantity: normalizedQuantity,
               unit: material.unit,
+              unitPrice: unitPrice,
+              totalPrice: totalPrice,
+              source: source,
+              sourceUrl: sourceUrl,
+              itemId: itemId,
+              sorCode: sorCode,
+              rateYear: rateYear,
+              confidence: confidence,
+              lastUpdated: new Date(),
             });
-            unitPrice = roundToDecimals(estimatedPrice.unitPrice, 2);
-            source = estimatedPrice.source;
-            sourceUrl = estimatedPrice.sourceUrl || null;
-            itemId = estimatedPrice.itemId || null;
-            rateYear = estimatedPrice.year || "2024";
-            confidence = estimatedPrice.confidence || "low";
-            sorCode = getSORItemCode(material.item, null)?.code;
-          } else {
-            console.log(`      ✅ Found in database: ${priceInfo.source}`);
-            unitPrice = roundToDecimals(priceInfo.unitPrice, 2);
-            source = priceInfo.source;
-            sourceUrl = priceInfo.sourceUrl || null;
-            itemId = priceInfo.itemCode || null;
-            rateYear = priceInfo.rateYear || "2024";
-            confidence = "high";
-            sorCode =
-              priceInfo.itemCode || getSORItemCode(material.item, null)?.code;
+          } catch (materialError) {
+            if (materialError.message.startsWith("NO_OFFICIAL_RATE")) {
+              const errorParts = materialError.message.split("|");
+              missingOfficialRates.push({
+                itemName: errorParts[1] || material.item,
+                unit: errorParts[2] || material.unit,
+                intervention: intervention.recommendation,
+                section: intervention.sectionName,
+              });
+              console.error(
+                `      ❌ MISSING OFFICIAL RATE: ${material.item} (${material.unit})`
+              );
+              console.error(
+                `         This intervention cannot be processed without official rate`
+              );
+            } else {
+              console.error(
+                `      ❌ Error processing material "${material.item}":`,
+                materialError.message
+              );
+              throw materialError;
+            }
           }
-
-          const totalPrice = roundToDecimals(normalizedQuantity * unitPrice, 2);
-          totalCost += totalPrice;
-
-          console.log(
-            `      💵 Unit Price: ${formatCurrency(unitPrice)} per ${
-              material.unit
-            }`
-          );
-          console.log(`      💰 Total: ${formatCurrency(totalPrice)}`);
-          console.log(
-            `      📌 Source: ${source}${itemId ? ` (Item: ${itemId})` : ""}${
-              sorCode ? ` [SOR: ${sorCode}]` : ""
-            }`
-          );
-
-          itemsWithPrices.push({
-            itemName: material.item,
-            description: material.details,
-            quantity: normalizedQuantity,
-            unit: material.unit,
-            unitPrice: unitPrice,
-            totalPrice: totalPrice,
-            source: source,
-            sourceUrl: sourceUrl,
-            itemId: itemId,
-            sorCode: sorCode,
-            rateYear: rateYear,
-            confidence: confidence,
-            lastUpdated: new Date(),
-          });
         }
+      }
+
+      if (missingOfficialRates.length > 0) {
+        console.error(`\n${"=".repeat(80)}`);
+        console.error(
+          `❌ INTERVENTION BLOCKED: Missing official rates for ${missingOfficialRates.length} material(s)`
+        );
+        console.error(`${"=".repeat(80)}`);
+        console.error(`📍 Intervention: ${intervention.recommendation}`);
+        console.error(
+          `📋 Section: ${intervention.sectionName} (${intervention.sectionId})`
+        );
+        console.error(`\n🚫 Missing rates for:`);
+        missingOfficialRates.forEach((missing, idx) => {
+          console.error(`   ${idx + 1}. ${missing.itemName} (${missing.unit})`);
+        });
+        console.error(`\n💡 Required action:`);
+        console.error(
+          `   Add these materials to: backend/data/cpwdSORRates2024.json`
+        );
+        console.error(`   Include official CPWD SOR 2024 or GeM rates`);
+        console.error(`${"=".repeat(80)}\n`);
+
+        throw new Error(
+          `MISSING_OFFICIAL_RATES: ${missingOfficialRates.length} material(s) ` +
+            `in intervention "${intervention.recommendation}" lack official CPWD SOR or GeM rates. ` +
+            `Materials: ${missingOfficialRates
+              .map((m) => m.itemName)
+              .join(", ")}`
+        );
       }
 
       let aiRationale = null;
