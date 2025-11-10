@@ -23,11 +23,11 @@ const menuItems = [
   { text: "Dashboard", path: "/", icon: DashboardIcon },
   { text: "Upload Report", path: "/upload", icon: CloudUploadIcon },
   { text: "Estimates", path: "/estimates", icon: AssessmentIcon },
-  {
-    text: "Safety Interventions GPT",
-    path: "/road-safety-gpt",
-    icon: TrafficIcon,
-  },
+  // {
+  //   text: "Safety Interventions GPT",
+  //   path: "/road-safety-gpt",
+  //   icon: TrafficIcon,
+  // },
   { text: "Price Management", path: "/prices", icon: SettingsIcon },
 ];
 

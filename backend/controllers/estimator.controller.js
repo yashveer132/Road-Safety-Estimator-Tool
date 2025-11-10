@@ -203,10 +203,7 @@ export const processDocument = async (req, res) => {
     }
 
     if (req.params.estimateId) {
-      await Estimate.findByIdAndUpdate(req.params.estimateId, {
-        status: "failed",
-        errorMessage: errorMessage,
-      });
+      await Estimate.findByIdAndDelete(req.params.estimateId);
     }
 
     res.status(500).json({

@@ -481,9 +481,23 @@ export const generateCostRationale = async (
         (m) =>
           `${m.itemName}: ${m.quantity} ${m.unit} @ ₹${m.unitPrice} = ₹${
             m.totalPrice
-          } (${m.source || "CPWD SOR"})`
+          } (${m.source || "CPWD SOR"} ${
+            m.sorCode ? `Item: ${m.sorCode}` : ""
+          })`
       )
       .join("\n");
+
+    const hasNonOfficialSources = materials.some(
+      (m) =>
+        m.source &&
+        (m.source.includes("DB_SIMILAR_ITEMS") ||
+          m.source.includes("CATEGORY_FALLBACK") ||
+          m.source.includes("DEFAULT_FALLBACK"))
+    );
+
+    const sourceWarning = hasNonOfficialSources
+      ? `\n\n⚠️ CRITICAL: This estimate contains FALLBACK RATES that are NOT from official CPWD SOR or GeM sources.`
+      : ``;
 
     const prompt = `
 Generate a professional, audit-ready rationale for this road safety intervention cost estimate. Follow this exact format:
@@ -514,6 +528,7 @@ Requirements:
 5. Keep rationale concise (under 150 words)
 6. Use proper formatting for technical references
 7. Add brief context about why this intervention matters
+8. IF using non-official rates, MUST flag with 🟡 or 🔴 tag${sourceWarning}
 
 Return a JSON object with this structure:
 {
@@ -527,14 +542,17 @@ Return a JSON object with this structure:
   "confidence": "high",
   "confidenceTag": "🟢 Fully validated using CPWD SOR 2024 items",
   "ircClause": "${ircMapping.ircCode}, ${ircMapping.clause}",
-  "sorItems": ["16.53", "14.28", "18.12"]
+  "sorItems": ["16.53", "14.28", "18.12"],
+  "hasNonOfficialRates": ${hasNonOfficialSources},
+  "criticalFlags": []
 }
 
 IMPORTANT:
 - Make it sound human and professional, not AI-generic
 - Include specific clause numbers and SOR codes
 - Add context about intervention importance
-- Use confidence tags (🟢🟡🔴)
+- Use confidence tags (🟢🟡🔴) with accuracy
+- If ANY non-official rates: MUST use 🟡 or 🔴 tag
 - Keep assumptions focused and relevant
 - Return valid JSON only
 `;
@@ -553,10 +571,13 @@ IMPORTANT:
       ],
       confidence: result.confidence || "medium",
       confidenceTag:
-        result.confidenceTag || "🟡 Fallback rate used (verify with DPR)",
+        result.confidenceTag ||
+        (hasNonOfficialSources ? "🟡 Fallback rate used" : "🟢 Verified"),
       ircClause:
         result.ircClause || `${ircMapping.ircCode}, ${ircMapping.clause}`,
       sorItems: result.sorItems || [],
+      hasNonOfficialRates: result.hasNonOfficialRates || hasNonOfficialSources,
+      criticalFlags: result.criticalFlags || [],
       notes: result.notes || "Excludes labor, installation, and taxes",
     };
   } catch (error) {
@@ -573,6 +594,10 @@ IMPORTANT:
         "🟡 Fallback rate used (check with detailed project report)",
       ircClause: `${ircMapping.ircCode}, ${ircMapping.clause}`,
       sorItems: [],
+      hasNonOfficialRates: true,
+      criticalFlags: [
+        "Missing official SOR rates - must be replaced before approval",
+      ],
       notes:
         "Excludes labor, installation, equipment rental, transportation, and taxes",
     };

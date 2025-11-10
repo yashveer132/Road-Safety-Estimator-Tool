@@ -13,6 +13,13 @@ import {
   formatQuantity,
   formatCurrency,
 } from "../utils/format.js";
+import {
+  validateQuantities,
+  validatePricing,
+  validateInterventionCost,
+  getSORItemCode,
+  flagImplausibleCosts,
+} from "./validation.service.js";
 
 export const calculateMaterialCosts = async (interventions, ircMappings) => {
   try {
@@ -68,10 +75,25 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
           console.log(`\n   📦 Material: ${material.item}`);
 
           const canonicalUnit = normalizeUnit(material.unit);
-          const normalizedQuantity = formatQuantity(
-            material.quantity,
-            canonicalUnit
-          );
+
+          let normalizedQuantity = material.quantity;
+          if (isCountableUnit(canonicalUnit)) {
+            normalizedQuantity = Math.max(
+              0,
+              Math.round(Number(material.quantity) || 0)
+            );
+            if (normalizedQuantity === 0) {
+              console.warn(
+                `      ⚠️ WARNING: Quantity rounded to 0 for countable item`
+              );
+              continue;
+            }
+          } else {
+            normalizedQuantity = formatQuantity(
+              material.quantity,
+              canonicalUnit
+            );
+          }
 
           console.log(`      Quantity: ${normalizedQuantity} ${material.unit}`);
 
@@ -83,6 +105,7 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
           let itemId = null;
           let rateYear = "2024";
           let confidence = "high";
+          let sorCode = null;
 
           if (!priceInfo) {
             console.log(`      ⚠️ Not in database, fetching from web...`);
@@ -97,14 +120,17 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
             itemId = estimatedPrice.itemId || null;
             rateYear = estimatedPrice.year || "2024";
             confidence = estimatedPrice.confidence || "low";
+            sorCode = getSORItemCode(material.item, null)?.code;
           } else {
-            console.log(`      ✅ Found in database: ${source}`);
+            console.log(`      ✅ Found in database: ${priceInfo.source}`);
             unitPrice = roundToDecimals(priceInfo.unitPrice, 2);
             source = priceInfo.source;
             sourceUrl = priceInfo.sourceUrl || null;
             itemId = priceInfo.itemCode || null;
             rateYear = priceInfo.rateYear || "2024";
             confidence = "high";
+            sorCode =
+              priceInfo.itemCode || getSORItemCode(material.item, null)?.code;
           }
 
           const totalPrice = roundToDecimals(normalizedQuantity * unitPrice, 2);
@@ -117,7 +143,9 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
           );
           console.log(`      💰 Total: ${formatCurrency(totalPrice)}`);
           console.log(
-            `      📌 Source: ${source}${itemId ? ` (Item: ${itemId})` : ""}`
+            `      📌 Source: ${source}${itemId ? ` (Item: ${itemId})` : ""}${
+              sorCode ? ` [SOR: ${sorCode}]` : ""
+            }`
           );
 
           itemsWithPrices.push({
@@ -130,6 +158,7 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
             source: source,
             sourceUrl: sourceUrl,
             itemId: itemId,
+            sorCode: sorCode,
             rateYear: rateYear,
             confidence: confidence,
             lastUpdated: new Date(),
@@ -190,14 +219,55 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
         `   ✅ Total cost for this intervention: ${formatCurrency(totalCost)}`
       );
 
+      console.log(`   🔍 Running validation checks...`);
+      const quantValidation = validateQuantities(
+        itemsWithPrices,
+        intervention.sectionName
+      );
+      const priceValidation = validatePricing(itemsWithPrices);
+      const costValidation = validateInterventionCost(intervention, totalCost);
+      const implausibleCosts = flagImplausibleCosts(itemsWithPrices);
+
+      if (quantValidation.hasIssues) {
+        console.log(`   ⚠️ Quantity issues detected:`);
+        quantValidation.issues.forEach((issue) => {
+          console.log(
+            `      [${issue.severity.toUpperCase()}] ${issue.material}: ${
+              issue.problem
+            }`
+          );
+        });
+      }
+
+      if (priceValidation.hasIssues) {
+        console.log(`   ⚠️ Pricing issues detected:`);
+        priceValidation.issues.forEach((issue) => {
+          console.log(
+            `      [${issue.severity.toUpperCase()}] ${issue.material}: ${
+              issue.problem
+            }`
+          );
+        });
+      }
+
+      if (implausibleCosts.length > 0) {
+        console.log(`   � Cost outliers detected:`);
+        implausibleCosts.forEach((outlier) => {
+          console.log(
+            `      ${outlier.material}: ${roundToDecimals(
+              outlier.percentage,
+              1
+            )}% of total`
+          );
+        });
+      }
+
       const quantityGuidelines = getIRCQuantityGuidelines(
         intervention.sectionName
       );
       const quantityValidation = [];
 
       if (quantityGuidelines) {
-        console.log(`   🔍 Validating quantities against IRC guidelines...`);
-
         itemsWithPrices.forEach((item) => {
           const guideline =
             quantityGuidelines[

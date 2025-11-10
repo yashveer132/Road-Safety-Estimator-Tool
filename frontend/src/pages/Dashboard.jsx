@@ -262,21 +262,6 @@ export default function Dashboard() {
   const generateAlerts = (kpi, performance) => {
     const alerts = [];
 
-    if (kpi && kpi.failedEstimates > 5) {
-      alerts.push({
-        type: "error",
-        message: `${kpi.failedEstimates} estimates have failed. Check error logs.`,
-      });
-    }
-
-    if (kpi && kpi.completionRate < 70) {
-      alerts.push({
-        type: "warning",
-        message:
-          "Processing backlog detected. Some estimates are still pending.",
-      });
-    }
-
     setActiveAlerts(alerts);
   };
 
@@ -431,7 +416,7 @@ export default function Dashboard() {
         spacing={{ xs: 1.5, sm: 2, md: 2.5 }}
         sx={{ mb: { xs: 2, sm: 4 } }}
       >
-        <Grid item xs={6} sm={6} md={4} lg={3}>
+        <Grid item xs={6} sm={6} md={3} lg={3}>
           <KPICard
             title="Total Estimates"
             value={kpiData?.totalEstimates || 0}
@@ -442,7 +427,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={6} sm={6} md={4} lg={3}>
+        <Grid item xs={6} sm={6} md={3} lg={3}>
           <KPICard
             title="Total Material Cost"
             value={kpiData?.totalMaterialCost || 0}
@@ -453,29 +438,7 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={6} sm={6} md={4} lg={3}>
-          <KPICard
-            title="Completion Rate"
-            value={kpiData?.completionRate || 0}
-            unit="%"
-            icon={CheckCircleIcon}
-            color="#8B5CF6"
-            loading={loading}
-          />
-        </Grid>
-
-        <Grid item xs={6} sm={6} md={4} lg={3}>
-          <KPICard
-            title="Avg Cost/Estimate"
-            value={kpiData?.averageCostPerEstimate || 0}
-            unit="₹"
-            icon={SpeedIcon}
-            color="#F59E0B"
-            loading={loading}
-          />
-        </Grid>
-
-        <Grid item xs={6} sm={6} md={4} lg={3}>
+        <Grid item xs={6} sm={6} md={3} lg={3}>
           <KPICard
             title="Total Interventions"
             value={kpiData?.totalInterventions || 0}
@@ -486,35 +449,13 @@ export default function Dashboard() {
           />
         </Grid>
 
-        <Grid item xs={6} sm={6} md={4} lg={3}>
+        <Grid item xs={6} sm={6} md={3} lg={3}>
           <KPICard
             title="Unique Materials"
             value={kpiData?.uniqueMaterials || 0}
             unit="types"
             icon={StorageIcon}
             color="#06B6D4"
-            loading={loading}
-          />
-        </Grid>
-
-        <Grid item xs={6} sm={6} md={4} lg={3}>
-          <KPICard
-            title="Estimate Accuracy"
-            value={kpiData?.estimateAccuracy || 0}
-            unit="%"
-            icon={AnalyticsIcon}
-            color="#14B8A6"
-            loading={loading}
-          />
-        </Grid>
-
-        <Grid item xs={6} sm={6} md={4} lg={3}>
-          <KPICard
-            title="Failed Estimates"
-            value={kpiData?.failedEstimates || 0}
-            unit="errors"
-            icon={ErrorIcon}
-            color="#EF4444"
             loading={loading}
           />
         </Grid>

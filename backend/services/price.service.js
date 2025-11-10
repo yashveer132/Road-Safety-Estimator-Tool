@@ -267,17 +267,20 @@ export const estimatePriceIfNotFound = async (material) => {
         similarItems.reduce((sum, item) => sum + item.unitPrice, 0) /
         similarItems.length;
       console.log(
-        `   ✅ Found ${
+        `   ⚠️  Found ${
           similarItems.length
-        } similar items, avg price: ₹${roundToDecimals(avgPrice, 2)}`
+        } similar items, avg price: ₹${roundToDecimals(
+          avgPrice,
+          2
+        )} (FALLBACK - NOT OFFICIAL)`
       );
 
       const result = {
         unitPrice: roundToDecimals(avgPrice, 2),
-        source: "DB_SIMILAR_ITEMS",
+        source: "DB_SIMILAR_ITEMS (FALLBACK)",
         itemId: null,
         year: "2024",
-        confidence: "medium",
+        confidence: "low",
       };
 
       setCachedEstimate(material.itemName, material.unit, result);
@@ -285,7 +288,7 @@ export const estimatePriceIfNotFound = async (material) => {
     }
 
     console.log(
-      `   ⚠️ No matches found, using category fallback with sanity checks`
+      `   ⚠️  No matches found, using category fallback with sanity checks`
     );
     const fallback = getCategoryFallback(
       material.itemName,
@@ -304,7 +307,7 @@ export const estimatePriceIfNotFound = async (material) => {
     };
 
     console.log(
-      `   📌 Using ${fallback.category} category fallback: ₹${result.unitPrice} (range: ₹${fallback.range.min}-${fallback.range.max})`
+      `   � FALLBACK RATE APPLIED: ${fallback.category} category – ₹${result.unitPrice} (range: ₹${fallback.range.min}-${fallback.range.max}). ⚠️  MUST BE REPLACED WITH OFFICIAL RATE BEFORE FINAL SUBMISSION.`
     );
 
     setCachedEstimate(material.itemName, normalizedUnit, result);
@@ -314,7 +317,7 @@ export const estimatePriceIfNotFound = async (material) => {
 
     return {
       unitPrice: 500,
-      source: "DEFAULT_FALLBACK",
+      source: "DEFAULT_FALLBACK (CRITICAL - MUST REPLACE)",
       itemId: null,
       year: "2024",
       confidence: "very_low",
