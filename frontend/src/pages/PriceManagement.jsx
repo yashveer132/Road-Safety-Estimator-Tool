@@ -59,17 +59,13 @@ const CATEGORIES = [
 ];
 
 const SOURCE_ICONS = {
-  CPWD_SOR: "🏗️",
-  GeM: "🛍️",
-  AOR: "📋",
-  MANUAL: "✏️",
+  CPWD_SOR: "",
+  GeM: "",
 };
 
 const SOURCE_COLORS = {
   CPWD_SOR: "#3B82F6",
   GeM: "#8B5CF6",
-  AOR: "#10B981",
-  MANUAL: "#F59E0B",
 };
 
 export default function PriceManagement() {
@@ -115,7 +111,7 @@ export default function PriceManagement() {
     category: "",
     unitPrice: "",
     unit: "",
-    source: "MANUAL",
+    source: "CPWD_SOR",
     itemCode: "",
     description: "",
     sourceUrl: "",
@@ -364,7 +360,7 @@ export default function PriceManagement() {
       category: "",
       unitPrice: "",
       unit: "",
-      source: "MANUAL",
+      source: "CPWD_SOR",
       itemCode: "",
       description: "",
       sourceUrl: "",
@@ -424,16 +420,6 @@ export default function PriceManagement() {
       }
     };
 
-    const getStatusLabelForCSV = (item) => {
-      if (!item.lastVerified) return "Unknown";
-      const daysSinceUpdate = Math.floor(
-        (new Date() - new Date(item.lastVerified)) / (1000 * 60 * 60 * 24)
-      );
-      if (daysSinceUpdate < 7) return "Fresh";
-      if (daysSinceUpdate < 30) return "Aging";
-      return "Stale";
-    };
-
     const headers = [
       "Item Name",
       "Item Code",
@@ -441,7 +427,6 @@ export default function PriceManagement() {
       "Unit Price (₹)",
       "Unit",
       "Source",
-      "Status",
       "Description",
       "IRC References",
       "Source URL",
@@ -458,7 +443,6 @@ export default function PriceManagement() {
         : "₹0",
       item.unit || "N/A",
       item.source || "",
-      getStatusLabelForCSV(item),
       item.description || "",
       item.ircReference ? item.ircReference.join("; ") : "",
       item.sourceUrl || "",
@@ -492,24 +476,6 @@ export default function PriceManagement() {
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
-
-  const getStatusColor = (item) => {
-    const daysSinceUpdate = Math.floor(
-      (new Date() - new Date(item.lastVerified)) / (1000 * 60 * 60 * 24)
-    );
-    if (daysSinceUpdate < 7) return "#10B981";
-    if (daysSinceUpdate < 30) return "#F59E0B";
-    return "#EF4444";
-  };
-
-  const getStatusLabel = (item) => {
-    const daysSinceUpdate = Math.floor(
-      (new Date() - new Date(item.lastVerified)) / (1000 * 60 * 60 * 24)
-    );
-    if (daysSinceUpdate < 7) return "Fresh";
-    if (daysSinceUpdate < 30) return "Aging";
-    return "Stale";
   };
 
   return (
@@ -637,7 +603,6 @@ export default function PriceManagement() {
         >
           <Tab label="📊 Dashboard" />
           <Tab label="📋 Inventory" />
-          <Tab label="📈 Analytics" />
         </Tabs>
       </Paper>
 
@@ -1057,7 +1022,7 @@ export default function PriceManagement() {
                           fontWeight: 600,
                         }}
                       >
-                        {SOURCE_ICONS[source]} {source}
+                        {source}
                       </Typography>
                       <Typography
                         variant="h6"
@@ -1216,16 +1181,10 @@ export default function PriceManagement() {
                     All Sources
                   </MenuItem>
                   <MenuItem value="CPWD_SOR" sx={{ textAlign: "center" }}>
-                    {SOURCE_ICONS.CPWD_SOR} CPWD SOR
+                    CPWD SOR
                   </MenuItem>
                   <MenuItem value="GeM" sx={{ textAlign: "center" }}>
-                    {SOURCE_ICONS.GeM} GeM
-                  </MenuItem>
-                  <MenuItem value="AOR" sx={{ textAlign: "center" }}>
-                    {SOURCE_ICONS.AOR} AOR
-                  </MenuItem>
-                  <MenuItem value="MANUAL" sx={{ textAlign: "center" }}>
-                    {SOURCE_ICONS.MANUAL} Manual
+                    GeM
                   </MenuItem>
                 </TextField>
               </Grid>
@@ -1503,9 +1462,7 @@ export default function PriceManagement() {
                                     }}
                                   />
                                   <Chip
-                                    label={`${SOURCE_ICONS[item.source]} ${
-                                      item.source
-                                    }`}
+                                    label={item.source}
                                     size="small"
                                     sx={{
                                       fontWeight: 600,
@@ -1516,20 +1473,6 @@ export default function PriceManagement() {
                                       border: `1px solid ${
                                         SOURCE_COLORS[item.source]
                                       }`,
-                                      height: { xs: 24, sm: 28 },
-                                    }}
-                                  />
-                                  <Chip
-                                    label={getStatusLabel(item)}
-                                    size="small"
-                                    sx={{
-                                      fontWeight: 700,
-                                      fontSize: { xs: "0.7rem", sm: "0.75rem" },
-                                      bgcolor: getStatusColor(item) + "20",
-                                      color: getStatusColor(item),
-                                      border: `1.5px solid ${getStatusColor(
-                                        item
-                                      )}`,
                                       height: { xs: 24, sm: 28 },
                                     }}
                                   />
@@ -1674,12 +1617,6 @@ export default function PriceManagement() {
                         align="center"
                         sx={{ fontWeight: 700, fontSize: "0.85rem" }}
                       >
-                        Status
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{ fontWeight: 700, fontSize: "0.85rem" }}
-                      >
                         IRC References
                       </TableCell>
                       <TableCell
@@ -1779,9 +1716,7 @@ export default function PriceManagement() {
 
                           <TableCell align="center">
                             <Chip
-                              label={`${SOURCE_ICONS[item.source]} ${
-                                item.source
-                              }`}
+                              label={item.source}
                               size="small"
                               sx={{
                                 fontWeight: 600,
@@ -1791,20 +1726,6 @@ export default function PriceManagement() {
                                 border: `1px solid ${
                                   SOURCE_COLORS[item.source]
                                 }`,
-                              }}
-                            />
-                          </TableCell>
-
-                          <TableCell align="center">
-                            <Chip
-                              label={getStatusLabel(item)}
-                              size="small"
-                              sx={{
-                                fontWeight: 700,
-                                fontSize: "0.7rem",
-                                bgcolor: getStatusColor(item) + "20",
-                                color: getStatusColor(item),
-                                border: `1.5px solid ${getStatusColor(item)}`,
                               }}
                             />
                           </TableCell>
@@ -1973,215 +1894,6 @@ export default function PriceManagement() {
         </Paper>
       )}
 
-      {tabValue === 2 && (
-        <Grid container spacing={{ xs: 2, sm: 3, md: 3 }}>
-          <Grid item xs={12}>
-            <Card
-              elevation={0}
-              sx={{
-                borderRadius: { xs: 2, sm: 3 },
-                border: "1px solid",
-                borderColor: "divider",
-                p: { xs: 2, sm: 3 },
-              }}
-            >
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 700,
-                  mb: { xs: 2, sm: 3 },
-                  textAlign: "center",
-                  fontSize: { xs: "1.1rem", sm: "1.25rem" },
-                }}
-              >
-                📊 Price Distribution Analysis
-              </Typography>
-              <Grid container spacing={{ xs: 2, sm: 3 }}>
-                <Grid item xs={12} sm={6}>
-                  <Box
-                    sx={{
-                      p: { xs: 1.5, sm: 2 },
-                      bgcolor: "rgba(16, 185, 129, 0.05)",
-                      borderRadius: 2,
-                      textAlign: "center",
-                      border: "1px solid",
-                      borderColor: "rgba(16, 185, 129, 0.2)",
-                    }}
-                  >
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "text.secondary",
-                        mb: 1,
-                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
-                        fontWeight: 600,
-                      }}
-                    >
-                      Price Range
-                    </Typography>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 700,
-                        mb: { xs: 1.5, sm: 2 },
-                        fontSize: { xs: "1.1rem", sm: "1.25rem" },
-                      }}
-                    >
-                      ₹{stats.minPrice.toLocaleString("en-IN")} - ₹
-                      {stats.maxPrice.toLocaleString("en-IN")}
-                    </Typography>
-                    <LinearProgress
-                      variant="determinate"
-                      value={
-                        stats.avgPrice > 0
-                          ? ((stats.avgPrice - stats.minPrice) /
-                              (stats.maxPrice - stats.minPrice)) *
-                            100
-                          : 0
-                      }
-                      sx={{
-                        height: { xs: 6, sm: 8 },
-                        borderRadius: 4,
-                        bgcolor: "rgba(16, 185, 129, 0.2)",
-                        "& .MuiLinearProgress-bar": {
-                          borderRadius: 4,
-                          background:
-                            "linear-gradient(90deg, #10B981 0%, #059669 100%)",
-                        },
-                      }}
-                    />
-                  </Box>
-                </Grid>
-
-                <Grid item xs={12} sm={6}>
-                  <Box
-                    sx={{
-                      p: { xs: 1.5, sm: 2 },
-                      bgcolor: "rgba(245, 158, 11, 0.05)",
-                      borderRadius: 2,
-                      textAlign: "center",
-                      border: "1px solid",
-                      borderColor: "rgba(245, 158, 11, 0.2)",
-                    }}
-                  >
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "text.secondary",
-                        mb: 1,
-                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
-                        fontWeight: 600,
-                      }}
-                    >
-                      Data Freshness
-                    </Typography>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: { xs: "1.1rem", sm: "1.25rem" },
-                      }}
-                    >
-                      {stats.lastUpdated
-                        ? Math.floor(
-                            (new Date() - new Date(stats.lastUpdated)) /
-                              (1000 * 60 * 60 * 24)
-                          ) + " days ago"
-                        : "N/A"}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "text.secondary",
-                        display: "block",
-                        mt: 1,
-                        fontSize: { xs: "0.7rem", sm: "0.75rem" },
-                      }}
-                    >
-                      Last comprehensive update
-                    </Typography>
-                  </Box>
-                </Grid>
-              </Grid>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Card
-              elevation={0}
-              sx={{
-                borderRadius: { xs: 2, sm: 3 },
-                border: "1px solid",
-                borderColor: "divider",
-                p: { xs: 2, sm: 3 },
-              }}
-            >
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 700,
-                  mb: { xs: 2, sm: 3 },
-                  textAlign: "center",
-                  fontSize: { xs: "1.1rem", sm: "1.25rem" },
-                }}
-              >
-                🔍 Data Sources Breakdown
-              </Typography>
-              <Grid container spacing={{ xs: 1.5, sm: 2 }}>
-                {Object.entries(sourceStats).map(([source, data]) => (
-                  <Grid item xs={12} sm={6} md={4} key={source}>
-                    <Box
-                      sx={{
-                        p: { xs: 1.5, sm: 2 },
-                        bgcolor: SOURCE_COLORS[source] + "10",
-                        borderRadius: 2,
-                        border: `1px solid ${SOURCE_COLORS[source]}30`,
-                        textAlign: "center",
-                      }}
-                    >
-                      <Typography
-                        variant="subtitle2"
-                        sx={{
-                          fontWeight: 700,
-                          mb: 0.5,
-                          fontSize: { xs: "0.9rem", sm: "1rem" },
-                        }}
-                      >
-                        {SOURCE_ICONS[source]} {source}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: 700,
-                          color: SOURCE_COLORS[source],
-                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
-                        }}
-                      >
-                        {data.count} items
-                      </Typography>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color: "text.secondary",
-                          display: "block",
-                          mt: { xs: 0.25, sm: 0.5 },
-                          fontSize: { xs: "0.7rem", sm: "0.75rem" },
-                        }}
-                      >
-                        Avg: ₹
-                        {Math.round(data.total / data.count).toLocaleString(
-                          "en-IN"
-                        )}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </Card>
-          </Grid>
-        </Grid>
-      )}
-
       <Dialog
         open={openDetailsDialog}
         onClose={handleCloseDetails}
@@ -2304,9 +2016,7 @@ export default function PriceManagement() {
                     Source
                   </Typography>
                   <Chip
-                    label={`${SOURCE_ICONS[selectedItem.source]} ${
-                      selectedItem.source
-                    }`}
+                    label={selectedItem.source}
                     size="small"
                     sx={{
                       bgcolor: SOURCE_COLORS[selectedItem.source] + "20",
@@ -2523,12 +2233,6 @@ export default function PriceManagement() {
               </MenuItem>
               <MenuItem value="GeM" sx={{ textAlign: "center" }}>
                 GeM
-              </MenuItem>
-              <MenuItem value="AOR" sx={{ textAlign: "center" }}>
-                AOR
-              </MenuItem>
-              <MenuItem value="MANUAL" sx={{ textAlign: "center" }}>
-                Manual
               </MenuItem>
             </TextField>
             <TextField
@@ -2763,17 +2467,11 @@ export default function PriceManagement() {
                 },
               }}
             >
-              <MenuItem value="MANUAL" sx={{ textAlign: "center" }}>
-                ✏️ Manual Entry
-              </MenuItem>
               <MenuItem value="CPWD_SOR" sx={{ textAlign: "center" }}>
-                🏗️ CPWD SOR
+                CPWD SOR
               </MenuItem>
               <MenuItem value="GeM" sx={{ textAlign: "center" }}>
-                🛍️ GeM
-              </MenuItem>
-              <MenuItem value="AOR" sx={{ textAlign: "center" }}>
-                📋 AOR
+                GeM
               </MenuItem>
             </TextField>
             <TextField
@@ -2878,7 +2576,7 @@ export default function PriceManagement() {
                   fontSize: { xs: "0.9rem", sm: "0.95rem" },
                 }}
               >
-                🏗️ CPWD SOR
+                CPWD SOR
               </Typography>
               <Typography
                 variant="caption"
@@ -2904,7 +2602,7 @@ export default function PriceManagement() {
                   fontSize: { xs: "0.9rem", sm: "0.95rem" },
                 }}
               >
-                🛍️ GeM Portal
+                GeM Portal
               </Typography>
               <Typography
                 variant="caption"
@@ -2916,31 +2614,6 @@ export default function PriceManagement() {
               >
                 Government e-Marketplace - Real-time pricing data from approved
                 vendors
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 700,
-                  color: "text.primary",
-                  mb: 0.5,
-                  fontSize: { xs: "0.9rem", sm: "0.95rem" },
-                }}
-              >
-                📋 AOR & Other Sources
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "text.secondary",
-                  fontSize: { xs: "0.75rem", sm: "0.8rem" },
-                  lineHeight: 1.4,
-                }}
-              >
-                Annual Rate Orders and verified official procurement sources
               </Typography>
             </Box>
           </Grid>

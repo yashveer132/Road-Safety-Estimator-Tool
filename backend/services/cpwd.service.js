@@ -8,6 +8,29 @@ const __dirname = path.dirname(__filename);
 
 let cpwdData = null;
 
+const extractIRCCodes = (specString) => {
+  if (!specString) return [];
+
+  const ircPattern =
+    /IRC[\s:]*(\d{1,2}(?::\s?(?:SP\s?)?:?\s?\d{1,2})?[-–]?\d{4}|\d{1,2}[-–]?\d{4}|:\s?SP\s?:\s?\d{1,2}[-–]?\d{4})/gi;
+  const matches = specString.match(ircPattern) || [];
+
+  return matches
+    .map((match) => {
+      let cleaned = match
+        .replace(/\s+/g, "")
+        .replace(/–/g, "-")
+        .replace(/:/g, ":");
+
+      if (!cleaned.startsWith("IRC")) {
+        cleaned = "IRC:" + cleaned;
+      }
+
+      return cleaned.toUpperCase();
+    })
+    .filter((v, i, a) => a.indexOf(v) === i);
+};
+
 const loadCPWDData = () => {
   if (cpwdData) return cpwdData;
 
@@ -40,6 +63,7 @@ export const searchCPWDOffline = (itemName, unit) => {
     console.log(
       `   ✅ Exact CPWD match: ${exactMatch.itemName} (Item ${exactMatch.itemCode})`
     );
+    const ircRefs = extractIRCCodes(exactMatch.specification);
     return {
       unitPrice: exactMatch.unitPrice,
       source: "CPWD_SOR",
@@ -48,6 +72,7 @@ export const searchCPWDOffline = (itemName, unit) => {
       sourceUrl: `https://cpwd.gov.in/SOR/Item/${exactMatch.itemCode}`,
       description: exactMatch.description,
       specification: exactMatch.specification,
+      ircReferences: ircRefs,
       confidence: "high",
     };
   }

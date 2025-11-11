@@ -6,7 +6,7 @@ import {
 
 export const searchPrices = async (req, res) => {
   try {
-    const { query, category, source } = req.query;
+    const { query, category, source, limit = 500 } = req.query;
 
     let filter = { isActive: true };
 
@@ -25,9 +25,11 @@ export const searchPrices = async (req, res) => {
         $text: { $search: query },
       })
         .sort({ score: { $meta: "textScore" } })
-        .limit(100);
+        .limit(parseInt(limit));
     } else {
-      prices = await Price.find(filter).sort({ createdAt: -1 }).limit(100);
+      prices = await Price.find(filter)
+        .sort({ createdAt: -1 })
+        .limit(parseInt(limit));
     }
 
     res.status(200).json({
