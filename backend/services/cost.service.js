@@ -76,6 +76,23 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
           try {
             console.log(`\n   📦 Material: ${material.item}`);
 
+            if (!material.quantity || material.quantity <= 0) {
+              console.warn(
+                `      ⚠️ WARNING: Invalid or zero quantity for "${material.item}"`
+              );
+              console.warn(
+                `      💡 TIP: Check if AI extracted dimensions correctly from document`
+              );
+              missingOfficialRates.push({
+                itemName: material.item,
+                unit: material.unit,
+                error: "Invalid quantity (zero or negative)",
+                suggestion:
+                  "Review intervention description for dimensions/quantities",
+              });
+              continue;
+            }
+
             const canonicalUnit = normalizeUnit(material.unit);
 
             let normalizedQuantity = material.quantity;
@@ -146,6 +163,15 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
             );
             totalCost += totalPrice;
 
+            const isEstimated =
+              source === "ESTIMATED" ||
+              source === "EMERGENCY_FALLBACK" ||
+              priceInfo.official === false;
+
+            if (isEstimated) {
+              console.log(`      ⚠️ ESTIMATED PRICE (Not official CPWD/GeM)`);
+            }
+
             console.log(
               `      💵 Unit Price: ${formatCurrency(unitPrice)} per ${
                 material.unit
@@ -157,6 +183,10 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
                 sorCode ? ` [SOR: ${sorCode}]` : ""
               }`
             );
+
+            if (priceInfo.reasoning) {
+              console.log(`      💭 Reasoning: ${priceInfo.reasoning}`);
+            }
 
             itemsWithPrices.push({
               itemName: material.item,
@@ -171,62 +201,53 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
               sorCode: sorCode,
               rateYear: rateYear,
               confidence: confidence,
+              isEstimated: isEstimated,
+              reasoning: priceInfo?.reasoning || null,
               lastUpdated: new Date(),
             });
           } catch (materialError) {
-            if (materialError.message.startsWith("NO_OFFICIAL_RATE")) {
-              const errorParts = materialError.message.split("|");
-              missingOfficialRates.push({
-                itemName: errorParts[1] || material.item,
-                unit: errorParts[2] || material.unit,
-                intervention: intervention.recommendation,
-                section: intervention.sectionName,
-              });
-              console.error(
-                `      ❌ MISSING OFFICIAL RATE: ${material.item} (${material.unit})`
-              );
-              console.error(
-                `         This intervention cannot be processed without official rate`
-              );
-            } else {
-              console.error(
-                `      ❌ Error processing material "${material.item}":`,
-                materialError.message
-              );
-              throw materialError;
-            }
+            console.error(
+              `      ⚠️ Error processing material "${material.item}":`,
+              materialError.message
+            );
+            console.error(`      ⏭️ Skipping this material and continuing...`);
+
+            missingOfficialRates.push({
+              itemName: material.item,
+              unit: material.unit,
+              intervention: intervention.recommendation,
+              section: intervention.sectionName,
+              error: materialError.message,
+            });
           }
         }
       }
 
       if (missingOfficialRates.length > 0) {
-        console.error(`\n${"=".repeat(80)}`);
-        console.error(
-          `❌ INTERVENTION BLOCKED: Missing official rates for ${missingOfficialRates.length} material(s)`
+        console.warn(`\n${"=".repeat(80)}`);
+        console.warn(
+          `⚠️ WARNING: ${missingOfficialRates.length} material(s) could not be processed`
         );
-        console.error(`${"=".repeat(80)}`);
-        console.error(`📍 Intervention: ${intervention.recommendation}`);
-        console.error(
+        console.warn(`${"=".repeat(80)}`);
+        console.warn(`📍 Intervention: ${intervention.recommendation}`);
+        console.warn(
           `📋 Section: ${intervention.sectionName} (${intervention.sectionId})`
         );
-        console.error(`\n🚫 Missing rates for:`);
+        console.warn(`\n⚠️ Problematic materials:`);
         missingOfficialRates.forEach((missing, idx) => {
-          console.error(`   ${idx + 1}. ${missing.itemName} (${missing.unit})`);
+          console.warn(`   ${idx + 1}. ${missing.itemName} (${missing.unit})`);
+          if (missing.error) {
+            console.warn(`      Error: ${missing.error}`);
+          }
         });
-        console.error(`\n💡 Required action:`);
-        console.error(
-          `   Add these materials to: backend/data/cpwdSORRates2024.json`
+        console.warn(`\n💡 Note:`);
+        console.warn(
+          `   Intervention will be processed with available materials only`
         );
-        console.error(`   Include official CPWD SOR 2024 or GeM rates`);
-        console.error(`${"=".repeat(80)}\n`);
-
-        throw new Error(
-          `MISSING_OFFICIAL_RATES: ${missingOfficialRates.length} material(s) ` +
-            `in intervention "${intervention.recommendation}" lack official CPWD SOR or GeM rates. ` +
-            `Materials: ${missingOfficialRates
-              .map((m) => m.itemName)
-              .join(", ")}`
+        console.warn(
+          `   Estimated prices will be marked accordingly in the report`
         );
+        console.warn(`${"=".repeat(80)}\n`);
       }
 
       let aiRationale = null;
@@ -386,12 +407,52 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
       0
     );
     console.log(`   📊 GRAND TOTAL: ${formatCurrency(grandTotal)}`);
+
+    const estimatedCount = materialEstimates.reduce(
+      (count, section) =>
+        count +
+        section.items.filter((item) =>
+          item.materials.some((m) => m.isEstimated)
+        ).length,
+      0
+    );
+
+    if (estimatedCount > 0) {
+      console.warn(`\n${"=".repeat(60)}`);
+      console.warn(
+        `⚠️ NOTICE: ${estimatedCount} intervention(s) use estimated prices`
+      );
+      console.warn(`   These are marked as non-official in the report`);
+      console.warn(`${"=".repeat(60)}`);
+    }
+
     console.log("=".repeat(60) + "\n");
 
     return materialEstimates;
   } catch (error) {
     console.error("❌ Error calculating material costs:", error);
-    throw new Error(`Failed to calculate costs: ${error.message}`);
+
+    if (error.message && error.message.includes("MISSING_OFFICIAL_RATES")) {
+      console.warn(
+        "⚠️ Some materials lack official rates, but continuing with available data"
+      );
+      console.warn(
+        "   Please review the estimate and add missing rates to CPWD database"
+      );
+    }
+
+    if (
+      !error.message ||
+      (!error.message.includes("MISSING") &&
+        !error.message.includes("ESTIMATED"))
+    ) {
+      throw new Error(`Failed to calculate costs: ${error.message}`);
+    }
+
+    console.warn(
+      `⚠️ Cost calculation completed with warnings: ${error.message}`
+    );
+    return [];
   }
 };
 

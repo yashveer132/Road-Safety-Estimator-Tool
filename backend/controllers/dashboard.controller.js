@@ -52,23 +52,27 @@ export const getKPISummary = async (req, res) => {
   try {
     const metrics = await getDashboardMetrics("all-time");
 
+    console.log("📊 KPI Metrics:", JSON.stringify(metrics, null, 2));
+
     const kpis = {
-      totalEstimates: metrics.estimates.total,
-      completionRate: metrics.estimates.completionRate,
-      totalMaterialCost: metrics.costs.totalMaterialCost,
-      averageCostPerEstimate: metrics.costs.averageCostPerEstimate,
+      totalEstimates: metrics?.estimates?.total || 0,
+      completionRate: metrics?.estimates?.completionRate || 0,
+      totalMaterialCost: metrics?.costs?.totalMaterialCost || 0,
+      averageCostPerEstimate: metrics?.costs?.averageCostPerEstimate || 0,
 
-      totalInterventions: metrics.interventions.total,
-      uniqueMaterials: metrics.materials.totalUnique,
-      topIRCStandard: metrics.ircStandards.topUsed[0],
-      topMaterial: metrics.materials.topUsed[0],
+      totalInterventions: metrics?.interventions?.total || 0,
+      uniqueMaterials: metrics?.materials?.totalUnique || 0,
+      topIRCStandard: metrics?.ircStandards?.topUsed?.[0] || null,
+      topMaterial: metrics?.materials?.topUsed?.[0] || null,
 
-      estimateAccuracy: metrics.quality.estimateAccuracy,
-      priceDataAccuracy: metrics.quality.priceDataAccuracy,
+      estimateAccuracy: metrics?.quality?.estimateAccuracy || 0,
+      priceDataAccuracy: metrics?.quality?.priceDataAccuracy || 0,
 
-      successRate: metrics.documents.successRate,
-      failedEstimates: metrics.estimates.failed,
+      successRate: metrics?.documents?.successRate || 0,
+      failedEstimates: metrics?.estimates?.failed || 0,
     };
+
+    console.log("📤 Sending KPIs:", JSON.stringify(kpis, null, 2));
 
     res.status(200).json({
       success: true,
@@ -305,6 +309,56 @@ export const getCategoryBreakdown = async (req, res) => {
   }
 };
 
+export const getCategoryDetails = async (req, res) => {
+  try {
+    const { categoryName } = req.params;
+
+    console.log("📋 Fetching details for category:", categoryName);
+
+    const estimates = await Estimate.find({ status: "completed" }).lean();
+
+    const categoryItems = [];
+
+    estimates.forEach((estimate) => {
+      estimate.materialEstimates?.forEach((section) => {
+        if (section.sectionName === categoryName) {
+          section.items?.forEach((item) => {
+            categoryItems.push({
+              no: item.no || 0,
+              intervention: item.recommendation,
+              location: `${item.chainage || "N/A"} ${item.side || ""}`,
+              ircReference: item.ircReference,
+              materialsCount: item.materials?.length || 0,
+              totalCost: item.totalCost || 0,
+              materials: item.materials,
+              rationale: item.rationale,
+              assumptions: item.assumptions,
+              observation: item.observation,
+            });
+          });
+        }
+      });
+    });
+
+    console.log(`📊 Found ${categoryItems.length} items for ${categoryName}`);
+
+    res.status(200).json({
+      success: true,
+      data: categoryItems,
+      category: categoryName,
+      count: categoryItems.length,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Error fetching category details:", error);
+    res.status(500).json({
+      error: true,
+      message: "Failed to fetch category details",
+      details: error.message,
+    });
+  }
+};
+
 export const getIRCDistribution = async (req, res) => {
   try {
     const estimates = await Estimate.find({ status: "completed" }).lean();
@@ -363,5 +417,6 @@ export default {
   getPerformanceAnalytics,
   getRecentEstimates,
   getCategoryBreakdown,
+  getCategoryDetails,
   getIRCDistribution,
 };

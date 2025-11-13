@@ -7,6 +7,7 @@ import {
   getPerformanceAnalytics,
   getRecentEstimates,
   getCategoryBreakdown,
+  getCategoryDetails,
   getIRCDistribution,
 } from "../controllers/dashboard.controller.js";
 
@@ -25,6 +26,8 @@ router.get("/analytics/performance", getPerformanceAnalytics);
 router.get("/estimates/recent", getRecentEstimates);
 
 router.get("/breakdown/categories", getCategoryBreakdown);
+
+router.get("/breakdown/category/:categoryName", getCategoryDetails);
 
 router.get("/distribution/irc", getIRCDistribution);
 

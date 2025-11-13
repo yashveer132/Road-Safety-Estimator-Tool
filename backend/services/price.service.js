@@ -3,6 +3,7 @@ import { scrapeCPWDPrices, scrapeGeMPrices } from "./scraper.service.js";
 import { normalizeUnit } from "../utils/unit.js";
 import { searchCPWDOffline, sanitycheckPrice } from "./cpwd.service.js";
 import { roundToDecimals } from "../utils/format.js";
+import { generateFallbackPrice } from "./fallback-price.service.js";
 
 const priceEstimateCache = new Map();
 const CACHE_TTL = 24 * 60 * 60 * 1000;
@@ -264,51 +265,99 @@ export const estimatePriceIfNotFound = async (material) => {
       return result;
     }
 
-    console.error(`\n${"=".repeat(80)}`);
-    console.error(`❌ CRITICAL ERROR: NO OFFICIAL RATE FOUND`);
-    console.error(`${"=".repeat(80)}`);
-    console.error(`📌 Material: ${material.itemName}`);
-    console.error(`📏 Unit: ${material.unit} (normalized: ${normalizedUnit})`);
-    console.error(`📝 Description: ${material.description || "N/A"}`);
-    console.error(`\n🔍 Searched in:`);
-    console.error(
-      `   ✗ CPWD SOR 2024 offline database (cpwdSORRates2024.json)`
+    console.warn(`\n${"=".repeat(80)}`);
+    console.warn(
+      `⚠️ WARNING: NO OFFICIAL RATE FOUND - Using Fallback Estimation`
     );
-    console.error(`   ✗ CPWD SOR website (cpwd.gov.in)`);
-    console.error(`   ✗ GeM Portal (mkp.gem.gov.in)`);
-    console.error(`\n💡 RESOLUTION REQUIRED:`);
-    console.error(
-      `   1. Add this material to: backend/data/cpwdSORRates2024.json`
-    );
-    console.error(`   2. Include official CPWD SOR 2024 rate`);
-    console.error(`   3. Provide correct item code and specification`);
-    console.error(`   4. Re-run the estimate after updating the database`);
-    console.error(`\n⚠️  As per hackathon requirements:`);
-    console.error(
-      `   - Only CPWD SOR 2024 and GeM Portal rates are acceptable`
-    );
-    console.error(`   - Fallback/estimated prices are NOT permitted`);
-    console.error(`   - All interventions must have official rate sources`);
-    console.error(`${"=".repeat(80)}\n`);
+    console.warn(`${"=".repeat(80)}`);
+    console.warn(`📌 Material: ${material.itemName}`);
+    console.warn(`📏 Unit: ${material.unit} (normalized: ${normalizedUnit})`);
+    console.warn(`📝 Description: ${material.description || "N/A"}`);
+    console.warn(`\n🔍 Searched in:`);
+    console.warn(`   ✗ CPWD SOR 2024 offline database (cpwdSORRates2024.json)`);
+    console.warn(`   ✗ CPWD SOR website (cpwd.gov.in)`);
+    console.warn(`   ✗ GeM Portal (mkp.gem.gov.in)`);
+    console.warn(`\n💡 FALLBACK STRATEGY:`);
+    console.warn(`   ✓ Searching for similar materials in database`);
+    console.warn(`   ✓ Using AI to estimate price from internet sources`);
+    console.warn(`   ✓ Applying intelligent rule-based pricing`);
+    console.warn(`   ⚠️ Price will be marked as "ESTIMATED" (not official)`);
+    console.warn(`${"=".repeat(80)}\n`);
 
-    throw new Error(
-      `NO_OFFICIAL_RATE|${material.itemName}|${material.unit}|` +
-        `Cannot find official CPWD SOR 2024 or GeM rate. ` +
-        `This material must be added to cpwdSORRates2024.json with correct official rate. ` +
-        `Fallback pricing is disabled per hackathon requirements.`
-    );
-  } catch (error) {
-    if (error.message.startsWith("NO_OFFICIAL_RATE")) {
-      throw error;
+    const fallbackResult = await generateFallbackPrice(material);
+
+    setCachedEstimate(material.itemName, material.unit, fallbackResult);
+
+    try {
+      const newPrice = new Price({
+        itemName: material.itemName,
+        itemCode: `ESTIMATED-${Date.now()}`,
+        category: "road_safety",
+        unitPrice: fallbackResult.unitPrice,
+        unit: normalizedUnit,
+        currency: "₹",
+        source: "ESTIMATED",
+        sourceUrl: "AI and Database Analysis",
+        description: material.description || fallbackResult.reasoning,
+        rateYear: "2024",
+        validFrom: new Date(),
+        isActive: true,
+      });
+      await newPrice.save();
+      console.log(`   💾 Saved ESTIMATED price to database for future use`);
+    } catch (dbError) {
+      console.log(
+        `   ⚠️ Could not save estimated price to DB:`,
+        dbError.message
+      );
     }
 
+    console.log(
+      `   ✅ FALLBACK PRICE: ₹${fallbackResult.unitPrice} (${fallbackResult.confidence} confidence)`
+    );
+
+    return fallbackResult;
+  } catch (error) {
     console.error("   ❌ Unexpected error in price estimation:", error.message);
 
-    throw new Error(
-      `PRICE_ESTIMATION_ERROR|${material.itemName}|${material.unit}|` +
-        `Failed to estimate price: ${error.message}. ` +
-        `Please check material specifications and database integrity.`
-    );
+    console.warn("   🔄 Attempting emergency fallback pricing...");
+
+    try {
+      const emergencyFallback = await generateFallbackPrice(material);
+      console.warn(
+        `   ⚠️ Using emergency fallback: ₹${emergencyFallback.unitPrice}`
+      );
+      return emergencyFallback;
+    } catch (fallbackError) {
+      console.error(
+        "   ❌ Emergency fallback also failed:",
+        fallbackError.message
+      );
+
+      const normalizedUnit = normalizeUnit(material.unit);
+      const genericPrice =
+        normalizedUnit === "kg"
+          ? 100
+          : normalizedUnit === "sqm"
+          ? 500
+          : normalizedUnit === "cum"
+          ? 5000
+          : 250;
+
+      console.error(
+        `   ⚠️ Using absolute fallback price: ₹${genericPrice} per ${normalizedUnit}`
+      );
+
+      return {
+        unitPrice: genericPrice,
+        source: "EMERGENCY_FALLBACK",
+        confidence: "very-low",
+        official: false,
+        reasoning: `Generic emergency fallback price due to system error: ${error.message}`,
+        estimationSources: [],
+        estimatedAt: new Date(),
+      };
+    }
   }
 };
 

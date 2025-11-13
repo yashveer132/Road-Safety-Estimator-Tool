@@ -228,8 +228,11 @@ IRC:79-2019 - Delineators
 
 IRC:82-2023 - Pavement Maintenance
 • Cold mix asphalt: Pothole repair, compact to 50mm depth
-• Hot mix: Overlay 40-50mm thickness
+  - Volume = Area (sqm) × Depth (m)
+  - Example: 2.5 sqm × 0.05m = 0.125 cum
 • Tack coat: SS-1 emulsion at 0.25 kg/sqm
+  - Example: 2.5 sqm × 0.25 kg/sqm = 0.625 kg
+• Hot mix: Overlay 40-50mm thickness
 
 IRC:93-2019 - Traffic Signals
 • LED signal module: 300mm, 10W consumption
@@ -277,6 +280,14 @@ Thermoplastic Markings (per 100m x 150mm):
 Pedestrian Crossing (4m x 3m zebra):
 → Pedestrian Crossing Paint: 36 kg
 → Glass Beads Type B: 4.8 kg
+
+Pothole Repair (CRITICAL - Calculate from dimensions):
+→ If area given in sqm and depth in mm:
+   Volume (cum) = Area (sqm) × Depth (m)
+   Example: 2.5 sqm × 0.05m (50mm) = 0.125 cum
+→ Cold Mix Asphalt: [calculated volume] cum
+→ Tack Coat SS-1 Emulsion: Area (sqm) × 0.25 kg/sqm
+   Example: 2.5 sqm × 0.25 = 0.625 kg
 
 Solar Blinker (1 unit):
 → Solar Panel 10W: 1 nos

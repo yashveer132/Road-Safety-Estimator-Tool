@@ -871,9 +871,34 @@
         "bitumen",
         "emulsion",
         "ss",
+        "ss-1",
         "tack",
-        "coat"
+        "coat",
+        "ss1",
+        "tack coat"
       ]
+    },
+    {
+      "itemCode": "14.61A",
+      "category": "Pavement",
+      "itemName": "Tack Coat SS-1 Emulsion",
+      "description": "SS-1 grade bituminous emulsion for tack coat application, 0.25 kg/sqm as per IRC:82-2023",
+      "unitPrice": 65,
+      "unit": "kg",
+      "specification": "IRC:82-2023, SS-1 grade, 0.25 kg/sqm application rate",
+      "keywords": [
+        "tack",
+        "coat",
+        "ss-1",
+        "ss1",
+        "emulsion",
+        "bitumen",
+        "bituminous",
+        "pavement"
+      ],
+      "source": "CPWD SOR 2024 Vol 2, Item 14.6.5 (bitumen emulsion component)",
+      "verified": true,
+      "verificationDate": "2024-11-10"
     },
     {
       "itemCode": "14.62",

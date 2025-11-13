@@ -79,8 +79,12 @@ export default function EstimateDetails() {
       setLoading(true);
       try {
         const response = await axios.get(`${API_URL}/api/estimator/${id}`);
-        console.log("Whole response:", response);
+        console.log("Whole response:", JSON.stringify(response, null, 2));
         setEstimate(response.data.data);
+        console.log(
+          "Estimate data:",
+          JSON.stringify(response.data.data, null, 2)
+        );
       } catch (error) {
         console.error("Error fetching estimate:", error);
       } finally {

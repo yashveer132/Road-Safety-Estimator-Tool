@@ -218,6 +218,8 @@ export default function Dashboard() {
   const [ircData, setIrcData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeAlerts, setActiveAlerts] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [categoryDetails, setCategoryDetails] = useState([]);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -230,6 +232,12 @@ export default function Dashboard() {
   useEffect(() => {
     fetchAllDashboardData();
   }, []);
+
+  useEffect(() => {
+    if (categoryData.length > 0 && !selectedCategory) {
+      handleCategoryClick(categoryData[0].name, 0);
+    }
+  }, [categoryData]);
 
   const fetchAllDashboardData = async () => {
     try {
@@ -244,6 +252,9 @@ export default function Dashboard() {
           axios.get(`${apiUrl}/api/dashboard/estimates/recent?limit=8`),
         ]);
 
+      console.log("📊 KPI Data:", kpiRes.data.data);
+      console.log("📊 Category Data:", categoryRes.data.data);
+
       setKpiData(kpiRes.data.data);
       setPerformanceData(performanceRes.data.data);
       setCategoryData(categoryRes.data.data);
@@ -256,6 +267,31 @@ export default function Dashboard() {
       enqueueSnackbar("Failed to load dashboard data", { variant: "error" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCategoryClick = async (categoryName, index) => {
+    try {
+      setSelectedCategory(categoryName);
+
+      const response = await axios.get(
+        `${apiUrl}/api/dashboard/breakdown/category/${encodeURIComponent(
+          categoryName
+        )}`
+      );
+
+      setCategoryDetails(response.data.data || []);
+
+      setTimeout(() => {
+        const tableElement = document.getElementById("category-details-table");
+        if (tableElement) {
+          tableElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Error fetching category details:", error);
+      enqueueSnackbar("Failed to load category details", { variant: "error" });
+      setCategoryDetails([]);
     }
   };
 
@@ -692,10 +728,25 @@ export default function Dashboard() {
               <Grid item xs={12} sm={6} lg={4} key={idx}>
                 <Card
                   elevation={0}
+                  onClick={() => handleCategoryClick(cat.name, idx)}
                   sx={{
-                    border: "1px solid",
-                    borderColor: "divider",
+                    border: "2px solid",
+                    borderColor:
+                      selectedCategory === cat.name
+                        ? "primary.main"
+                        : "divider",
                     borderRadius: 2,
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                    bgcolor:
+                      selectedCategory === cat.name
+                        ? "primary.lighter"
+                        : "background.paper",
+                    "&:hover": {
+                      borderColor: "primary.main",
+                      transform: "translateY(-4px)",
+                      boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
+                    },
                   }}
                 >
                   <CardContent
@@ -846,6 +897,273 @@ export default function Dashboard() {
               </Grid>
             ))}
           </Grid>
+
+          {selectedCategory && categoryDetails.length > 0 && (
+            <Box id="category-details-table" sx={{ mt: 4 }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: { xs: 2, sm: 3 },
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 2,
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 3,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    justifyContent: "center",
+                    fontSize: { xs: "1.1rem", sm: "1.3rem" },
+                    textAlign: "center",
+                  }}
+                >
+                  <BookmarkIcon color="primary" />
+                  {selectedCategory} - Detailed Breakdown
+                </Typography>
+
+                <Box sx={{ overflowX: "auto" }}>
+                  <table
+                    style={{
+                      width: "100%",
+                      borderCollapse: "collapse",
+                      minWidth: "800px",
+                    }}
+                  >
+                    <thead>
+                      <tr
+                        style={{
+                          backgroundColor: "#1E293B",
+                          color: "white",
+                        }}
+                      >
+                        <th
+                          style={{
+                            padding: "12px",
+                            textAlign: "center",
+                            borderBottom: "2px solid #ddd",
+                          }}
+                        >
+                          #
+                        </th>
+                        <th
+                          style={{
+                            padding: "12px",
+                            textAlign: "center",
+                            borderBottom: "2px solid #ddd",
+                          }}
+                        >
+                          Intervention
+                        </th>
+                        <th
+                          style={{
+                            padding: "12px",
+                            textAlign: "center",
+                            borderBottom: "2px solid #ddd",
+                          }}
+                        >
+                          Location
+                        </th>
+                        <th
+                          style={{
+                            padding: "12px",
+                            textAlign: "center",
+                            borderBottom: "2px solid #ddd",
+                          }}
+                        >
+                          IRC Reference
+                        </th>
+                        <th
+                          style={{
+                            padding: "12px",
+                            textAlign: "center",
+                            borderBottom: "2px solid #ddd",
+                          }}
+                        >
+                          Materials
+                        </th>
+                        <th
+                          style={{
+                            padding: "12px",
+                            textAlign: "center",
+                            borderBottom: "2px solid #ddd",
+                          }}
+                        >
+                          Total Cost
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {categoryDetails.map((item, idx) => (
+                        <tr
+                          key={idx}
+                          style={{
+                            backgroundColor:
+                              idx % 2 === 0
+                                ? "transparent"
+                                : "rgba(0,0,0,0.02)",
+                            transition: "background-color 0.2s",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor =
+                              "rgba(59, 130, 246, 0.08)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor =
+                              idx % 2 === 0
+                                ? "transparent"
+                                : "rgba(0,0,0,0.02)";
+                          }}
+                        >
+                          <td
+                            style={{
+                              padding: "12px",
+                              borderBottom: "1px solid #eee",
+                              fontWeight: 600,
+                              textAlign: "center",
+                            }}
+                          >
+                            {item.no || idx + 1}
+                          </td>
+                          <td
+                            style={{
+                              padding: "12px",
+                              borderBottom: "1px solid #eee",
+                              maxWidth: "300px",
+                              textAlign: "center",
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontSize: "0.875rem",
+                                lineHeight: 1.5,
+                              }}
+                            >
+                              {item.intervention?.substring(0, 100)}
+                              {item.intervention?.length > 100 ? "..." : ""}
+                            </Typography>
+                          </td>
+                          <td
+                            style={{
+                              padding: "12px",
+                              borderBottom: "1px solid #eee",
+                              textAlign: "center",
+                            }}
+                          >
+                            <Chip
+                              label={item.location || "N/A"}
+                              size="small"
+                              variant="outlined"
+                              sx={{ fontSize: "0.75rem" }}
+                            />
+                          </td>
+                          <td
+                            style={{
+                              padding: "12px",
+                              borderBottom: "1px solid #eee",
+                              textAlign: "center",
+                            }}
+                          >
+                            <Chip
+                              label={item.ircReference || "N/A"}
+                              size="small"
+                              color="secondary"
+                              sx={{
+                                fontSize: "0.75rem",
+                                backgroundColor: "#7C3AED !important",
+                                color: "white !important",
+                              }}
+                            />
+                          </td>
+                          <td
+                            style={{
+                              padding: "12px",
+                              borderBottom: "1px solid #eee",
+                              textAlign: "center",
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 500 }}
+                            >
+                              {item.materialsCount || 0}
+                            </Typography>
+                          </td>
+                          <td
+                            style={{
+                              padding: "12px",
+                              borderBottom: "1px solid #eee",
+                              textAlign: "center",
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: 700,
+                                color: "primary.main",
+                              }}
+                            >
+                              ₹{item.totalCost?.toLocaleString() || 0}
+                            </Typography>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr
+                        style={{
+                          backgroundColor: "#1E293B",
+                          color: "white",
+                          fontWeight: 700,
+                        }}
+                      >
+                        <td
+                          colSpan="5"
+                          style={{
+                            padding: "12px",
+                            textAlign: "right",
+                            borderTop: "2px solid #ddd",
+                          }}
+                        >
+                          <Typography variant="body1" sx={{ fontWeight: 700, color: "white" }}>
+                            TOTAL:
+                          </Typography>
+                        </td>
+                        <td
+                          style={{
+                            padding: "12px",
+                            textAlign: "center",
+                            borderTop: "2px solid #ddd",
+                          }}
+                        >
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontWeight: 700,
+                              color: "#10B981",
+                            }}
+                          >
+                            ₹
+                            {categoryDetails
+                              .reduce(
+                                (sum, item) => sum + (item.totalCost || 0),
+                                0
+                              )
+                              .toLocaleString()}
+                          </Typography>
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </Box>
+              </Paper>
+            </Box>
+          )}
         </TabPanel>
 
         <TabPanel value={tabValue} index={2}>
