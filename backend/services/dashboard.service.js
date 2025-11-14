@@ -311,27 +311,12 @@ export const calculateDashboardMetrics = async (period = "all-time") => {
 
 export const getDashboardMetrics = async (period = "all-time") => {
   try {
-    const cacheExpiry =
-      period === "daily" ? 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
-
-    const cachedMetrics = await DashboardMetrics.findOne({
-      period,
-      lastCalculated: {
-        $gte: new Date(Date.now() - cacheExpiry),
-      },
-    }).sort({ lastCalculated: -1 });
-
-    if (cachedMetrics) {
-      console.log(`✅ Using cached metrics for period: ${period}`);
-      return cachedMetrics;
-    }
-
     const metricsData = await calculateDashboardMetrics(period);
 
     const savedMetrics = new DashboardMetrics(metricsData);
     await savedMetrics.save();
 
-    return savedMetrics;
+    return metricsData;
   } catch (error) {
     console.error("Error getting dashboard metrics:", error);
     throw error;

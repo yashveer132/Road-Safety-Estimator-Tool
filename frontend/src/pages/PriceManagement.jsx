@@ -414,7 +414,7 @@ export default function PriceManagement() {
       try {
         const d = new Date(date);
         if (isNaN(d.getTime())) return "Invalid Date";
-        return d.toISOString().split("T")[0];
+        return d.toLocaleDateString("en-IN");
       } catch (error) {
         return "Invalid Date";
       }
@@ -422,31 +422,23 @@ export default function PriceManagement() {
 
     const headers = [
       "Item Name",
-      "Item Code",
       "Category",
-      "Unit Price (₹)",
+      "Unit Price",
       "Unit",
       "Source",
-      "Description",
       "IRC References",
-      "Source URL",
-      "Created Date",
-      "Last Updated",
+      "Updated",
     ];
 
     const rows = results.map((item) => [
-      item.itemName || "",
-      item.itemCode || "",
+      item.itemName + (item.itemCode ? ` (Code: ${item.itemCode})` : ""),
       item.category || "General",
       item.unitPrice
         ? `₹${Number(item.unitPrice).toLocaleString("en-IN")}`
         : "₹0",
       item.unit || "N/A",
       item.source || "",
-      item.description || "",
       item.ircReference ? item.ircReference.join("; ") : "",
-      item.sourceUrl || "",
-      formatDateForCSV(item.createdAt),
       formatDateForCSV(item.lastVerified),
     ]);
 
@@ -608,8 +600,8 @@ export default function PriceManagement() {
 
       {tabValue === 0 && (
         <>
-          <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} sx={{ mb: 4 }}>
-            <Grid item xs={12} sm={6} md={3}>
+          <Grid container spacing={2} sx={{ mb: 4 }}>
+            <Grid item xs={12} sm={6} md={4}>
               <Card
                 elevation={0}
                 sx={{
@@ -619,6 +611,7 @@ export default function PriceManagement() {
                   background:
                     "linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%)",
                   transition: "all 0.3s ease-in-out",
+                  minHeight: 160,
                   "&:hover": {
                     transform: "translateY(-4px)",
                     borderColor: "primary.main",
@@ -676,7 +669,7 @@ export default function PriceManagement() {
               </Card>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={4}>
               <Card
                 elevation={0}
                 sx={{
@@ -686,6 +679,7 @@ export default function PriceManagement() {
                   background:
                     "linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%)",
                   transition: "all 0.3s ease-in-out",
+                  minHeight: 160,
                   "&:hover": {
                     transform: "translateY(-4px)",
                     borderColor: "secondary.main",
@@ -743,74 +737,7 @@ export default function PriceManagement() {
               </Card>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3}>
-              <Card
-                elevation={0}
-                sx={{
-                  borderRadius: { xs: 2, sm: 3 },
-                  border: "1px solid",
-                  borderColor: "divider",
-                  background:
-                    "linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(22, 163, 74, 0.1) 100%)",
-                  transition: "all 0.3s ease-in-out",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    borderColor: "success.main",
-                  },
-                }}
-              >
-                <CardContent sx={{ textAlign: "center", p: { xs: 2, sm: 3 } }}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: { xs: 1.5, sm: 2 },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: { xs: 48, sm: 56 },
-                        height: { xs: 48, sm: 56 },
-                        borderRadius: 2,
-                        bgcolor: "#22C55E",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "white",
-                        fontSize: { xs: "1.25rem", sm: "1.5rem" },
-                      }}
-                    >
-                      💹
-                    </Box>
-                    <Box>
-                      <Typography
-                        variant="h5"
-                        sx={{
-                          fontWeight: 700,
-                          color: "#22C55E",
-                          fontSize: { xs: "1.5rem", sm: "1.875rem" },
-                        }}
-                      >
-                        ₹{stats.avgPrice.toLocaleString("en-IN")}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "text.secondary",
-                          fontWeight: 500,
-                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
-                        }}
-                      >
-                        Avg Price
-                      </Typography>
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={4}>
               <Card
                 elevation={0}
                 sx={{
@@ -820,6 +747,7 @@ export default function PriceManagement() {
                   background:
                     "linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%)",
                   transition: "all 0.3s ease-in-out",
+                  minHeight: 180,
                   "&:hover": {
                     transform: "translateY(-4px)",
                     borderColor: "info.main",
@@ -881,115 +809,9 @@ export default function PriceManagement() {
             </Grid>
           </Grid>
 
-          <Grid container spacing={{ xs: 2, sm: 2 }} sx={{ mb: 4 }}>
-            <Grid item xs={12} sm={6}>
-              <Card
-                elevation={0}
-                sx={{
-                  borderRadius: { xs: 2, sm: 3 },
-                  border: "1px solid",
-                  borderColor: "divider",
-                  p: { xs: 2, sm: 2.5 },
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: { xs: 1.5, sm: 2 },
-                    textAlign: "center",
-                  }}
-                >
-                  <TrendingUpIcon
-                    sx={{
-                      fontSize: { xs: 32, sm: 40 },
-                      color: "#10B981",
-                      opacity: 0.7,
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Box sx={{ flex: 1 }}>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "text.secondary",
-                        mb: 0.5,
-                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
-                      }}
-                    >
-                      Highest Price
-                    </Typography>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: { xs: "1.25rem", sm: "1.5rem" },
-                      }}
-                    >
-                      ₹{stats.maxPrice.toLocaleString("en-IN")}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <Card
-                elevation={0}
-                sx={{
-                  borderRadius: { xs: 2, sm: 3 },
-                  border: "1px solid",
-                  borderColor: "divider",
-                  p: { xs: 2, sm: 2.5 },
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: { xs: 1.5, sm: 2 },
-                    textAlign: "center",
-                  }}
-                >
-                  <TrendingDownIcon
-                    sx={{
-                      fontSize: { xs: 32, sm: 40 },
-                      color: "#F59E0B",
-                      opacity: 0.7,
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Box sx={{ flex: 1 }}>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "text.secondary",
-                        mb: 0.5,
-                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
-                      }}
-                    >
-                      Lowest Price
-                    </Typography>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: { xs: "1.25rem", sm: "1.5rem" },
-                      }}
-                    >
-                      ₹{stats.minPrice.toLocaleString("en-IN")}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Card>
-            </Grid>
-          </Grid>
-
-          <Grid container spacing={{ xs: 2, sm: 2, md: 2 }} sx={{ mb: 4 }}>
+          <Grid container spacing={2} sx={{ mb: 4, justifyContent: "center" }}>
             {Object.entries(sourceStats).map(([source, data]) => (
-              <Grid item xs={12} sm={6} md={4} key={source}>
+              <Grid item xs={12} sm={6} md={6} key={source}>
                 <Card
                   elevation={0}
                   sx={{
@@ -1000,6 +822,7 @@ export default function PriceManagement() {
                       "rgba(" +
                       SOURCE_COLORS[source].match(/\d+/g).join(",") +
                       ", 0.05)",
+                    minHeight: 160,
                   }}
                 >
                   <CardContent
@@ -1033,20 +856,6 @@ export default function PriceManagement() {
                         }}
                       >
                         {data.count} items
-                      </Typography>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color: "text.secondary",
-                          display: "block",
-                          mt: { xs: 0.25, sm: 0.5 },
-                          fontSize: { xs: "0.7rem", sm: "0.75rem" },
-                        }}
-                      >
-                        Avg: ₹
-                        {Math.round(data.total / data.count).toLocaleString(
-                          "en-IN"
-                        )}
                       </Typography>
                     </Box>
                   </CardContent>
@@ -1915,34 +1724,9 @@ export default function PriceManagement() {
             >
               📋 Item Details
             </DialogTitle>
-            <DialogContent sx={{ textAlign: "center" }}>
-              <Box
-                sx={{
-                  pt: 2,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 2,
-                  alignItems: "center",
-                }}
-              >
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "text.secondary",
-                      fontWeight: 600,
-                      display: "block",
-                      mb: 0.5,
-                    }}
-                  >
-                    Item Name
-                  </Typography>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                    {selectedItem.itemName}
-                  </Typography>
-                </Box>
-
-                {selectedItem.itemCode && (
+            <DialogContent>
+              <Grid container spacing={2} sx={{ pt: 2 }}>
+                <Grid item xs={4} sx={{ textAlign: "center" }}>
                   <Box>
                     <Typography
                       variant="caption"
@@ -1953,82 +1737,16 @@ export default function PriceManagement() {
                         mb: 0.5,
                       }}
                     >
-                      Item Code
+                      Item Name
                     </Typography>
-                    <Chip
-                      label={selectedItem.itemCode}
-                      size="small"
-                      variant="outlined"
-                    />
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                      {selectedItem.itemName}
+                    </Typography>
                   </Box>
-                )}
+                </Grid>
 
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "text.secondary",
-                      fontWeight: 600,
-                      display: "block",
-                      mb: 0.5,
-                    }}
-                  >
-                    Price
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    sx={{ fontWeight: 700, color: "primary.main" }}
-                  >
-                    ₹{(selectedItem.unitPrice || 0).toLocaleString("en-IN")} per{" "}
-                    {selectedItem.unit}
-                  </Typography>
-                </Box>
-
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "text.secondary",
-                      fontWeight: 600,
-                      display: "block",
-                      mb: 0.5,
-                    }}
-                  >
-                    Category
-                  </Typography>
-                  <Chip
-                    label={selectedItem.category}
-                    size="small"
-                    sx={{ textTransform: "capitalize" }}
-                  />
-                </Box>
-
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "text.secondary",
-                      fontWeight: 600,
-                      display: "block",
-                      mb: 0.5,
-                    }}
-                  >
-                    Source
-                  </Typography>
-                  <Chip
-                    label={selectedItem.source}
-                    size="small"
-                    sx={{
-                      bgcolor: SOURCE_COLORS[selectedItem.source] + "20",
-                      color: SOURCE_COLORS[selectedItem.source],
-                      border: `1px solid ${SOURCE_COLORS[selectedItem.source]}`,
-                      fontWeight: 600,
-                    }}
-                  />
-                </Box>
-
-                {selectedItem.ircReference &&
-                  selectedItem.ircReference.length > 0 && (
+                {selectedItem.itemCode && (
+                  <Grid item xs={4} sx={{ textAlign: "center" }}>
                     <Box>
                       <Typography
                         variant="caption"
@@ -2039,90 +1757,173 @@ export default function PriceManagement() {
                           mb: 0.5,
                         }}
                       >
-                        IRC References
+                        Item Code
                       </Typography>
-                      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                        {selectedItem.ircReference.map((ref, idx) => (
-                          <Chip key={idx} label={ref} size="small" />
-                        ))}
-                      </Box>
+                      <Chip
+                        label={selectedItem.itemCode}
+                        size="small"
+                        variant="outlined"
+                      />
                     </Box>
+                  </Grid>
+                )}
+
+                <Grid item xs={4} sx={{ textAlign: "center" }}>
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                        fontWeight: 600,
+                        display: "block",
+                        mb: 0.5,
+                      }}
+                    >
+                      Price
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: 700, color: "primary.main" }}
+                    >
+                      ₹{(selectedItem.unitPrice || 0).toLocaleString("en-IN")}{" "}
+                      per {selectedItem.unit}
+                    </Typography>
+                  </Box>
+                </Grid>
+
+                <Grid item xs={4} sx={{ textAlign: "center" }}>
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                        fontWeight: 600,
+                        display: "block",
+                        mb: 0.5,
+                      }}
+                    >
+                      Category
+                    </Typography>
+                    <Chip
+                      label={selectedItem.category}
+                      size="small"
+                      sx={{ textTransform: "capitalize" }}
+                    />
+                  </Box>
+                </Grid>
+
+                <Grid item xs={4} sx={{ textAlign: "center" }}>
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                        fontWeight: 600,
+                        display: "block",
+                        mb: 0.5,
+                      }}
+                    >
+                      Source
+                    </Typography>
+                    <Chip
+                      label={selectedItem.source}
+                      size="small"
+                      sx={{
+                        bgcolor: SOURCE_COLORS[selectedItem.source] + "20",
+                        color: SOURCE_COLORS[selectedItem.source],
+                        border: `1px solid ${
+                          SOURCE_COLORS[selectedItem.source]
+                        }`,
+                        fontWeight: 600,
+                      }}
+                    />
+                  </Box>
+                </Grid>
+
+                {selectedItem.ircReference &&
+                  selectedItem.ircReference.length > 0 && (
+                    <Grid item xs={4} sx={{ textAlign: "center" }}>
+                      <Box>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "text.secondary",
+                            fontWeight: 600,
+                            display: "block",
+                            mb: 0.5,
+                          }}
+                        >
+                          IRC References
+                        </Typography>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            gap: 1,
+                            flexWrap: "wrap",
+                            justifyContent: "center",
+                          }}
+                        >
+                          {selectedItem.ircReference.map((ref, idx) => (
+                            <Chip key={idx} label={ref} size="small" />
+                          ))}
+                        </Box>
+                      </Box>
+                    </Grid>
                   )}
 
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "text.secondary",
-                      fontWeight: 600,
-                      display: "block",
-                      mb: 0.5,
-                    }}
-                  >
-                    Timestamps
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{ color: "text.secondary", display: "block", mb: 0.5 }}
-                  >
-                    Added: {formatDate(selectedItem.createdAt)}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{ color: "text.secondary", display: "block" }}
-                  >
-                    Last Updated: {formatDate(selectedItem.lastVerified)}
-                  </Typography>
-                </Box>
+                <Grid item xs={4} sx={{ textAlign: "center" }}>
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                        fontWeight: 600,
+                        display: "block",
+                        mb: 0.5,
+                      }}
+                    >
+                      Timestamps
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                        display: "block",
+                        mb: 0.5,
+                      }}
+                    >
+                      Added: {formatDate(selectedItem.createdAt)}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{ color: "text.secondary", display: "block" }}
+                    >
+                      Last Updated: {formatDate(selectedItem.lastVerified)}
+                    </Typography>
+                  </Box>
+                </Grid>
 
                 {selectedItem.description && (
-                  <Box>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "text.secondary",
-                        fontWeight: 600,
-                        display: "block",
-                        mb: 0.5,
-                      }}
-                    >
-                      Description
-                    </Typography>
-                    <Typography variant="body2">
-                      {selectedItem.description}
-                    </Typography>
-                  </Box>
+                  <Grid item xs={4} sx={{ textAlign: "center" }}>
+                    <Box>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "text.secondary",
+                          fontWeight: 600,
+                          display: "block",
+                          mb: 0.5,
+                        }}
+                      >
+                        Description
+                      </Typography>
+                      <Typography variant="body2">
+                        {selectedItem.description}
+                      </Typography>
+                    </Box>
+                  </Grid>
                 )}
-
-                {selectedItem.sourceUrl && (
-                  <Box>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "text.secondary",
-                        fontWeight: 600,
-                        display: "block",
-                        mb: 0.5,
-                      }}
-                    >
-                      Source URL
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "primary.main",
-                        textDecoration: "underline",
-                        cursor: "pointer",
-                      }}
-                      onClick={() =>
-                        window.open(selectedItem.sourceUrl, "_blank")
-                      }
-                    >
-                      {selectedItem.sourceUrl}
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
+              </Grid>
             </DialogContent>
             <DialogActions sx={{ justifyContent: "center" }}>
               <Button onClick={handleCloseDetails} variant="outlined">

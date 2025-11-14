@@ -260,21 +260,6 @@ export default function EstimateDetails() {
             }}
           >
             <Button
-              variant="outlined"
-              startIcon={<PrintIcon />}
-              onClick={() => window.print()}
-              sx={{
-                fontWeight: 600,
-                fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                minWidth: { xs: "auto", sm: "auto" },
-                px: { xs: 1, sm: 2 },
-              }}
-              className="no-print"
-            >
-              <Box sx={{ display: { xs: "none", sm: "block" } }}>Print</Box>
-              <Box sx={{ display: { xs: "block", sm: "none" } }}>🖨️</Box>
-            </Button>
-            <Button
               variant="contained"
               startIcon={<DownloadIcon />}
               onClick={() => {
@@ -296,66 +281,6 @@ export default function EstimateDetails() {
                 Export PDF
               </Box>
               <Box sx={{ display: { xs: "block", sm: "none" } }}>📄</Box>
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<TableChartIcon />}
-              onClick={() => {
-                const headers = [
-                  "Sr.",
-                  "Category",
-                  "Intervention",
-                  "Material",
-                  "Quantity",
-                  "Unit",
-                  "Rate (₹)",
-                  "Total (₹)",
-                  "IRC Ref",
-                  "Source",
-                ];
-                let csvContent = headers.join(",") + "\n";
-
-                let srNo = 1;
-                estimate.interventions?.forEach((category) => {
-                  category.items?.forEach((item) => {
-                    const row = [
-                      srNo++,
-                      category.categoryName.replace(/,/g, ";"),
-                      item.intervention.replace(/,/g, ";"),
-                      item.materials.replace(/,/g, ";"),
-                      item.quantity,
-                      item.unit,
-                      item.unitRate || 0,
-                      item.totalCost || 0,
-                      item.ircReference.replace(/,/g, ";"),
-                      (item.source || "N/A").replace(/,/g, ";"),
-                    ];
-                    csvContent += row.join(",") + "\n";
-                  });
-                });
-
-                csvContent += `\n,,,,,,GRAND TOTAL,${totalCost},,\n`;
-
-                const blob = new Blob([csvContent], {
-                  type: "text/csv;charset=utf-8;",
-                });
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = `${estimate.documentName}_BOQ.csv`;
-                link.click();
-              }}
-              sx={{
-                fontWeight: 600,
-                fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                minWidth: { xs: "auto", sm: "auto" },
-                px: { xs: 1, sm: 2 },
-              }}
-              className="no-print"
-            >
-              <Box sx={{ display: { xs: "none", sm: "block" } }}>
-                Export BOQ
-              </Box>
-              <Box sx={{ display: { xs: "block", sm: "none" } }}>📊</Box>
             </Button>
             <Button
               variant="outlined"
@@ -542,13 +467,20 @@ export default function EstimateDetails() {
             >
               Categories Overview
             </Typography>
-            <Grid
-              container
-              spacing={{ xs: 1, sm: 2 }}
-              sx={{ justifyContent: "center" }}
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "stretch",
+                justifyContent: "center",
+                gap: 2,
+              }}
             >
               {estimate.categories.map((category) => (
-                <Grid item xs={12} sm={6} md={4} key={category.id}>
+                <Box
+                  key={category.id}
+                  sx={{ flex: "1 1 300px", maxWidth: 400 }}
+                >
                   <Tooltip
                     title={getCategoryInfo(category.id, category.name).tooltip}
                     arrow
@@ -562,6 +494,7 @@ export default function EstimateDetails() {
                         borderColor: "divider",
                         transition: "all 0.2s",
                         cursor: "pointer",
+                        height: "100%",
                         "&:hover": {
                           borderColor: "primary.main",
                           transform: "translateY(-2px)",
@@ -626,9 +559,9 @@ export default function EstimateDetails() {
                       </CardContent>
                     </Card>
                   </Tooltip>
-                </Grid>
+                </Box>
               ))}
-            </Grid>
+            </Box>
           </Box>
         )}
 
@@ -946,7 +879,7 @@ export default function EstimateDetails() {
                           sx={{
                             fontWeight: 700,
                             fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                            minWidth: { xs: 40, sm: 50 },
+                            minWidth: { xs: 30, sm: 40 },
                           }}
                         >
                           #
@@ -956,7 +889,7 @@ export default function EstimateDetails() {
                           sx={{
                             fontWeight: 700,
                             fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                            minWidth: { xs: 120, sm: 150 },
+                            minWidth: { xs: 100, sm: 130 },
                           }}
                         >
                           Intervention
@@ -966,7 +899,7 @@ export default function EstimateDetails() {
                           sx={{
                             fontWeight: 700,
                             fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                            minWidth: { xs: 80, sm: 100 },
+                            minWidth: { xs: 70, sm: 90 },
                           }}
                         >
                           IRC Reference
@@ -976,7 +909,7 @@ export default function EstimateDetails() {
                           sx={{
                             fontWeight: 700,
                             fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                            minWidth: { xs: 150, sm: 200 },
+                            minWidth: { xs: 130, sm: 180 },
                           }}
                         >
                           Materials
@@ -986,7 +919,7 @@ export default function EstimateDetails() {
                           sx={{
                             fontWeight: 700,
                             fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                            minWidth: { xs: 80, sm: 100 },
+                            minWidth: { xs: 70, sm: 90 },
                           }}
                         >
                           Quantity
@@ -996,7 +929,7 @@ export default function EstimateDetails() {
                           sx={{
                             fontWeight: 700,
                             fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                            minWidth: { xs: 90, sm: 110 },
+                            minWidth: { xs: 80, sm: 100 },
                           }}
                         >
                           Unit Rate (₹)
@@ -1006,7 +939,7 @@ export default function EstimateDetails() {
                           sx={{
                             fontWeight: 700,
                             fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                            minWidth: { xs: 90, sm: 110 },
+                            minWidth: { xs: 80, sm: 100 },
                           }}
                         >
                           Total (₹)
@@ -1016,7 +949,7 @@ export default function EstimateDetails() {
                           sx={{
                             fontWeight: 700,
                             fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                            minWidth: { xs: 70, sm: 80 },
+                            minWidth: { xs: 60, sm: 70 },
                           }}
                         >
                           Source
@@ -1026,7 +959,7 @@ export default function EstimateDetails() {
                           sx={{
                             fontWeight: 700,
                             fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                            minWidth: { xs: 80, sm: 100 },
+                            minWidth: { xs: 70, sm: 90 },
                           }}
                         >
                           Details
@@ -1600,14 +1533,19 @@ export default function EstimateDetails() {
           <Box
             sx={{
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
-              justifyContent: "center",
-              gap: 1,
+              pr: 5,
             }}
           >
-            <InfoOutlinedIcon />
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              Intervention Details: {rationaleModal.item?.intervention}
+              Intervention Details
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ mt: 1, opacity: 0.9, textAlign: "center" }}
+            >
+              {rationaleModal.item?.intervention}
             </Typography>
           </Box>
           <IconButton

@@ -574,7 +574,7 @@ export default function Dashboard() {
                           border: `1px solid`,
                           borderColor: `${COLORS[idx % COLORS.length]}30`,
                           textAlign: "center",
-                          minHeight: { xs: 70, sm: 80 },
+                          minHeight: { xs: 100, sm: 110 },
                           width: "100%",
                           display: "flex",
                           flexDirection: "column",
@@ -742,6 +742,7 @@ export default function Dashboard() {
                       selectedCategory === cat.name
                         ? "primary.lighter"
                         : "background.paper",
+                    minHeight: { xs: 200, sm: 240 },
                     "&:hover": {
                       borderColor: "primary.main",
                       transform: "translateY(-4px)",
@@ -794,7 +795,7 @@ export default function Dashboard() {
                       </Typography>
                     </Box>
                     <Grid container spacing={{ xs: 1, sm: 2 }}>
-                      <Grid item xs={6}>
+                      <Grid item xs={4}>
                         <Box sx={{ textAlign: "center" }}>
                           <Typography
                             variant="caption"
@@ -819,7 +820,7 @@ export default function Dashboard() {
                           </Typography>
                         </Box>
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid item xs={4}>
                         <Box sx={{ textAlign: "center" }}>
                           <Typography
                             variant="caption"
@@ -843,7 +844,7 @@ export default function Dashboard() {
                           </Typography>
                         </Box>
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid item xs={4}>
                         <Box sx={{ textAlign: "center" }}>
                           <Typography
                             variant="caption"
@@ -864,30 +865,6 @@ export default function Dashboard() {
                             }}
                           >
                             {cat.percentage}%
-                          </Typography>
-                        </Box>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Box sx={{ textAlign: "center" }}>
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              color: "text.secondary",
-                              display: "block",
-                              mb: 0.5,
-                              fontSize: { xs: "0.7rem", sm: "0.75rem" },
-                            }}
-                          >
-                            Avg Cost
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: 700,
-                              fontSize: { xs: "0.875rem", sm: "1rem" },
-                            }}
-                          >
-                            ₹{cat.averageCostPerItem.toLocaleString()}
                           </Typography>
                         </Box>
                       </Grid>
@@ -1044,8 +1021,7 @@ export default function Dashboard() {
                                 lineHeight: 1.5,
                               }}
                             >
-                              {item.intervention?.substring(0, 100)}
-                              {item.intervention?.length > 100 ? "..." : ""}
+                              {item.intervention}
                             </Typography>
                           </td>
                           <td
@@ -1130,7 +1106,10 @@ export default function Dashboard() {
                             borderTop: "2px solid #ddd",
                           }}
                         >
-                          <Typography variant="body1" sx={{ fontWeight: 700, color: "white" }}>
+                          <Typography
+                            variant="body1"
+                            sx={{ fontWeight: 700, color: "white" }}
+                          >
                             TOTAL:
                           </Typography>
                         </td>
