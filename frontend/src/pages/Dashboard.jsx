@@ -795,7 +795,7 @@ export default function Dashboard() {
                       </Typography>
                     </Box>
                     <Grid container spacing={{ xs: 1, sm: 2 }}>
-                      <Grid item xs={4}>
+                      <Grid item xs={6}>
                         <Box sx={{ textAlign: "center" }}>
                           <Typography
                             variant="caption"
@@ -820,7 +820,7 @@ export default function Dashboard() {
                           </Typography>
                         </Box>
                       </Grid>
-                      <Grid item xs={4}>
+                      <Grid item xs={6}>
                         <Box sx={{ textAlign: "center" }}>
                           <Typography
                             variant="caption"
@@ -841,30 +841,6 @@ export default function Dashboard() {
                             }}
                           >
                             {cat.itemCount}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Box sx={{ textAlign: "center" }}>
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              color: "text.secondary",
-                              display: "block",
-                              mb: 0.5,
-                              fontSize: { xs: "0.7rem", sm: "0.75rem" },
-                            }}
-                          >
-                            Share
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: 700,
-                              fontSize: { xs: "0.875rem", sm: "1rem" },
-                            }}
-                          >
-                            {cat.percentage}%
                           </Typography>
                         </Box>
                       </Grid>
@@ -935,6 +911,15 @@ export default function Dashboard() {
                           }}
                         >
                           Intervention
+                        </th>
+                        <th
+                          style={{
+                            padding: "12px",
+                            textAlign: "center",
+                            borderBottom: "2px solid #ddd",
+                          }}
+                        >
+                          Report
                         </th>
                         <th
                           style={{
@@ -1031,6 +1016,23 @@ export default function Dashboard() {
                               textAlign: "center",
                             }}
                           >
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontSize: "0.875rem",
+                                fontWeight: 500,
+                              }}
+                            >
+                              {item.reportName}
+                            </Typography>
+                          </td>
+                          <td
+                            style={{
+                              padding: "12px",
+                              borderBottom: "1px solid #eee",
+                              textAlign: "center",
+                            }}
+                          >
                             <Chip
                               label={item.location || "N/A"}
                               size="small"
@@ -1099,7 +1101,7 @@ export default function Dashboard() {
                         }}
                       >
                         <td
-                          colSpan="5"
+                          colSpan="6"
                           style={{
                             padding: "12px",
                             textAlign: "right",

@@ -334,6 +334,7 @@ export const getCategoryDetails = async (req, res) => {
               rationale: item.rationale,
               assumptions: item.assumptions,
               observation: item.observation,
+              reportName: estimate.documentName,
             });
           });
         }
