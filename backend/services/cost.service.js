@@ -20,6 +20,18 @@ import {
   getSORItemCode,
   flagImplausibleCosts,
 } from "./validation.service.js";
+import {
+  calculateThermoplasticQuantities,
+  calculatePedestrianCrossingQuantities,
+  calculateRoadStudQuantities,
+  calculatePotholeRepairQuantities,
+  calculateRoadSignQuantities,
+  calculateGuardrailQuantities,
+  calculateChevronQuantities,
+  calculateSpeedHumpQuantities,
+  calculateFootpathQuantities,
+  calculateDrainageQuantities,
+} from "../utils/dimension-parser.js";
 
 export const calculateMaterialCosts = async (interventions, ircMappings) => {
   try {
@@ -67,12 +79,211 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
       let totalCost = 0;
       const missingOfficialRates = [];
 
-      if (mapping.materials && Array.isArray(mapping.materials)) {
+      let materialsToProcess = mapping.materials || [];
+      let quantitySource = "AI_EXTRACTED";
+
+      if (
+        materialsToProcess.length === 0 ||
+        materialsToProcess.every((m) => !m.quantity || m.quantity <= 0)
+      ) {
+        console.warn(
+          `   ⚠️ AI failed to extract quantities, using fallback parser...`
+        );
+        quantitySource = "FALLBACK_PARSER";
+
+        const sectionName = intervention.sectionName.toUpperCase();
+        const recommendation = intervention.recommendation.toLowerCase();
+        const observation = intervention.observation.toLowerCase();
+        let fallbackMaterials = null;
+
+        if (sectionName.includes("SIGN")) {
+          console.log(`      🔧 Calculating road sign quantities...`);
+          const result = calculateRoadSignQuantities(
+            intervention.observation,
+            intervention.recommendation
+          );
+          fallbackMaterials = result.materials;
+          console.log(`      ✅ Calculated for ${result.size} sign`);
+        } else if (
+          sectionName.includes("ROAD MARKING") ||
+          sectionName.includes("MARKINGS")
+        ) {
+          if (
+            recommendation.includes("longitudinal") ||
+            recommendation.includes("edge line") ||
+            recommendation.includes("center line") ||
+            recommendation.includes("lane marking") ||
+            (observation.includes("faded") && observation.includes("marking"))
+          ) {
+            console.log(
+              `      🔧 Calculating thermoplastic marking quantities...`
+            );
+            const result = calculateThermoplasticQuantities(
+              intervention.observation,
+              intervention.chainage
+            );
+            fallbackMaterials = result.materials;
+            console.log(
+              `      ✅ Calculated for ${result.length}m marking (${result.area} sqm)`
+            );
+          } else if (
+            recommendation.includes("pedestrian crossing") ||
+            recommendation.includes("zebra")
+          ) {
+            console.log(
+              `      🔧 Calculating pedestrian crossing quantities...`
+            );
+            const result = calculatePedestrianCrossingQuantities(
+              intervention.observation
+            );
+            fallbackMaterials = result.materials;
+            console.log(
+              `      ✅ Calculated for ${result.width}m × ${result.length}m crossing`
+            );
+          } else if (
+            recommendation.includes("road stud") ||
+            recommendation.includes("cat eye")
+          ) {
+            console.log(`      🔧 Calculating road stud quantities...`);
+            const result = calculateRoadStudQuantities(
+              intervention.observation,
+              intervention.chainage
+            );
+            fallbackMaterials = result.materials;
+            console.log(
+              `      ✅ Calculated ${result.numStuds} studs for ${result.length}m`
+            );
+          }
+        } else if (
+          sectionName.includes("PAVEMENT") ||
+          sectionName.includes("POTHOLE") ||
+          recommendation.includes("pothole") ||
+          recommendation.includes("patch")
+        ) {
+          console.log(`      🔧 Calculating pothole repair quantities...`);
+          const result = calculatePotholeRepairQuantities(
+            intervention.observation
+          );
+          fallbackMaterials = result.materials;
+          console.log(
+            `      ✅ Calculated for ${result.area} sqm × ${result.depth}m depth`
+          );
+        } else if (
+          sectionName.includes("DELINEATOR") ||
+          sectionName.includes("SAFETY FURNITURE") ||
+          sectionName.includes("ROADSIDE")
+        ) {
+          if (
+            recommendation.includes("guardrail") ||
+            recommendation.includes("barrier") ||
+            recommendation.includes("crash barrier")
+          ) {
+            console.log(`      🔧 Calculating guardrail quantities...`);
+            const result = calculateGuardrailQuantities(
+              intervention.observation,
+              intervention.chainage
+            );
+            fallbackMaterials = result.materials;
+            console.log(`      ✅ Calculated for ${result.length}m guardrail`);
+          } else if (
+            recommendation.includes("chevron") ||
+            recommendation.includes("curve marker")
+          ) {
+            console.log(`      🔧 Calculating chevron board quantities...`);
+            const result = calculateChevronQuantities(
+              intervention.observation,
+              intervention.chainage
+            );
+            fallbackMaterials = result.materials;
+            console.log(
+              `      ✅ Calculated ${result.numBoards} chevron boards`
+            );
+          } else {
+            console.log(`      🔧 Using standard delineator quantities...`);
+            fallbackMaterials = [
+              {
+                item: "Flexible Guidepost",
+                quantity: 1,
+                unit: "nos",
+                details: "FP-750 type, 750mm height",
+              },
+              {
+                item: "Adhesive for Delineator",
+                quantity: 0.5,
+                unit: "kg",
+                details: "For fixing",
+              },
+              {
+                item: "Fasteners",
+                quantity: 1,
+                unit: "set",
+                details: "Bolts and nuts",
+              },
+            ];
+          }
+        } else if (
+          sectionName.includes("PEDESTRIAN") ||
+          sectionName.includes("FOOTPATH") ||
+          sectionName.includes("SIDEWALK")
+        ) {
+          if (
+            recommendation.includes("footpath") ||
+            recommendation.includes("sidewalk") ||
+            recommendation.includes("walkway")
+          ) {
+            console.log(`      🔧 Calculating footpath quantities...`);
+            const result = calculateFootpathQuantities(
+              intervention.observation,
+              intervention.chainage
+            );
+            fallbackMaterials = result.materials;
+            console.log(
+              `      ✅ Calculated for ${result.length}m × ${result.width}m footpath`
+            );
+          } else if (
+            recommendation.includes("speed hump") ||
+            recommendation.includes("speed bump") ||
+            recommendation.includes("rumble strip")
+          ) {
+            console.log(`      🔧 Calculating speed hump quantities...`);
+            const result = calculateSpeedHumpQuantities(
+              intervention.observation
+            );
+            fallbackMaterials = result.materials;
+            console.log(`      ✅ Calculated ${result.quantity} speed hump(s)`);
+          }
+        } else if (
+          sectionName.includes("DRAINAGE") ||
+          sectionName.includes("UTILITIES") ||
+          recommendation.includes("drain") ||
+          recommendation.includes("culvert")
+        ) {
+          console.log(`      🔧 Calculating drainage quantities...`);
+          const result = calculateDrainageQuantities(
+            intervention.observation,
+            intervention.chainage
+          );
+          fallbackMaterials = result.materials;
+          console.log(`      ✅ Calculated for ${result.length}m drainage`);
+        }
+
+        if (fallbackMaterials && fallbackMaterials.length > 0) {
+          materialsToProcess = fallbackMaterials;
+          quantitySource = "FALLBACK_PARSER";
+          console.log(
+            `      ✅ Fallback parser extracted ${materialsToProcess.length} materials`
+          );
+        }
+      } else {
+        console.log(`      ✅ AI successfully extracted quantities`);
+      }
+
+      if (materialsToProcess && Array.isArray(materialsToProcess)) {
         console.log(
-          `   🔧 Processing ${mapping.materials.length} materials...`
+          `   🔧 Processing ${materialsToProcess.length} materials...`
         );
 
-        for (const material of mapping.materials) {
+        for (const material of materialsToProcess) {
           try {
             console.log(`\n   📦 Material: ${material.item}`);
 
@@ -80,15 +291,21 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
               console.warn(
                 `      ⚠️ WARNING: Invalid or zero quantity for "${material.item}"`
               );
+              console.warn(`      📝 Observation: ${intervention.observation}`);
               console.warn(
-                `      💡 TIP: Check if AI extracted dimensions correctly from document`
+                `      💡 TIP: AI should extract dimensions from observation text`
               );
+              console.warn(
+                `      🔍 Expected patterns: "200m", "2.5 sqm", "20mm depth", "3.5m width"`
+              );
+
               missingOfficialRates.push({
                 itemName: material.item,
                 unit: material.unit,
                 error: "Invalid quantity (zero or negative)",
+                observation: intervention.observation,
                 suggestion:
-                  "Review intervention description for dimensions/quantities",
+                  "Check if observation contains dimensions that AI should have extracted",
               });
               continue;
             }
@@ -166,7 +383,7 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
             const isEstimated =
               source === "ESTIMATED" ||
               source === "EMERGENCY_FALLBACK" ||
-              priceInfo.official === false;
+              (priceInfo && priceInfo.official === false);
 
             if (isEstimated) {
               console.log(`      ⚠️ ESTIMATED PRICE (Not official CPWD/GeM)`);
@@ -202,6 +419,9 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
               rateYear: rateYear,
               confidence: confidence,
               isEstimated: isEstimated,
+              quantitySource: quantitySource,
+              quantityConfidence:
+                quantitySource === "AI_EXTRACTED" ? "high" : "medium",
               reasoning: priceInfo?.reasoning || null,
               lastUpdated: new Date(),
             });
@@ -277,6 +497,27 @@ export const calculateMaterialCosts = async (interventions, ircMappings) => {
         "Prices exclude GST, labor, and installation",
         `Location: ${intervention.chainage} ${intervention.side} ${intervention.road}`,
       ];
+
+      // Add quantity extraction method to assumptions if using fallback
+      if (
+        quantitySource === "FALLBACK_PARSER" &&
+        !assumptions.some((a) => a.includes("Quantities calculated"))
+      ) {
+        assumptions.unshift(
+          "Quantities calculated using rule-based dimension parser (AI extraction fallback)"
+        );
+      }
+
+      // Add stretch length assumption for street lighting if applicable
+      if (
+        intervention.sectionName.toUpperCase().includes("LIGHTING") &&
+        !intervention.observation.match(/\d+\s*km|\d+\s*m/) &&
+        !assumptions.some((a) => a.toLowerCase().includes("stretch"))
+      ) {
+        assumptions.push(
+          "Assumed 500m typical road section length (not specified in observation)"
+        );
+      }
 
       const notes =
         aiRationale?.notes ||

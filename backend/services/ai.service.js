@@ -197,12 +197,14 @@ export const mapToIRCStandards = async (interventions) => {
       const interventionsList = sectionInterventions
         .map(
           (int) =>
-            `${int.serialNo}. [${int.chainage} ${int.side} ${int.road}] ${int.recommendation} (${int.ircClause})`
+            `${int.serialNo}. [${int.chainage} ${int.side} ${int.road}]\nObservation: ${int.observation}\nRecommendation: ${int.recommendation}\nIRC: ${int.ircClause}`
         )
-        .join("\n");
+        .join("\n\n");
 
       const prompt = `
 You are an expert IRC standards engineer specializing in road safety material quantification. Analyze each intervention and provide EXACT material requirements.
+
+**CRITICAL: READ THE OBSERVATION FIELD CAREFULLY FOR DIMENSIONS**
 
 **INTERVENTIONS TO ANALYZE:**
 
@@ -272,22 +274,54 @@ Road Signs (900mm square):
 → GI Pipe Post 50mm: 1 nos
 → Concrete M20: 0.1 cum
 
-Thermoplastic Markings (per 100m x 150mm):
-→ Thermoplastic Paint: 4.5 kg (3mm thick)
-→ Glass Beads Type A: 1.5 kg
-→ Primer: 0.5 litre
+Thermoplastic Markings (EXTRACT LENGTH FROM OBSERVATION ONLY - DO NOT USE CHAINAGE):
+→ Look for: "200m", "about 200m", "100 m stretch" in observation field ONLY
+→ DO NOT use chainage numbers as length (e.g., ignore "10+900" as 900m)
+→ If no length in observation: Use 100m default for typical intervention
+→ Calculate: Length (m) × Width (0.15m for edge line, 0.10m for center line)
+→ Thermoplastic Paint: Area (sqm) × Thickness (0.003m) × Density (2400 kg/cum) = kg
+→ Glass Beads Type A: Area × 0.4 kg/sqm = kg
+→ Primer: Area × 0.1 litre/sqm = litre
+→ Example for "200m faded markings":
+   • Area = 200m × 0.15m = 30 sqm
+   • Thermoplastic Paint: 30 sqm × 0.003m × 2400 kg/cum = 216 kg
+   • Glass Beads: 30 × 0.4 = 12 kg
+   • Primer: 30 × 0.1 = 3 litre
 
-Pedestrian Crossing (4m x 3m zebra):
-→ Pedestrian Crossing Paint: 36 kg
-→ Glass Beads Type B: 4.8 kg
+Pedestrian Crossing (EXTRACT DIMENSIONS):
+→ Look for: "3.5m width", "4m x 3m", "zebra crossing"
+→ Standard: 4m width, 3m length, 250mm stripe width, 250mm gaps
+→ Paint area = Width × Length × 0.5 (for stripes)
+→ Pedestrian Crossing Paint: Area × 3mm × 2400 kg/cum = kg
+→ Glass Beads Type B: Area × 0.4 kg/sqm = kg
+→ Example for "3.5m width for each lane on four lane":
+   • Total width = 3.5m × 4 lanes = 14m (or use actual width mentioned)
+   • Length = 3m (standard)
+   • Area = 14m × 3m × 0.5 = 21 sqm
+   • Pedestrian Crossing Paint: 21 × 0.003 × 2400 = 151.2 kg
+   • Glass Beads: 21 × 0.4 = 8.4 kg
 
-Pothole Repair (CRITICAL - Calculate from dimensions):
-→ If area given in sqm and depth in mm:
-   Volume (cum) = Area (sqm) × Depth (m)
-   Example: 2.5 sqm × 0.05m (50mm) = 0.125 cum
-→ Cold Mix Asphalt: [calculated volume] cum
-→ Tack Coat SS-1 Emulsion: Area (sqm) × 0.25 kg/sqm
-   Example: 2.5 sqm × 0.25 = 0.625 kg
+Road Studs (EXTRACT LENGTH/SPACING):
+→ Look for: "100m", "304+500 to 304+600" = 100m stretch
+→ Spacing: 10m intervals for straight, 5m for curves
+→ Retroreflective Road Studs: Length / Spacing = nos
+→ Adhesive: Number of studs × 0.5 kg = kg
+→ Example for "100m stretch":
+   • Road Studs: 100m / 10m = 10 nos
+   • Adhesive: 10 × 0.5 = 5 kg
+
+Pothole Repair (CRITICAL - EXTRACT FROM OBSERVATION):
+→ Look for: "area 2.5 sqm and 20 mm depth", "pothole 3m x 2m, 50mm deep", "2-3 minor potholes (~1 m² each)"
+→ Calculate total area: number × area per pothole
+→ Depth: Use 50mm if not specified
+→ Volume (cum) = Total Area (sqm) × Depth (m)
+→ Cold Mix Asphalt: Volume × 1.1 (compaction factor) = cum
+→ Tack Coat SS-1 Emulsion: Total Area × 0.25 kg/sqm = kg
+→ Example for "2-3 minor potholes (~1 m² each)":
+   • Total Area = 2.5 × 1 = 2.5 sqm (average)
+   • Volume = 2.5 sqm × 0.05m = 0.125 cum
+   • Cold Mix Asphalt: 0.125 × 1.1 = 0.1375 cum
+   • Tack Coat: 2.5 × 0.25 = 0.625 kg
 
 Solar Blinker (1 unit):
 → Solar Panel 10W: 1 nos
@@ -295,11 +329,21 @@ Solar Blinker (1 unit):
 → LED Module Amber: 1 nos
 → Wiring Kit: 1 set
 
-Street Light (per pole):
-→ LED Luminaire 50W: 1 nos
-→ Lighting Pole 6m: 1 nos
-→ Underground Cable 2-Core: 5 m
-→ Earthing Electrode: 1 nos
+Street Light (CALCULATE QUANTITY FOR STRETCH):
+→ CRITICAL: Extract stretch length from chainage range (e.g., "12+000-15+000" = 3km)
+→ If chainage is SINGLE POINT (e.g., "305+100"), look for length in observation
+→ If NO LENGTH FOUND: Assume 500m stretch and MUST document in specification:
+   "Assumed 500m typical road section (length not specified in observation)"
+→ Extract spacing from recommendation or use 50m default (IRC:SP:73-2018)
+→ Number of poles = (Stretch length / Spacing) + 1 (round up)
+→ Example for "305+100 lacks lighting" (no length):
+   • Assumed stretch: 500m (document this assumption)
+   • Spacing: 50m (IRC standard)
+   • Number of poles = (500m / 50m) + 1 = 11 poles
+   • LED Luminaire 80W: 11 nos
+   • Lighting Pole 6m: 11 nos
+   • Underground Cable 2-Core: 11 × 5m = 55 m
+   • Earthing Electrode: 11 nos
 
 Flexible Guidepost:
 → Flexible Guidepost: 1 nos
@@ -353,12 +397,26 @@ Return ONLY valid JSON array:
 ]
 
 **CRITICAL REQUIREMENTS:**
+✅ MUST extract dimensions from observation field (look for: "200m", "2.5 sqm", "20mm depth", "3.5m width")
+✅ MUST calculate actual quantities - DO NOT use placeholder values
 ✅ Use exact item names from CPWD database when possible
-✅ Calculate quantities accurately (don't guess)
+✅ Calculate quantities accurately based on extracted dimensions
 ✅ Include ALL materials (sheeting, substrate, post, foundation)
 ✅ Preserve original IRC clause from intervention
 ✅ Be consistent with units (sqm, m, kg, nos, cum, litre)
 ✅ Return only valid JSON, no markdown
+
+**COMMON MISTAKES TO AVOID:**
+❌ DO NOT use 0 or negative quantities
+❌ DO NOT ignore dimensions in observation field
+❌ DO NOT use generic quantities without calculation
+❌ DO NOT skip materials because dimensions are missing (estimate standard size if needed)
+
+**IF NO DIMENSIONS GIVEN:**
+• Road markings: Assume 100m × 0.15m = 15 sqm
+• Pedestrian crossing: Assume 4m × 3m = 12 sqm
+• Potholes: Assume 1 sqm × 50mm depth
+• Road studs: Assume 10 nos for typical intervention
 
 This is for HACKATHON EVALUATION - accuracy is critical!
 `;
