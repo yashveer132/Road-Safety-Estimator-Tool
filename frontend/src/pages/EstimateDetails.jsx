@@ -759,16 +759,6 @@ export default function EstimateDetails() {
                           sx={{
                             fontWeight: 700,
                             fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                            minWidth: { xs: 70, sm: 90 },
-                          }}
-                        >
-                          Quantity
-                        </TableCell>
-                        <TableCell
-                          align="center"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: { xs: "0.75rem", sm: "0.85rem" },
                             minWidth: { xs: 80, sm: 100 },
                           }}
                         >
@@ -927,17 +917,6 @@ export default function EstimateDetails() {
                                 ))}
                               </Box>
                             </Paper>
-                          </TableCell>
-                          <TableCell align="center">
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontWeight: 600,
-                                fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                              }}
-                            >
-                              {formatQuantityWithUnit(item.quantity, item.unit)}
-                            </Typography>
                           </TableCell>
                           <TableCell
                             align="center"
