@@ -252,9 +252,6 @@ export default function Dashboard() {
           axios.get(`${apiUrl}/api/dashboard/estimates/recent?limit=8`),
         ]);
 
-      console.log("📊 KPI Data:", kpiRes.data.data);
-      console.log("📊 Category Data:", categoryRes.data.data);
-
       setKpiData(kpiRes.data.data);
       setPerformanceData(performanceRes.data.data);
       setCategoryData(categoryRes.data.data);
