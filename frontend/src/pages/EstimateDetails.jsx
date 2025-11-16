@@ -1296,14 +1296,13 @@ export default function EstimateDetails() {
             preparation, permits, taxes, and contingencies.
             <br />
             <strong>Accuracy:</strong> Estimates are based on standard
-            specifications and prevailing market rates. Actual costs may vary
-            based on location, supplier, and market conditions.
+            specifications and prevailing market rates.
             <br />
             <strong>Standards:</strong> All interventions comply with IRC
             guidelines and relevant road safety standards.
             <br />
             <strong>Updates:</strong> Material rates are sourced from CPWD SOR
-            2024 and may require periodic updates.
+            2024 and GEM and may require periodic updates.
           </Typography>
         </Paper>
 
